@@ -78,3 +78,62 @@ dotnet new classlib -o Sage.Net.Extensions
 dotnet sln add Sage.Net.Extensions
 dotnet add reference --project Sage.Net.Compression.Eac.RefPack Sage.Net.Extensions
 ```
+
+The first thing to look at will be the following method (comments added for clarity):
+
+```c++
+// Check if a given pointer of any type of data is valid RefPack compressed data
+bool GCALL REF_is(const void *compresseddata)
+{
+    bool ok=false; // Initially consider the data to be invalid
+    int packtype=ggetm(compresseddata,2); // Get 2 bytes in big-endian format, the data header - This is unsafe, we will add safety to this operation.
+
+    if (packtype==0x10fb
+     || packtype==0x11fb
+     || packtype==0x90fb
+     || packtype==0x91fb)
+        ok = true; // If the header bytes are any of the above values, we are reading a valid RefPack
+
+    return(ok);
+}
+```
+
+Okay, so we are going to need our first extension. We know for a FACT that we will be using streams
+for compression/decompression to make this system idiomatic. As such, we will be dealing with the
+`BinaryReader` and `BinaryWriter` classes quite a lot to read and write bytes.
+
+The `BinaryReader` class will be used for the `REF_is` method, which requires two considerations:
+
+1. `BinaryReader` CANNOT read big-endian data and requires further action with `BinaryPrimitives`.
+2. `BinaryReader` will take in an `Encoding` value, and the original engine uses the
+  [Windows ANSI encoding (page 1252)](https://en.wikipedia.org/wiki/Windows-1252)
+
+Both of these limitations can be resolved through the `Sage.Net.Extensions` library, so we will work on that first.
+
+For the first problem, we can add as many options as the `GIMEX` system has, which is for 2, 3 and 4 bytes reading and writing. These are defined in the `gimex.h` header as
+`static __inline unsigned int ggetm(const void *src, int bytes)` and
+`static __inline void gputm(void *dst, unsigned int data, int bytes)` respectively.
+
+We will also add extensions to read and write specifically in little-endian, regardless of the machine, defined
+in the `gimex.h` header as `static __inline unsigned int ggeti(const void *src, int bytes)` and
+`static __inline void gputi(void *dst, unsigned int data, int bytes)` respectively and, again; up to 4 bytes.
+
+We will define the equivalents in the
+[`BinaryReaderExtensions`](../Sage.Net.Extensions/BinaryReaderExtensions.cs) static class first.
+This defines the reading and writing of 2, 3 and 4 big-endian and little-endian bytes in a dotnet idiomatic way:
+
+```csharp
+using BinaryReader reader = new(myStream1);
+var value = reader.ReadUInt16BigEndian();
+
+using BinaryWriter writer = new(myStream2);
+reader.WriteUInt16BigEndian(value);
+```
+
+```csharp
+using BinaryReader reader = new(myStream1);
+var value = reader.ReadUInt16LittleEndian();
+
+using BinaryWriter writer = new(myStream2);
+writer.WriteUInt16LittleEndian(value);
+```

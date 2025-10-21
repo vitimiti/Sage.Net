@@ -9,6 +9,14 @@ would speed up the process, and projects like [OpenSAGE](https://github.com/Open
 this is meant for my personal development of programming skills in dotnet, forcing me to better understand
 graphics programming and the development of low level systems in dotnet, such as marshalling and p/invoke.
 
+We will be using the `GeneralsMD` (the expansion) code, and assuming all improvements are, in fact, improvements.
+
+## Table of Contents
+
+- [The Recreation of the SAGE Engine in Modern Dotnet](#the-recreation-of-the-sage-engine-in-modern-dotnet)
+  - [Table of Contents](#table-of-contents)
+  - [The "Easiest" Start](#the-easiest-start)
+
 ## The "Easiest" Start
 
 Because they don't depend on anything else, the easiest place to start would be the compression libraries.
@@ -47,4 +55,26 @@ be used by it:
 dotnet new classlib -o Sage.Net.Compression.Eac.RefPack
 dotnet sln add Sage.Net.Compression.Eac.RefPack -s Compression/Eac
 dotnet add reference --project Sage.Net.Compression Sage.Net.Compression.Eac.RefPack
+```
+
+The files that, in conjuction, form the RefPack codex, are defined in the original code at:
+
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/codex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/gimex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refcodex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refabout.cpp`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refdecode.cpp`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refencode.cpp`
+
+Of these files, because we want to implement the system in a dotnet idiomatic manner, we are only interested in
+implementing the reading and writing in big-endian from `gimex.h` and the `refdecode.cpp` and `refencode.cpp` files
+that hold the decoding and encoding algorithms, respectively.
+
+Dotnet has systems to read and write little and big endian bytes, but it may require more than 1 command in some occasions.
+For this, we will be creating an extensions library:
+
+```shell
+dotnet new classlib -o Sage.Net.Extensions
+dotnet sln add Sage.Net.Extensions
+dotnet add reference --project Sage.Net.Compression.Eac.RefPack Sage.Net.Extensions
 ```

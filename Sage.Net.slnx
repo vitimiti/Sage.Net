@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Folder Name="/Compression/">
+    <Project Path="Sage.Net.Compression/Sage.Net.Compression.csproj" />
+  </Folder>
+</Solution>

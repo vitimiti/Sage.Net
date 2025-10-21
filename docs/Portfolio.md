@@ -24,3 +24,27 @@ dotnet sln add Sage.Net.Compression -s Compression
 ```
 
 We will be using solution folder to better organize common functionality.
+
+Now, there are multiple libraries we will need to implement to actually have the core functionality. In the style of
+`ZLibStream`, the official ZLib compression/decompression system in dotnet; we will be only exposing streams for each
+compression algorithm.
+
+I will be starting with the RefPack compression algorithm, as I find it the easiest to implement, and we will be using
+the existing `ZLibStream` for ZLib. All in all, we require the following:
+
+- EAC
+  - RefPack
+  - BinaryTree
+  - HuffmanWithRunlength
+- NoxCompressor
+  - LightZHL
+- ZLib
+
+We proceed to create the RefPack algorithm and will add its dependency to the `Sage.Net.Compression` library, as it will
+be used by it:
+
+```shell
+dotnet new classlib -o Sage.Net.Compression.Eac.RefPack
+dotnet sln add Sage.Net.Compression.Eac.RefPack -s Compression/Eac
+dotnet add reference --project Sage.Net.Compression Sage.Net.Compression.Eac.RefPack
+```

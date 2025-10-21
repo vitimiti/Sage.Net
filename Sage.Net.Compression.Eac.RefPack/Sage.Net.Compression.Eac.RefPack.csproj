@@ -4,7 +4,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Sage.Net.Compression.Eac.RefPack\Sage.Net.Compression.Eac.RefPack.csproj" />
-  </ItemGroup>
 </Project>

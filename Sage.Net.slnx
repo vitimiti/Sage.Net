@@ -2,4 +2,7 @@
   <Folder Name="/Compression/">
     <Project Path="Sage.Net.Compression/Sage.Net.Compression.csproj" />
   </Folder>
+  <Folder Name="/Compression/Eac/">
+    <Project Path="Sage.Net.Compression.Eac.RefPack/Sage.Net.Compression.Eac.RefPack.csproj" />
+  </Folder>
 </Solution>

@@ -86,25 +86,6 @@ dotnet add reference --project Sage.Net.Compression.Eac.RefPack Sage.Net.Extensi
 
 ### Extensions of the Core Language
 
-The first thing to look at will be the following method (comments added for clarity):
-
-```c++
-// Check if a given pointer of any type of data is valid RefPack compressed data
-bool GCALL REF_is(const void *compresseddata)
-{
-    bool ok=false; // Initially consider the data to be invalid
-    int packtype=ggetm(compresseddata,2); // Get 2 bytes in big-endian format, the data header - This is unsafe, we will add safety to this operation.
-
-    if (packtype==0x10fb
-     || packtype==0x11fb
-     || packtype==0x90fb
-     || packtype==0x91fb)
-        ok = true; // If the header bytes are any of the above values, we are reading a valid RefPack
-
-    return(ok);
-}
-```
-
 Okay, so we are going to need our first extension. We know for a FACT that we will be using streams
 for compression/decompression to make this system idiomatic. As such, we will be dealing with the
 `BinaryReader` and `BinaryWriter` classes quite a lot to read and write bytes.
@@ -184,6 +165,25 @@ To recap, the files we are interested in for this codex are:
 We have now implemented the gimex system, and we can ignore the codex interface due to our idiomatic requirements. We will
 also be ignoring the `refabout` data due to, again, the idiomatic requirements. Version information about the library
 can be retrieved through the assembly's version, the same with the description.
+
+The first thing to look at will be the following method (comments added for clarity):
+
+```c++
+// Check if a given pointer of any type of data is valid RefPack compressed data
+bool GCALL REF_is(const void *compresseddata)
+{
+    bool ok=false; // Initially consider the data to be invalid
+    int packtype=ggetm(compresseddata,2); // Get 2 bytes in big-endian format, the data header - This is unsafe, we will add safety to this operation.
+
+    if (packtype==0x10fb
+     || packtype==0x11fb
+     || packtype==0x90fb
+     || packtype==0x91fb)
+        ok = true; // If the header bytes are any of the above values, we are reading a valid RefPack
+
+    return(ok);
+}
+```
 
 We will start by creating an internal class that will deal with the decoding and an internal class that will deal with the
 encoding. Both of these classes will NOT work on buffers but rather the `BinaryReader` or `BinaryWriter` classes that the

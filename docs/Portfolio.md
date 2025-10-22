@@ -16,6 +16,9 @@ We will be using the `GeneralsMD` (the expansion) code, and assuming all improve
 - [The Recreation of the SAGE Engine in Modern Dotnet](#the-recreation-of-the-sage-engine-in-modern-dotnet)
   - [Table of Contents](#table-of-contents)
   - [The "Easiest" Start](#the-easiest-start)
+    - [Preparation](#preparation)
+    - [Extensions of the Core Language](#extensions-of-the-core-language)
+    - [RefPack Codex](#refpack-codex)
 
 ## The "Easiest" Start
 
@@ -48,6 +51,8 @@ the existing `ZLibStream` for ZLib. All in all, we require the following:
   - LightZHL
 - ZLib
 
+### Preparation
+
 We proceed to create the RefPack algorithm and will add its dependency to the `Sage.Net.Compression` library, as it will
 be used by it:
 
@@ -78,6 +83,8 @@ dotnet new classlib -o Sage.Net.Extensions
 dotnet sln add Sage.Net.Extensions
 dotnet add reference --project Sage.Net.Compression.Eac.RefPack Sage.Net.Extensions
 ```
+
+### Extensions of the Core Language
 
 The first thing to look at will be the following method (comments added for clarity):
 
@@ -137,3 +144,59 @@ var value = reader.ReadUInt16LittleEndian();
 using BinaryWriter writer = new(myStream2);
 writer.WriteUInt16LittleEndian(value);
 ```
+
+With this, we must have into mind that, as estated above, the engine was using ANSI characters for their configuration files.
+These are legacy characters that aren't found on the standard `Encoding` class, and we will be resolving this by creating
+our own extension in [`LegacyEncodings`](../Sage.Net.Extensions/LegacyEncodings.cs). This is accomplish trough the
+[`Encoding.GetEncoding`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getencoding?view=net-9.0)
+method in dotnet, and by registering it on first usage through the `LegacyEncodings` static constructor with the
+[`Encoding.RegisterProvider`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider?view=net-9.0)
+method.
+
+With this, we will be able to create `BinaryReader`s and `BinaryWriter`s by using their corresponding constructors,
+[`BinaryReader(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binaryreader.-ctor?view=net-9.0#system-io-binaryreader-ctor(system-io-stream-system-text-encoding-system-boolean))
+and [`BinaryWriter(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binarywriter.-ctor?view=net-9.0#system-io-binarywriter-ctor(system-io-stream-system-text-encoding-system-boolean))
+constructors respecting the original encoding of the bytes. This is important to read the original strings and to
+save strings in a way that is compatible with the original engine's expectations.
+
+Now we are ready to start with the first codex.
+
+### RefPack Codex
+
+The RefPack codex is the preferred compression algorithm within the engine. And while it is not used widely and the other
+codexes are not really found in the original games, I intend to allow future usage of this engine to support all possible
+systems that may have existed within the original engine.
+
+But with this being the preferred system, we will start here. We want to create a `RefPackStream` in the style of the
+existing [`ZLibStream`](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.zlibstream?view=net-9.0)
+to help users better understand how to compress and decompress data within the class. In short, `Read` will be
+used to decompress and `Write` to compress data.
+
+To recap, the files we are interested in for this codex are:
+
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/codex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/gimex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refcodex.h`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refabout.cpp`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refdecode.cpp`
+- `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refencode.cpp`
+
+We have now implemented the gimex system, and we can ignore the codex interface due to our idiomatic requirements. We will
+also be ignoring the `refabout` data due to, again, the idiomatic requirements. Version information about the library
+can be retrieved through the assembly's version, the same with the description.
+
+We will start by creating an internal class that will deal with the decoding and an internal class that will deal with the
+encoding. Both of these classes will NOT work on buffers but rather the `BinaryReader` or `BinaryWriter` classes that the
+`RefPackStream` will work with.
+
+We will start with `refdecode.cpp` in the [`Decode`](../Sage.Net.Compression.Eac.RefPack/Internals/Decode.cs) static class.
+For this, we need to understand the process of the decoding algorithm. The first step will be to transliterate the
+`bool GCALL REF_is(const void *compresseddata)` static method that is used to check if a set of data is valid
+RefPack compressed data or not. This method will read 2 bytes off the `compresseddata` and (without safety checks),
+checks if these bytes are `0x10FB`, `0x11FB`, `0x90FB` or `0x91FB`. These just seem to be magic numbers, so we will
+have to just deal with them.
+
+We will be implemented this as a static, internal method defined as
+`internal static bool IsValidRefPackStream(BinaryReader reader)`. We will be adding a safety check without
+exceptions to prevent reading on streams that aren't 2 bytes long. This method will also restore the previous
+position, avoiding advancing the pointer in the base stream.

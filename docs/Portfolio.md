@@ -244,11 +244,13 @@ int GCALL REF_size(const void *compresseddata)
     // Check if the end of the magic number is 11FB
     if (packtype&0x100)     /* 11fb */
     {
+        // This is getting 3/4 bytes big-endian at position 0 + 2 + ssize
         len = ggetm((char *)compresseddata+2+ssize,ssize);
     }
     // Or 10FB
     else                    /* 10fb */
     {
+        // This is getting 3/4 bytes big-endian at position 0 + 2
         len = ggetm((char *)compresseddata+2,ssize);
     }
 

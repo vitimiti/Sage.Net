@@ -47,4 +47,45 @@ internal static class Decode
             _ = reader.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
         }
     }
+
+    /// <summary>
+    /// Retrieves the size of the decompressed data from a RefPack compressed stream.
+    /// </summary>
+    /// <param name="reader">The binary reader for the RefPack compressed stream.</param>
+    /// <returns>The size of the decompressed data.</returns>
+    /// <remarks>
+    /// This method reads the size information from the stream header and does not alter the stream's position.
+    /// </remarks>
+    internal static int RetrieveDecompressedRefPackStreamSize(BinaryReader reader)
+    {
+        // Save the current position to restore later
+        var currentPosition = reader.BaseStream.Position;
+        try
+        {
+            // Read the first two bytes as big-endian
+            _ = reader.BaseStream.Seek(0, SeekOrigin.Begin);
+            var headerMagic = reader.ReadUInt16BigEndian();
+
+            // Check if the header starts with 0x9 or 0x1
+            var isOx9 = (headerMagic & 0x8000) != 0;
+
+            // Determine the size of the decompressed data based on the header
+            var sizeBytes = isOx9 ? 4 : 3;
+
+            // Skip the size bytes if it's version 0x(.)1(..)
+            var shouldSkip = (headerMagic & 0x1000) != 0;
+            if (shouldSkip)
+            {
+                _ = reader.BaseStream.Seek(sizeBytes, SeekOrigin.Current);
+            }
+
+            // Read and return the decompressed size
+            return sizeBytes == 3 ? (int)reader.ReadUInt24BigEndian() : (int)reader.ReadUInt32BigEndian();
+        }
+        finally
+        {
+            // Restore the original position
+            _ = reader.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
+        }
+    }
 }

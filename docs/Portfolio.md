@@ -200,3 +200,96 @@ We will be implemented this as a static, internal method defined as
 `internal static bool IsValidRefPackStream(BinaryReader reader)`. We will be adding a safety check without
 exceptions to prevent reading on streams that aren't 2 bytes long. This method will also restore the previous
 position, avoiding advancing the pointer in the base stream.
+
+```csharp
+internal static bool IsValidRefPackStream(BinaryReader reader)
+{
+    if (reader.BaseStream.Length < 2)
+    {
+        return false; // Not enough data to read the header
+    }
+
+    // Save the current position to restore later
+    var currentPosition = reader.BaseStream.Position;
+    try
+    {
+        // Read the first two bytes as big-endian
+        _ = reader.BaseStream.Seek(0, SeekOrigin.Begin);
+        var headerMagic = reader.ReadUInt16BigEndian();
+
+        // Check if the header matches any of the known RefPack signatures
+        return headerMagic is 0x10FB or 0x11FB or 0x90FB or 0x91FB;
+    }
+    finally
+    {
+        // Restore the original position
+        _ = reader.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
+    }
+}
+```
+
+The next element will be a size check, to be able to retrieve the size of the encoded data once it
+has been decoded.
+
+This is done in the method following method (comments added for clarification):
+
+```c++
+int GCALL REF_size(const void *compresseddata)
+{
+    int len=0; // The length stored
+    int packtype=ggetm(compresseddata,2); // The magic number of the header
+    int ssize=(packtype&0x8000)?4:3; // Whether the size is stored in 4 or 3 bytes, with a flag check
+    // This flag checks whether the magic number is one of the 0x9(...) headers
+
+    // Check if the end of the magic number is 11FB
+    if (packtype&0x100)     /* 11fb */
+    {
+        len = ggetm((char *)compresseddata+2+ssize,ssize);
+    }
+    // Or 10FB
+    else                    /* 10fb */
+    {
+        len = ggetm((char *)compresseddata+2,ssize);
+    }
+
+    // Return the length after getting it
+    return(len);
+}
+```
+
+This can be very easily implemented with the following static method:
+
+```csharp
+internal static int RetrieveDecompressedRefPackStreamSize(BinaryReader reader)
+{
+    // Save the current position to restore later
+    var currentPosition = reader.BaseStream.Position;
+    try
+    {
+        // Read the first two bytes as big-endian
+        _ = reader.BaseStream.Seek(0, SeekOrigin.Begin);
+        var headerMagic = reader.ReadUInt16BigEndian();
+
+        // Check if the header starts with 0x9 or 0x1
+        var isOx9 = (headerMagic & 0x8000) != 0;
+
+        // Determine the size of the decompressed data based on the header
+        var sizeBytes = isOx9 ? 4 : 3;
+
+        // Skip the size bytes if it's version 0x(.)1(..)
+        var shouldSkip = (headerMagic & 0x1000) != 0;
+        if (shouldSkip)
+        {
+            _ = reader.BaseStream.Seek(sizeBytes, SeekOrigin.Current);
+        }
+
+        // Read and return the decompressed size
+        return sizeBytes == 3 ? (int)reader.ReadUInt24BigEndian() : (int)reader.ReadUInt32BigEndian();
+    }
+    finally
+    {
+        // Restore the original position
+        _ = reader.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
+    }
+}
+```

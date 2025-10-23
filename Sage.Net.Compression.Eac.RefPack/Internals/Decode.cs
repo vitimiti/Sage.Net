@@ -90,15 +90,44 @@ internal static class Decode
         }
     }
 
-    public static int Decompress([NotNull] BinaryReader reader, Span<byte> destination)
+    public static IList<byte> Decompress([NotNull] BinaryReader reader)
     {
         if (reader.BaseStream.Length == 0)
         {
-            return 0;
+            return [];
         }
 
         var unpackedLength = DecodeCalculateSize(reader);
-        return unpackedLength;
+        List<byte> destination = new(unpackedLength);
+
+        while (true)
+        {
+            var first = reader.ReadByte();
+            if (TryAndProcessShortForm(reader, destination, first))
+            {
+                continue;
+            }
+
+            if (TryAndProcessIntForm(reader, destination, first))
+            {
+                continue;
+            }
+
+            if (TryAndProcessVeryIntForm(reader, destination, first))
+            {
+                continue;
+            }
+
+            if (TryAndProcessLiteral(reader, destination, first))
+            {
+                continue;
+            }
+
+            ProcessEofLiteral(reader, destination, first);
+            break;
+        }
+
+        return destination;
     }
 
     private static int DecodeCalculateSize([NotNull] BinaryReader reader)
@@ -132,5 +161,109 @@ internal static class Decode
         }
 
         return (int)reader.ReadUInt24BigEndian();
+    }
+
+    private static bool TryAndProcessShortForm([NotNull] BinaryReader reader, List<byte> destination, byte first)
+    {
+        if ((first & 0x80) != 0)
+        {
+            return false;
+        }
+
+        var second = reader.ReadByte();
+        var runlength = first & 3;
+        while (runlength > 0)
+        {
+            destination.Add(reader.ReadByte());
+            runlength--;
+        }
+
+        var referenceIndex = destination.Count - 1 - (((first & 0x60) << 3) + second);
+        runlength = ((first & 0x1C) >> 2) + 3 - 1;
+        do
+        {
+            destination.Add(destination[referenceIndex++]);
+            runlength--;
+        } while (runlength > 0);
+
+        return true;
+    }
+
+    private static bool TryAndProcessIntForm([NotNull] BinaryReader reader, List<byte> destination, byte first)
+    {
+        if ((first & 0x40) != 0)
+        {
+            return false;
+        }
+
+        var second = reader.ReadByte();
+        var third = reader.ReadByte();
+        var runlength = second >> 6;
+        while (runlength > 0)
+        {
+            destination.Add(reader.ReadByte());
+            runlength--;
+        }
+
+        var referenceIndex = destination.Count - 1 - (((second & 0x3F) << 8) + third);
+        runlength = (first & 0x3F) + 4 - 1;
+        do
+        {
+            destination.Add(destination[referenceIndex++]);
+            runlength--;
+        } while (runlength > 0);
+
+        return true;
+    }
+
+    private static bool TryAndProcessVeryIntForm([NotNull] BinaryReader reader, List<byte> destination, byte first)
+    {
+        var second = reader.ReadByte();
+        var third = reader.ReadByte();
+        var fourth = reader.ReadByte();
+        var runlength = first & 3;
+        while (runlength > 0)
+        {
+            destination.Add(reader.ReadByte());
+            runlength--;
+        }
+
+        var referenceIndex = destination.Count - 1 - ((((first & 0x10) >> 4) << 16) + (second << 8) + third);
+
+        runlength = (((first & 0x0C) >> 2) << 8) + fourth + 5 - 1;
+        do
+        {
+            destination.Add(destination[referenceIndex++]);
+            runlength--;
+        } while (runlength > 0);
+
+        return true;
+    }
+
+    private static bool TryAndProcessLiteral([NotNull] BinaryReader reader, List<byte> destination, byte first)
+    {
+        var runlength = ((first & 0x1F) << 2) + 4;
+        if (runlength > 112)
+        {
+            return false;
+        }
+
+        while (runlength > 0)
+        {
+            destination.Add(reader.ReadByte());
+            runlength--;
+        }
+
+        return true;
+    }
+
+    private static void ProcessEofLiteral([NotNull] BinaryReader reader, List<byte> destination, byte first)
+    {
+        var runlength = first & 3;
+        while (runlength > 0)
+        {
+            destination.Add(reader.ReadByte());
+            runlength--;
+        }
     }
 }

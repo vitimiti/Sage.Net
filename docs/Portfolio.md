@@ -19,6 +19,7 @@ We will be using the `GeneralsMD` (the expansion) code, and assuming all improve
         - [Preparation](#preparation)
         - [Extensions of the Core Language](#extensions-of-the-core-language)
         - [RefPack Codex](#refpack-codex)
+          - [RefPack Decoding](#refpack-decoding)
 
 ## The "Easiest" Start
 
@@ -167,6 +168,8 @@ We have now implemented the gimex system, and we can ignore the codex interface 
 will also be ignoring the `refabout` data due to, again, the idiomatic requirements. Version information about the
 library can be retrieved through the assembly's version, the same with the description.
 
+#### RefPack Decoding
+
 The first thing to look at will be the following method (comments added for clarity):
 
 ```c++
@@ -300,7 +303,7 @@ Now we can proceed to implement the `int GCALL REF_decode(void *dest, const void
 method, which is the actual decoding algorithm. This is a method with high cognitive complexity and I will be splitting
 each step and implement these as smaller blocks, to make the code easier to follow and understand.
 
-Our own definition will be instead `int Decompress([NotNull] BinaryReader reader, Span<byte> destination)`
+Our own definition will be instead `IList<byte> Decompress([NotNull] BinaryReader reader)`
 
 The original code starts my defining some variables:
 
@@ -395,4 +398,67 @@ private static int DecodeCalculateSize([NotNull] BinaryReader reader)
 }
 ```
 
-Where the resulting value will be returned at the end of the `Decompress` method.
+Where the resulting value will be used to allocate a list of bytes that will be used to store the decompressed data:
+`List<byte> destination = new(unpackedLength)`.
+
+At this point, we enter the infinite loop that will be used to decompress the data. In the original code, this is
+entered through the `for (;;)` loop. In C#, we will be using a `while (true)` loop. Within this loop, there is 5 clear
+steps, clearly outlined in the original code's comments:
+
+1. "Short" form
+2. "Int" form
+3. "Very Int" form
+4. "Literal"
+5. "EOF" literal
+
+These steps use a common `first` variable (`first = *s++;`, which is the first byte read. This byte decides where in the decoding process we are. These will be divided into their own methods for clarity and to help readability and maintainability as:
+
+1. `bool TryAndProcessShortForm([NotNull] BinaryReader reader, List<byte> destination, byte first)`
+2. `bool TryAndProcessIntForm([NotNull] BinaryReader reader, List<byte> destination, byte first)`
+3. `bool TryAndProcessVeryIntForm([NotNull] BinaryReader reader, List<byte> destination, byte first)`
+4. `bool TryAndProcessLiteral([NotNull] BinaryReader reader, List<byte> destination, byte first)`
+5. `void ProcessEofLiteral([NotNull] BinaryReader reader, List<byte> destination, byte first)`
+
+All of these methods come together in the `Decompress` method to make the following decompression algorithm:
+
+```csharp
+public static IList<byte> Decompress([NotNull] BinaryReader reader)
+{
+    if (reader.BaseStream.Length == 0)
+    {
+        return [];
+    }
+
+    var unpackedLength = DecodeCalculateSize(reader);
+    List<byte> destination = new(unpackedLength);
+
+    while (true)
+    {
+        var first = reader.ReadByte();
+        if (TryAndProcessShortForm(reader, destination, first))
+        {
+            continue;
+        }
+
+        if (TryAndProcessIntForm(reader, destination, first))
+        {
+            continue;
+        }
+
+        if (TryAndProcessVeryIntForm(reader, destination, first))
+        {
+            continue;
+        }
+
+        if (TryAndProcessLiteral(reader, destination, first))
+        {
+            continue;
+        }
+
+        ProcessEofLiteral(reader, destination, first);
+        break;
+    }
+
+    return destination;
+}
+```

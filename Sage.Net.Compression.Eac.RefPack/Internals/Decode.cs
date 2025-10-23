@@ -6,6 +6,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
 using Sage.Net.Extensions;
 
 namespace Sage.Net.Compression.Eac.RefPack.Internals;
@@ -87,5 +88,49 @@ internal static class Decode
             // Restore the original position
             _ = reader.BaseStream.Seek(currentPosition, SeekOrigin.Begin);
         }
+    }
+
+    public static int Decompress([NotNull] BinaryReader reader, Span<byte> destination)
+    {
+        if (reader.BaseStream.Length == 0)
+        {
+            return 0;
+        }
+
+        var unpackedLength = DecodeCalculateSize(reader);
+        return unpackedLength;
+    }
+
+    private static int DecodeCalculateSize([NotNull] BinaryReader reader)
+    {
+        // Get the header
+        var type = reader.ReadUInt16BigEndian();
+
+        // Check whether we should skip the size bytes
+        var shouldSkip = (type & 0x1000) != 0;
+
+        // Determine the size of the decompressed data based on the header
+        var sizeBytes = (type & 0x8000) != 0 ? 4 : 3;
+
+        // If we are reading 4 bytes of size data
+        if (sizeBytes == 4)
+        {
+            if (shouldSkip)
+            {
+                // Skip 4 bytes
+                _ = reader.BaseStream.Seek(4, SeekOrigin.Current);
+            }
+
+            return (int)reader.ReadUInt32BigEndian();
+        }
+
+        // If we are reading 3 bytes of size data
+        if (shouldSkip)
+        {
+            // Skip 3 bytes
+            _ = reader.BaseStream.Seek(3, SeekOrigin.Current);
+        }
+
+        return (int)reader.ReadUInt24BigEndian();
     }
 }

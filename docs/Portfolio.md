@@ -1,33 +1,33 @@
 # The Recreation of the SAGE Engine in Modern Dotnet
 
-This document is here to document my process to recreate the SAGE engine as published by
-[EA on their official GitHub](https://github.com/electronicarts/CnC_Generals_Zero_Hour).
+This document is here to document my process to recreate the SAGE engine as published
+by [EA on their official GitHub](https://github.com/electronicarts/CnC_Generals_Zero_Hour).
 
-The objective is to create a full system without the use of external libraries. While libraries
-like the ones in [Silk.NET](https://github.com/dotnet/Silk.NET) and the ones in [Veldrid](https://github.com/veldrid/veldrid)
-would speed up the process, and projects like [OpenSAGE](https://github.com/OpenSAGE) already exist,
-this is meant for my personal development of programming skills in dotnet, forcing me to better understand
-graphics programming and the development of low level systems in dotnet, such as marshalling and p/invoke.
+The objective is to create a full system without the use of external libraries. While libraries like the ones
+in [Silk.NET](https://github.com/dotnet/Silk.NET) and the ones in [Veldrid](https://github.com/veldrid/veldrid) would
+speed up the process, and projects like [OpenSAGE](https://github.com/OpenSAGE) already exist, this is meant for my
+personal development of programming skills in dotnet, forcing me to better understand graphics programming and the
+development of low level systems in dotnet, such as marshalling and p/invoke.
 
 We will be using the `GeneralsMD` (the expansion) code, and assuming all improvements are, in fact, improvements.
 
 ## Table of Contents
 
 - [The Recreation of the SAGE Engine in Modern Dotnet](#the-recreation-of-the-sage-engine-in-modern-dotnet)
-  - [Table of Contents](#table-of-contents)
-  - [The "Easiest" Start](#the-easiest-start)
-    - [Preparation](#preparation)
-    - [Extensions of the Core Language](#extensions-of-the-core-language)
-    - [RefPack Codex](#refpack-codex)
+    - [Table of Contents](#table-of-contents)
+    - [The "Easiest" Start](#the-easiest-start)
+        - [Preparation](#preparation)
+        - [Extensions of the Core Language](#extensions-of-the-core-language)
+        - [RefPack Codex](#refpack-codex)
 
 ## The "Easiest" Start
 
-Because they don't depend on anything else, the easiest place to start would be the compression libraries.
-They are not all actually used in the actual games, but I will implement all of them regardless, because
-that way the engine can be more future proof and usable outside of the original games. I may even make my own.
+Because they don't depend on anything else, the easiest place to start would be the compression libraries. They are not
+all actually used in the actual games, but I will implement all of them regardless, because that way the engine can be
+more future proof and usable outside of the original games. I may even make my own.
 
-As such, we will need both a library that can be used by the engine and by a CLI and GUI tool to do the compression.
-We start with the commands:
+As such, we will need both a library that can be used by the engine and by a CLI and GUI tool to do the compression. We
+start with the commands:
 
 ```shell
 dotnet new classlib -o Sage.Net.Compression
@@ -44,11 +44,11 @@ I will be starting with the RefPack compression algorithm, as I find it the easi
 the existing `ZLibStream` for ZLib. All in all, we require the following:
 
 - EAC
-  - RefPack
-  - BinaryTree
-  - HuffmanWithRunlength
+    - RefPack
+    - BinaryTree
+    - HuffmanWithRunlength
 - NoxCompressor
-  - LightZHL
+    - LightZHL
 - ZLib
 
 ### Preparation
@@ -72,11 +72,11 @@ The files that, in conjuction, form the RefPack codex, are defined in the origin
 - `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refencode.cpp`
 
 Of these files, because we want to implement the system in a dotnet idiomatic manner, we are only interested in
-implementing the reading and writing in big-endian from `gimex.h` and the `refdecode.cpp` and `refencode.cpp` files
-that hold the decoding and encoding algorithms, respectively.
+implementing the reading and writing in big-endian from `gimex.h` and the `refdecode.cpp` and `refencode.cpp` files that
+hold the decoding and encoding algorithms, respectively.
 
-Dotnet has systems to read and write little and big endian bytes, but it may require more than 1 command in some occasions.
-For this, we will be creating an extensions library:
+Dotnet has systems to read and write little and big endian bytes, but it may require more than 1 command in some
+occasions. For this, we will be creating an extensions library:
 
 ```shell
 dotnet new classlib -o Sage.Net.Extensions
@@ -86,29 +86,29 @@ dotnet add reference --project Sage.Net.Compression.Eac.RefPack Sage.Net.Extensi
 
 ### Extensions of the Core Language
 
-Okay, so we are going to need our first extension. We know for a FACT that we will be using streams
-for compression/decompression to make this system idiomatic. As such, we will be dealing with the
-`BinaryReader` and `BinaryWriter` classes quite a lot to read and write bytes.
+Okay, so we are going to need our first extension. We know for a FACT that we will be using streams for
+compression/decompression to make this system idiomatic. As such, we will be dealing with the `BinaryReader` and
+`BinaryWriter` classes quite a lot to read and write bytes.
 
 The `BinaryReader` class will be used for the `REF_is` method, which requires two considerations:
 
 1. `BinaryReader` CANNOT read big-endian data and requires further action with `BinaryPrimitives`.
-2. `BinaryReader` will take in an `Encoding` value, and the original engine uses the
-  [Windows ANSI encoding (page 1252)](https://en.wikipedia.org/wiki/Windows-1252)
+2. `BinaryReader` will take in an `Encoding` value, and the original engine uses
+   the [Windows ANSI encoding (page 1252)](https://en.wikipedia.org/wiki/Windows-1252)
 
 Both of these limitations can be resolved through the `Sage.Net.Extensions` library, so we will work on that first.
 
-For the first problem, we can add as many options as the `GIMEX` system has, which is for 2, 3 and 4 bytes reading and writing. These are defined in the `gimex.h` header as
-`static __inline unsigned int ggetm(const void *src, int bytes)` and
-`static __inline void gputm(void *dst, unsigned int data, int bytes)` respectively.
+For the first problem, we can add as many options as the `GIMEX` system has, which is for 2, 3 and 4 bytes reading and
+writing. These are defined in the `gimex.h` header as `static __inline unsigned int ggetm(const void *src, int bytes)`
+and `static __inline void gputm(void *dst, unsigned int data, int bytes)` respectively.
 
-We will also add extensions to read and write specifically in little-endian, regardless of the machine, defined
-in the `gimex.h` header as `static __inline unsigned int ggeti(const void *src, int bytes)` and
+We will also add extensions to read and write specifically in little-endian, regardless of the machine, defined in the
+`gimex.h` header as `static __inline unsigned int ggeti(const void *src, int bytes)` and
 `static __inline void gputi(void *dst, unsigned int data, int bytes)` respectively and, again; up to 4 bytes.
 
-We will define the equivalents in the
-[`BinaryReaderExtensions`](../Sage.Net.Extensions/BinaryReaderExtensions.cs) static class first.
-This defines the reading and writing of 2, 3 and 4 big-endian and little-endian bytes in a dotnet idiomatic way:
+We will define the equivalents in the [`BinaryReaderExtensions`](../Sage.Net.Extensions/BinaryReaderExtensions.cs)
+static class first. This defines the reading and writing of 2, 3 and 4 big-endian and little-endian bytes in a dotnet
+idiomatic way:
 
 ```csharp
 using BinaryReader reader = new(myStream1);
@@ -126,32 +126,33 @@ using BinaryWriter writer = new(myStream2);
 writer.WriteUInt16LittleEndian(value);
 ```
 
-With this, we must have into mind that, as estated above, the engine was using ANSI characters for their configuration files.
-These are legacy characters that aren't found on the standard `Encoding` class, and we will be resolving this by creating
-our own extension in [`LegacyEncodings`](../Sage.Net.Extensions/LegacyEncodings.cs). This is accomplish trough the
-[`Encoding.GetEncoding`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getencoding?view=net-9.0)
-method in dotnet, and by registering it on first usage through the `LegacyEncodings` static constructor with the
-[`Encoding.RegisterProvider`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider?view=net-9.0)
+With this, we must have into mind that, as estated above, the engine was using ANSI characters for their configuration
+files. These are legacy characters that aren't found on the standard `Encoding` class, and we will be resolving this by
+creating our own extension in [`LegacyEncodings`](../Sage.Net.Extensions/LegacyEncodings.cs). This is accomplish trough
+the [`Encoding.GetEncoding`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getencoding?view=net-9.0)
+method in dotnet, and by registering it on first usage through the `LegacyEncodings` static constructor with the [
+`Encoding.RegisterProvider`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider?view=net-9.0)
 method.
 
-With this, we will be able to create `BinaryReader`s and `BinaryWriter`s by using their corresponding constructors,
-[`BinaryReader(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binaryreader.-ctor?view=net-9.0#system-io-binaryreader-ctor(system-io-stream-system-text-encoding-system-boolean))
-and [`BinaryWriter(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binarywriter.-ctor?view=net-9.0#system-io-binarywriter-ctor(system-io-stream-system-text-encoding-system-boolean))
-constructors respecting the original encoding of the bytes. This is important to read the original strings and to
-save strings in a way that is compatible with the original engine's expectations.
+With this, we will be able to create `BinaryReader`s and `BinaryWriter`s by using their corresponding constructors, [
+`BinaryReader(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binaryreader.-ctor?view=net-9.0#system-io-binaryreader-ctor(system-io-stream-system-text-encoding-system-boolean))
+and [
+`BinaryWriter(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binarywriter.-ctor?view=net-9.0#system-io-binarywriter-ctor(system-io-stream-system-text-encoding-system-boolean))
+constructors respecting the original encoding of the bytes. This is important to read the original strings and to save
+strings in a way that is compatible with the original engine's expectations.
 
 Now we are ready to start with the first codex.
 
 ### RefPack Codex
 
-The RefPack codex is the preferred compression algorithm within the engine. And while it is not used widely and the other
-codexes are not really found in the original games, I intend to allow future usage of this engine to support all possible
-systems that may have existed within the original engine.
+The RefPack codex is the preferred compression algorithm within the engine. And while it is not used widely and the
+other codexes are not really found in the original games, I intend to allow future usage of this engine to support all
+possible systems that may have existed within the original engine.
 
 But with this being the preferred system, we will start here. We want to create a `RefPackStream` in the style of the
-existing [`ZLibStream`](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.zlibstream?view=net-9.0)
-to help users better understand how to compress and decompress data within the class. In short, `Read` will be
-used to decompress and `Write` to compress data.
+existing [`ZLibStream`](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.zlibstream?view=net-9.0) to
+help users better understand how to compress and decompress data within the class. In short, `Read` will be used to
+decompress and `Write` to compress data.
 
 To recap, the files we are interested in for this codex are:
 
@@ -162,9 +163,9 @@ To recap, the files we are interested in for this codex are:
 - `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refdecode.cpp`
 - `CnC_Generals_Zero_Hour/GeneralsMD/Code/Libraries/Source/Compression/EAC/refencode.cpp`
 
-We have now implemented the gimex system, and we can ignore the codex interface due to our idiomatic requirements. We will
-also be ignoring the `refabout` data due to, again, the idiomatic requirements. Version information about the library
-can be retrieved through the assembly's version, the same with the description.
+We have now implemented the gimex system, and we can ignore the codex interface due to our idiomatic requirements. We
+will also be ignoring the `refabout` data due to, again, the idiomatic requirements. Version information about the
+library can be retrieved through the assembly's version, the same with the description.
 
 The first thing to look at will be the following method (comments added for clarity):
 
@@ -185,21 +186,21 @@ bool GCALL REF_is(const void *compresseddata)
 }
 ```
 
-We will start by creating an internal class that will deal with the decoding and an internal class that will deal with the
-encoding. Both of these classes will NOT work on buffers but rather the `BinaryReader` or `BinaryWriter` classes that the
-`RefPackStream` will work with.
+We will start by creating an internal class that will deal with the decoding and an internal class that will deal with
+the encoding. Both of these classes will NOT work on buffers but rather the `BinaryReader` or `BinaryWriter` classes
+that the `RefPackStream` will work with.
 
-We will start with `refdecode.cpp` in the [`Decode`](../Sage.Net.Compression.Eac.RefPack/Internals/Decode.cs) static class.
-For this, we need to understand the process of the decoding algorithm. The first step will be to transliterate the
-`bool GCALL REF_is(const void *compresseddata)` static method that is used to check if a set of data is valid
+We will start with `refdecode.cpp` in the [`Decode`](../Sage.Net.Compression.Eac.RefPack/Internals/Decode.cs) static
+class. For this, we need to understand the process of the decoding algorithm. The first step will be to transliterate
+the `bool GCALL REF_is(const void *compresseddata)` static method that is used to check if a set of data is valid
 RefPack compressed data or not. This method will read 2 bytes off the `compresseddata` and (without safety checks),
-checks if these bytes are `0x10FB`, `0x11FB`, `0x90FB` or `0x91FB`. These just seem to be magic numbers, so we will
-have to just deal with them.
+checks if these bytes are `0x10FB`, `0x11FB`, `0x90FB` or `0x91FB`. These just seem to be magic numbers, so we will have
+to just deal with them.
 
 We will be implemented this as a static, internal method defined as
-`internal static bool IsValidRefPackStream(BinaryReader reader)`. We will be adding a safety check without
-exceptions to prevent reading on streams that aren't 2 bytes long. This method will also restore the previous
-position, avoiding advancing the pointer in the base stream.
+`internal static bool IsValidRefPackStream(BinaryReader reader)`. We will be adding a safety check without exceptions to
+prevent reading on streams that aren't 2 bytes long. This method will also restore the previous position, avoiding
+advancing the pointer in the base stream.
 
 ```csharp
 internal static bool IsValidRefPackStream(BinaryReader reader)
@@ -228,8 +229,7 @@ internal static bool IsValidRefPackStream(BinaryReader reader)
 }
 ```
 
-The next element will be a size check, to be able to retrieve the size of the encoded data once it
-has been decoded.
+The next element will be a size check, to be able to retrieve the size of the encoded data once it has been decoded.
 
 This is done in the method following method (comments added for clarification):
 
@@ -295,3 +295,104 @@ internal static int RetrieveDecompressedRefPackStreamSize(BinaryReader reader)
     }
 }
 ```
+
+Now we can proceed to implement the `int GCALL REF_decode(void *dest, const void *compresseddata, int *compressedsize)`
+method, which is the actual decoding algorithm. This is a method with high cognitive complexity and I will be splitting
+each step and implement these as smaller blocks, to make the code easier to follow and understand.
+
+Our own definition will be instead `int Decompress([NotNull] BinaryReader reader, Span<byte> destination)`
+
+The original code starts my defining some variables:
+
+```c++
+unsigned char *s;
+unsigned char *ref;
+unsigned char *d;
+unsigned char first;
+unsigned char second;
+unsigned char third;
+unsigned char forth;
+unsigned int  run;
+unsigned int  type;
+int          ulen;
+
+s = (unsigned char *) compresseddata;
+d = (unsigned char *) dest;
+ulen = 0L;
+```
+
+This is mostly unnecessary in C#, but we will be defining some of our own later on when it's relevant for the language.
+In C++, the very first step is then to check that the source exists with the line `if (s)`. We will simply check if
+there is actual data to read with the check `if (source.Length == 0)`.
+
+The first thing that happens is retrieving the size of the uncompressed data. To do this, while we could use our
+existing method, we will be using a different one that actually will move the stream's position.
+
+The original code uses its own system due to the fact that the VC++98 code uses old-style C pointer arithmetic. This
+is not a problem in C#, but we will be using the `BinaryReader` class to move the stream's position.
+
+We transform this block of code within `REF_decode`:
+
+```c++
+type = *s++;
+type = (type<<8) + *s++;
+
+if (type&0x8000) /* 4 byte size field */
+{
+    if (type&0x100)                       /* skip ulen */
+        s += 4;
+
+    ulen = *s++;
+    ulen = (ulen<<8) + *s++;
+    ulen = (ulen<<8) + *s++;
+    ulen = (ulen<<8) + *s++;
+}
+else
+{
+    if (type&0x100)                       /* skip ulen */
+        s += 3;
+
+    ulen = *s++;
+    ulen = (ulen<<8) + *s++;
+    ulen = (ulen<<8) + *s++;
+}
+```
+
+Where `ulen` will be returned at the end of the method, into the following method:
+
+```csharp
+private static int DecodeCalculateSize([NotNull] BinaryReader reader)
+{
+    // Get the header
+    var type = reader.ReadUInt16BigEndian();
+
+    // Check whether we should skip the size bytes
+    var shouldSkip = (type & 0x1000) != 0;
+
+    // Determine the size of the decompressed data based on the header
+    var sizeBytes = (type & 0x8000) != 0 ? 4 : 3;
+
+    // If we are reading 4 bytes of size data
+    if (sizeBytes == 4)
+    {
+        if (shouldSkip)
+        {
+            // Skip 4 bytes
+            _ = reader.BaseStream.Seek(4, SeekOrigin.Current);
+        }
+
+        return (int)reader.ReadUInt32BigEndian();
+    }
+
+    // If we are reading 3 bytes of size data
+    if (shouldSkip)
+    {
+        // Skip 3 bytes
+        _ = reader.BaseStream.Seek(3, SeekOrigin.Current);
+    }
+
+    return (int)reader.ReadUInt24BigEndian();
+}
+```
+
+Where the resulting value will be returned at the end of the `Decompress` method.

@@ -14,12 +14,13 @@ We will be using the `GeneralsMD` (the expansion) code, and assuming all improve
 ## Table of Contents
 
 - [The Recreation of the SAGE Engine in Modern Dotnet](#the-recreation-of-the-sage-engine-in-modern-dotnet)
-    - [Table of Contents](#table-of-contents)
-    - [The "Easiest" Start](#the-easiest-start)
-        - [Preparation](#preparation)
-        - [Extensions of the Core Language](#extensions-of-the-core-language)
-        - [RefPack Codex](#refpack-codex)
-          - [RefPack Decoding](#refpack-decoding)
+  - [Table of Contents](#table-of-contents)
+  - [The "Easiest" Start](#the-easiest-start)
+    - [Preparation](#preparation)
+    - [Extensions of the Core Language](#extensions-of-the-core-language)
+    - [RefPack Codex](#refpack-codex)
+      - [RefPack Decoding](#refpack-decoding)
+      - [RefPack Encoding](#refpack-encoding)
 
 ## The "Easiest" Start
 
@@ -411,7 +412,9 @@ steps, clearly outlined in the original code's comments:
 4. "Literal"
 5. "EOF" literal
 
-These steps use a common `first` variable (`first = *s++;`, which is the first byte read. This byte decides where in the decoding process we are. These will be divided into their own methods for clarity and to help readability and maintainability as:
+These steps use a common `first` variable (`first = *s++;`, which is the first byte read. This byte decides where in the
+decoding process we are. These will be divided into their own methods for clarity and to help readability and
+maintainability as:
 
 1. `bool TryAndProcessShortForm([NotNull] BinaryReader reader, List<byte> destination, byte first)`
 2. `bool TryAndProcessIntForm([NotNull] BinaryReader reader, List<byte> destination, byte first)`
@@ -460,5 +463,89 @@ public static IList<byte> Decompress([NotNull] BinaryReader reader)
     }
 
     return destination;
+}
+```
+
+#### RefPack Encoding
+
+There is a higher complexity in understanding and following the encoding algorithm as per the original code. It contains
+now a private `static unsigned int matchlen(unsigned char *s,unsigned char *d, unsigned int maxmatch)`, then a macro
+`#define HASH(cptr) (int)((((unsigned int)(unsigned char)cptr[0]<<8) | ((unsigned int)(unsigned char)cptr[2])) ^ ((unsigned int)(unsigned char)cptr[1]<<4))`,
+then a private `static int refcompress(unsigned char *from, int len, unsigned char *dest, int maxback, int quick)` and
+finally the public `int GCALL REF_encode(void *compresseddata, const void *source, int sourcesize, int *opts)` method.
+We will be implementing them in reverse order and as the appear to be necessary to better understand the process and how
+to transliterate it to C#.
+
+The first step will be to decide what type of header is required before compressing the data. This is done as follows (
+comments added for clarity):
+
+```c++
+int GCALL REF_encode(void *compresseddata, const void *source, int sourcesize, int *opts)
+{
+    int    maxback=131072;
+    int     quick=0;
+    int    plen;
+    int    hlen;
+
+
+    /* simple fb6 header */
+
+    if (sourcesize>0xffffff)  // 32 bit header required
+    {
+        // Write the 0x90FB header
+        gputm(compresseddata,   (unsigned int) 0x90fb, 2);
+        // Write the 32 bit size
+        gputm((char *)compresseddata+2, (unsigned int) sourcesize, 4);
+        hlen = 6L;
+    }
+    else
+    {
+        // Write the 0x10FB header
+        gputm(compresseddata,   (unsigned int) 0x10fb, 2);
+        // Write the 24 bit size
+        gputm((char *)compresseddata+2, (unsigned int) sourcesize, 3);
+        hlen = 5L;
+    }
+    // Actually compress the data
+    plen = hlen+refcompress((unsigned char *)source, sourcesize, (unsigned char *)compresseddata+hlen, maxback, quick);
+    // Return the length of the compressed data
+    return(plen);
+}
+```
+
+The `quick` and `maxback` variables are used as options controls, but are never used in the original engine. The
+`maxback` value is just not used **at all**. We will be implementing the `quick` option and propagating these options
+all the way to the main compression/decompression stream. We will then create first the options, and then create the
+header writing system.
+
+We will define the options in the public class
+[`RefPackOptions`](../Sage.Net.Compression.Eac.RefPack/Options/RefPackOptions.cs).
+
+Afterwards, we can start by creating the header writing system. The threshold to decide whether to use the 32-bit or
+24-bit header is 0xFFFFFF. After we have decided which header to use and writing it, we will be able to write the size
+of the decompressed data with a 32-bit or 24-bit value following the header, respectively.
+
+This functionality is achieved like so:
+
+```csharp
+private static void WriteHeader([NotNull] BinaryWriter writer, ReadOnlySpan<byte> source)
+{
+    // Decide which header to write based on the length of the source data
+    if (source.Length > 0xFFFFFF)
+    {
+        // Write the 4-byte length header
+        writer.WriteUInt16BigEndian(0x90FB);
+
+        // Write the length as a 4-byte big-endian integer
+        writer.WriteUInt32BigEndian((uint)source.Length);
+    }
+    else
+    {
+        // Write the 3-byte length header
+        writer.WriteUInt16BigEndian(0x10FB);
+
+        // Write the length as a 3-byte big-endian integer
+        writer.WriteUInt24BigEndian((uint)source.Length);
+    }
 }
 ```

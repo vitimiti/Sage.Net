@@ -46,11 +46,11 @@ I will be starting with the RefPack compression algorithm, as I find it the easi
 the existing `ZLibStream` for ZLib. All in all, we require the following:
 
 - EAC
-    - RefPack
-    - BinaryTree
-    - HuffmanWithRunlength
+  - RefPack
+  - BinaryTree
+  - HuffmanWithRunlength
 - NoxCompressor
-    - LightZHL
+  - LightZHL
 - ZLib
 
 ### Preparation
@@ -132,14 +132,14 @@ With this, we must have into mind that, as estated above, the engine was using A
 files. These are legacy characters that aren't found on the standard `Encoding` class, and we will be resolving this by
 creating our own extension in [`LegacyEncodings`](../Sage.Net.Extensions/LegacyEncodings.cs). This is accomplish trough
 the [`Encoding.GetEncoding`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.getencoding?view=net-9.0)
-method in dotnet, and by registering it on first usage through the `LegacyEncodings` static constructor with the [
-`Encoding.RegisterProvider`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider?view=net-9.0)
+method in dotnet, and by registering it on first usage through the `LegacyEncodings` static constructor with the
+[`Encoding.RegisterProvider`](https://learn.microsoft.com/en-us/dotnet/api/system.text.encoding.registerprovider?view=net-9.0)
 method.
 
-With this, we will be able to create `BinaryReader`s and `BinaryWriter`s by using their corresponding constructors, [
-`BinaryReader(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binaryreader.-ctor?view=net-9.0#system-io-binaryreader-ctor(system-io-stream-system-text-encoding-system-boolean))
-and [
-`BinaryWriter(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binarywriter.-ctor?view=net-9.0#system-io-binarywriter-ctor(system-io-stream-system-text-encoding-system-boolean))
+With this, we will be able to create `BinaryReader`s and `BinaryWriter`s by using their corresponding constructors,
+[`BinaryReader(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binaryreader.-ctor?view=net-9.0#system-io-binaryreader-ctor(system-io-stream-system-text-encoding-system-boolean))
+and
+[`BinaryWriter(Stream, Encoding, Boolean)`](https://learn.microsoft.com/en-us/dotnet/api/system.io.binarywriter.-ctor?view=net-9.0#system-io-binarywriter-ctor(system-io-stream-system-text-encoding-system-boolean))
 constructors respecting the original encoding of the bytes. This is important to read the original strings and to save
 strings in a way that is compatible with the original engine's expectations.
 
@@ -546,6 +546,113 @@ private static void WriteHeader([NotNull] BinaryWriter writer, ReadOnlySpan<byte
 
         // Write the length as a 3-byte big-endian integer
         writer.WriteUInt24BigEndian((uint)source.Length);
+    }
+}
+```
+
+At this point, we start the process of compression defined in
+`static int refcompress(unsigned char *from, int len, unsigned char *dest, int maxback, int quick)`.
+
+The initial variable setup will mostly be skipped by the C# equivalent, since the method will not use pointer
+arithmetic and, therefore, doesn't need as much setup. The signature will therefore be left as
+`void Compress([NotNull] BinaryWriter writer, ReadOnlySpan<byte> source)`.
+
+For this, we will be creating two contexts to share information amongst methods, so that we can create methods
+capable of making reading and understanding the algorithm easier.
+
+```csharp
+public static void Compress([NotNull] BinaryWriter writer, ReadOnlySpan<byte> source, bool quick)
+{
+    WriteHeader(writer, source);
+
+    if (source.Length == 0)
+    {
+        return;
+    }
+
+    const int maxBack = 131071;
+    const int hashTableSize = 65536;
+    const int linkSize = 131072;
+
+    // Initialize compression context
+    CompressionContext context = new(hashTableSize, linkSize, source.Length);
+
+    // Lookahead
+    context.Length -= 4;
+    while (context.Length >= 0)
+    {
+        // Initialize compression loop context
+        CompressionLoopContext loopContext = new(
+            source,
+            context.Length,
+            context.CurrentPointer,
+            maxBack,
+            context.HashTable
+        );
+
+        // Process large loop if hash offset is valid
+        if (loopContext.HashOffset >= loopContext.MinimumHashOffset)
+        {
+            ProcessLargeLoop(context, loopContext, source);
+        }
+
+        // Decide processing based on cost and length
+        if (loopContext.Cost >= loopContext.Length || context.Length < 4)
+        {
+            ProcessCostlyLoop(context, loopContext);
+        }
+        else
+        {
+            ProcessMainLoop(context, loopContext, source, writer, quick);
+        }
+    }
+
+    // Flush remaining bytes
+    FlushLastBytes(context, source, writer);
+}
+
+private sealed class CompressionContext
+{
+    public int[] HashTable { get; }
+    public int[] Link { get; }
+    public int Run { get; set; }
+    public int CurrentPointer { get; set; }
+    public int ReadPointer { get; set; }
+    public int Length { get; set; }
+
+    public CompressionContext(int hashTableSize, int linkSize, int sourceLength)
+    {
+        HashTable = new int[hashTableSize];
+        Link = new int[linkSize];
+
+        Array.Fill(HashTable, -1);
+
+        Length = sourceLength;
+    }
+}
+
+private sealed class CompressionLoopContext
+{
+    public int Offset { get; set; }
+    public int Length { get; set; } = 2;
+    public int Cost { get; set; } = 2;
+    public int MinimumLength { get; set; }
+    public int HashValue { get; set; }
+    public int HashOffset { get; set; }
+    public int MinimumHashOffset { get; set; }
+
+    public CompressionLoopContext(
+        ReadOnlySpan<byte> source,
+        int length,
+        int currentPointer,
+        int maxBack,
+        int[] hashTable
+    )
+    {
+        MinimumLength = int.Min(length, 1028);
+        HashValue = Hash(source, currentPointer);
+        HashOffset = hashTable[HashValue];
+        MinimumHashOffset = int.Max(currentPointer - maxBack, 0);
     }
 }
 ```

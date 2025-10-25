@@ -15,15 +15,17 @@ We will be using the `GeneralsMD` (the expansion) code, and assuming all improve
 
 - [The Recreation of the SAGE Engine in Modern Dotnet](#the-recreation-of-the-sage-engine-in-modern-dotnet)
   - [Table of Contents](#table-of-contents)
-  - [The "Easiest" Start](#the-easiest-start)
+  - [The "Easiest" Start - Compression](#the-easiest-start---compression)
     - [Preparation](#preparation)
     - [Extensions of the Core Language](#extensions-of-the-core-language)
     - [RefPack Codex](#refpack-codex)
       - [RefPack Decoding](#refpack-decoding)
       - [RefPack Encoding](#refpack-encoding)
       - [RefPackStream](#refpackstream)
+    - [BinaryTree Codex](#binarytree-codex)
+      - [BinaryTree Decoding](#binarytree-decoding)
 
-## The "Easiest" Start
+## The "Easiest" Start - Compression
 
 Because they don't depend on anything else, the easiest place to start would be the compression libraries. They are not
 all actually used in the actual games, but I will implement all of them regardless, because that way the engine can be
@@ -823,3 +825,18 @@ var stream = File.Open("path/to/refpack/file"); // disposed by the refpack strea
 using RefPackStream refpack = new(stream, CompressionMode.Compress);
 refpack.Write(data, 0, data.Length); // This should completely compress the data into the given stream
 ```
+
+### BinaryTree Codex
+
+In a similar way to the [RefPack Codex](#refpack-codex), we are going to create a new library for the binary tree
+codex and directly link the extensions library to it, as we will be using them:
+
+```shell
+dotnet new classlib -o Sage.Net.Compression.Eac.BinaryTree
+dotnet sln add Sage.Net.Compression.Eac.BinaryTree
+dotnet add reference --project Sage.Net.Compression.Eac.BinaryTree Sage.Net.Extensions
+```
+
+#### BinaryTree Decoding
+
+We will be working on the decoding mechanism first, as it is the simplest mechanism of the two.

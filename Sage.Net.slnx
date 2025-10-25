@@ -5,5 +5,6 @@
   <Folder Name="/Compression/Eac/">
     <Project Path="Sage.Net.Compression.Eac.RefPack/Sage.Net.Compression.Eac.RefPack.csproj" />
   </Folder>
+  <Project Path="Sage.Net.Compression.Eac.BinaryTree/Sage.Net.Compression.Eac.BinaryTree.csproj" />
   <Project Path="Sage.Net.Extensions/Sage.Net.Extensions.csproj" />
 </Solution>

@@ -833,7 +833,7 @@ codex and directly link the extensions library to it, as we will be using them:
 
 ```shell
 dotnet new classlib -o Sage.Net.Compression.Eac.BinaryTree
-dotnet sln add Sage.Net.Compression.Eac.BinaryTree
+dotnet sln add Sage.Net.Compression.Eac.BinaryTree -s Compression/Eac
 dotnet add reference --project Sage.Net.Compression.Eac.BinaryTree Sage.Net.Extensions
 ```
 

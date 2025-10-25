@@ -21,6 +21,7 @@ We will be using the `GeneralsMD` (the expansion) code, and assuming all improve
     - [RefPack Codex](#refpack-codex)
       - [RefPack Decoding](#refpack-decoding)
       - [RefPack Encoding](#refpack-encoding)
+      - [RefPackStream](#refpackstream)
 
 ## The "Easiest" Start
 
@@ -304,7 +305,7 @@ Now we can proceed to implement the `int GCALL REF_decode(void *dest, const void
 method, which is the actual decoding algorithm. This is a method with high cognitive complexity and I will be splitting
 each step and implement these as smaller blocks, to make the code easier to follow and understand.
 
-Our own definition will be instead `IList<byte> Decompress([NotNull] BinaryReader reader)`
+Our own definition will be instead `List<byte> Decompress([NotNull] BinaryReader reader)`
 
 The original code starts my defining some variables:
 
@@ -425,7 +426,7 @@ maintainability as:
 All of these methods come together in the `Decompress` method to make the following decompression algorithm:
 
 ```csharp
-public static IList<byte> Decompress([NotNull] BinaryReader reader)
+public static List<byte> Decompress([NotNull] BinaryReader reader)
 {
     if (reader.BaseStream.Length == 0)
     {
@@ -655,4 +656,170 @@ private sealed class CompressionLoopContext
         MinimumHashOffset = int.Max(currentPointer - maxBack, 0);
     }
 }
+```
+
+To maintain the possibility of doing the quicker compression, we have created the following class:
+
+```csharp
+public class RefPackOptions
+{
+    public bool QuickCompression { get; set; }
+}
+```
+
+#### RefPackStream
+
+To put it all together, we will be creating the following stream class:
+
+```csharp
+public sealed class RefPackStream : Stream
+{
+    private readonly Stream _baseStream;
+    private readonly bool _leaveOpen;
+    private readonly RefPackOptions _options;
+
+    private bool _disposed;
+
+    public RefPackStream(
+        [NotNull] Stream baseStream,
+        CompressionMode compressionMode,
+        Action<RefPackOptions>? options = null,
+        bool leaveOpen = false
+    )
+    {
+        if (compressionMode is CompressionMode.Compress && !baseStream.CanWrite)
+        {
+            throw new ArgumentException("The base stream must be writable for compression.", nameof(baseStream));
+        }
+
+        if (compressionMode is CompressionMode.Decompress && !baseStream.CanRead)
+        {
+            throw new ArgumentException("The base stream must be readable for decompression.", nameof(baseStream));
+        }
+
+        _options = new RefPackOptions();
+        options?.Invoke(_options);
+
+        _baseStream = baseStream;
+        _leaveOpen = leaveOpen;
+
+        CanRead = compressionMode is CompressionMode.Decompress && baseStream.CanRead;
+        CanWrite = compressionMode is CompressionMode.Compress && baseStream.CanWrite;
+    }
+
+    public override bool CanRead { get; }
+
+    public override bool CanSeek => false;
+
+    public override bool CanWrite { get; }
+
+    public override long Length => _baseStream.Length;
+
+    public override long Position
+    {
+        get => _baseStream.Position;
+        set => throw new NotSupportedException($"The {nameof(RefPackStream)} does not support setting position.");
+    }
+
+    public static int RetrieveDecompressedSize([NotNull] Stream refPackStream)
+    {
+        using BinaryReader reader = new(refPackStream, LegacyEncodings.Ansi1252, leaveOpen: true);
+        return Decode.RetrieveDecompressedRefPackStreamSize(reader);
+    }
+
+    public override void Flush()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (!CanWrite)
+        {
+            throw new NotSupportedException($"The {nameof(RefPackStream)} is not writable.");
+        }
+
+        _baseStream.Flush();
+    }
+
+    public override int Read([NotNull] byte[] buffer, int offset, int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length - offset, count);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (!CanRead)
+        {
+            throw new NotSupportedException($"The {nameof(RefPackStream)} is not readable.");
+        }
+
+        using BinaryReader reader = new(_baseStream, LegacyEncodings.Ansi1252, leaveOpen: true);
+
+        if (!Decode.IsValidRefPackStream(reader))
+        {
+            throw new InvalidDataException("The provided stream is not a valid RefPack compressed stream.");
+        }
+
+        List<byte> decompressed = Decode.Decompress(reader);
+        var bytesToCopy = int.Min(count, decompressed.Count);
+        decompressed.CopyTo(0, buffer, offset, bytesToCopy);
+        return bytesToCopy;
+    }
+
+    public override long Seek(long offset, SeekOrigin origin) =>
+        throw new NotSupportedException($"The {nameof(RefPackStream)} does not support seeking.");
+
+    public override void SetLength(long value) =>
+        throw new NotSupportedException($"The {nameof(RefPackStream)} does not support setting length.");
+
+    public override void Write([NotNull] byte[] buffer, int offset, int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(offset);
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length - offset, count);
+        ObjectDisposedException.ThrowIf(_disposed, this);
+
+        if (!CanWrite)
+        {
+            throw new NotSupportedException($"The {nameof(RefPackStream)} is not writable.");
+        }
+
+        using BinaryWriter writer = new(_baseStream, LegacyEncodings.Ansi1252, leaveOpen: true);
+
+        ReadOnlySpan<byte> source = new Span<byte>(buffer, offset, count);
+        Encode.Compress(writer, source, _options.QuickCompression);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing && !_leaveOpen)
+        {
+            _baseStream.Dispose();
+        }
+
+        _disposed = true;
+        base.Dispose(disposing);
+    }
+}
+```
+
+With this, now we have a system to compress and decompress using the `RefPack` codex. For example:
+
+```csharp
+// Decompress a RefPack compressed file
+var stream = File.Open("path/to/refpack/file"); // disposed by the refpack stream
+using RefPackStream refpack = new(stream, CompressionMode.Decompress);
+var buffer = new byte[RefPackStream.RetrieveDecompressedSize(stream)];
+var compressedDataByteCount = refpack.Read(buffer, 0, buffer.Length); // This should completely decompress the stream
+```
+
+```csharp
+byte[] data = /* whatever data, maybe from memory bytes */;
+// Compress a stream to a RefPack file
+var stream = File.Open("path/to/refpack/file"); // disposed by the refpack stream
+using RefPackStream refpack = new(stream, CompressionMode.Compress);
+refpack.Write(data, 0, data.Length); // This should completely compress the data into the given stream
 ```

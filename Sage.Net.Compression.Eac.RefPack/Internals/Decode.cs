@@ -90,7 +90,7 @@ internal static class Decode
         }
     }
 
-    public static IList<byte> Decompress([NotNull] BinaryReader reader)
+    public static List<byte> Decompress([NotNull] BinaryReader reader)
     {
         if (reader.BaseStream.Length == 0)
         {

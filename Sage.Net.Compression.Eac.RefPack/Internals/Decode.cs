@@ -24,7 +24,7 @@ internal static class Decode
     /// <remarks>
     /// This method checks the first two bytes of the stream against known RefPack signatures and doesn't alter the stream's position.
     /// </remarks>
-    internal static bool IsValidRefPackStream(BinaryReader reader)
+    public static bool IsValidRefPackStream(BinaryReader reader)
     {
         if (reader.BaseStream.Length < 2)
         {
@@ -57,7 +57,7 @@ internal static class Decode
     /// <remarks>
     /// This method reads the size information from the stream header and does not alter the stream's position.
     /// </remarks>
-    internal static int RetrieveDecompressedRefPackStreamSize(BinaryReader reader)
+    public static int RetrieveDecompressedRefPackStreamSize(BinaryReader reader)
     {
         // Save the current position to restore later
         var currentPosition = reader.BaseStream.Position;
@@ -90,6 +90,11 @@ internal static class Decode
         }
     }
 
+    /// <summary>
+    /// Decompresses data from a RefPack compressed stream.
+    /// </summary>
+    /// <param name="reader">The binary reader for the RefPack compressed stream.</param>
+    /// <returns>A list of bytes representing the decompressed data.</returns>
     public static List<byte> Decompress([NotNull] BinaryReader reader)
     {
         if (reader.BaseStream.Length == 0)

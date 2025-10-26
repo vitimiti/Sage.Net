@@ -839,4 +839,65 @@ dotnet add reference --project Sage.Net.Compression.Eac.BinaryTree Sage.Net.Exte
 
 #### BinaryTree Decoding
 
-We will be working on the decoding mechanism first, as it is the simplest mechanism of the two.
+We will be working on the decoding mechanism first, as it is the simplest mechanism of the two. It is so simple, in
+fact, that in spite of the signature of the decompression method is now
+`List<byte> Decompress([NotNull] BinaryReader reader)`, the decompression process is written basically the same as
+in the original code.
+
+The only difference is that we use the `BinaryReader` and we return a `List<byte>` instead of using pointer arithmetic
+and returning the bytes count.
+
+Getting the size of the decompressed data is, therefore, used to allocate the capacity of the list, rather than return
+the number of bytes read.
+
+```csharp
+public static List<byte> Decompress([NotNull] BinaryReader reader)
+{
+    if (reader.BaseStream.Length == 0)
+    {
+        return [];
+    }
+
+    DecodeContext context = new() { Destination = { Capacity = DecodeCalculateSize(reader) } };
+
+    var clue = reader.ReadByte();
+    context.ClueTable[clue] = 1; // Mark this clue as special
+
+    var nodes = reader.ReadByte();
+    int node;
+    for (var i = 0; i < nodes; i++)
+    {
+        node = reader.ReadByte();
+        context.Left[node] = reader.ReadByte();
+        context.Right[node] = reader.ReadByte();
+        context.ClueTable[node] = -1;
+    }
+
+    while (true)
+    {
+        node = reader.ReadByte();
+        var currentClue = context.ClueTable[node];
+        switch (currentClue)
+        {
+            case 0:
+                context.Destination.Add((byte)node);
+                continue;
+            case < 0:
+                Chase(context, context.Left[node]);
+                Chase(context, context.Right[node]);
+                continue;
+        }
+
+        node = reader.ReadByte();
+        if (node != 0)
+        {
+            context.Destination.Add((byte)node);
+            continue;
+        }
+
+        break;
+    }
+
+    return context.Destination;
+}
+```

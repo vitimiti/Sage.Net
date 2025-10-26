@@ -32,7 +32,8 @@ public sealed class RefPackStream : Stream
     /// <param name="compressionMode">The compression mode (compress or decompress).</param>
     /// <param name="options">An optional action to configure <see cref="RefPackOptions"/>.</param>
     /// <param name="leaveOpen">Whether to leave the underlying stream open after disposing the <see cref="RefPackStream"/>.</param>
-    /// <exception cref="ArgumentException">Thrown when the base stream is not readable for decompression or not writable for compression.</exception>
+    /// <exception cref="ArgumentException">Thrown when the compression mode is not valid.</exception>
+    /// <exception cref="ArgumentException">Thrown when the base stream is not writable or readable for the specified mode.</exception>
     /// <remarks>
     /// This constructor sets up the RefPack stream for either compression or decompression based on the specified mode.
     /// </remarks>
@@ -43,6 +44,16 @@ public sealed class RefPackStream : Stream
         bool leaveOpen = false
     )
     {
+#pragma warning disable SA1008 // Opening parenthesis must be spaced correctly
+        if (compressionMode is not (CompressionMode.Compress or CompressionMode.Decompress))
+#pragma warning restore SA1008 // Opening parenthesis must be spaced correctly
+        {
+            throw new ArgumentException(
+                "The compression mode must be either CompressionMode.Compress or CompressionMode.Decompress.",
+                nameof(compressionMode)
+            );
+        }
+
         if (compressionMode is CompressionMode.Compress && !baseStream.CanWrite)
         {
             throw new ArgumentException("The base stream must be writable for compression.", nameof(baseStream));

@@ -6,10 +6,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
-    <!-- TODO: Enable this when you are ready to document. -->
-    <!-- <GenerateDocumentationFile>true</GenerateDocumentationFile> -->
-    <!-- TODO: Remove this when StyleCop doesn't shit the bed with file scoped namespaces. -->
-    <NoWarn>$(NoWarn);AD0001</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

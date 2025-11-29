@@ -1,1 +1,3 @@
-<Solution />
+<Solution>
+  <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
+</Solution>

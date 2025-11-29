@@ -28,11 +28,6 @@ namespace Sage.Net.BaseTypes;
 public record FCoord2D(float X, float Y)
 {
     /// <summary>
-    /// Gets the zero <see cref="FCoord2D"/>.
-    /// </summary>
-    public static FCoord2D Zero => new(0, 0);
-
-    /// <summary>
     /// Gets the length of the <see cref="FCoord2D"/>.
     /// </summary>
     public float Length => float.Sqrt(float.Pow(X, 2) + float.Pow(Y, 2));
@@ -40,13 +35,11 @@ public record FCoord2D(float X, float Y)
     /// <summary>
     /// Returns a normalized <see cref="FCoord2D"/>.
     /// </summary>
-    /// <returns>A new, normalized <see cref="FCoord2D"/>, or the <see cref="Zero"/> coordinate.</returns>
+    /// <returns>A new, normalized <see cref="FCoord2D"/>, or the zero coordinate.</returns>
     public FCoord2D Normalized()
     {
         var length = Length;
-
-        // Check if the `Length` is NOT zero (with epsilon)
-        return float.Abs(Length) > float.Epsilon ? new FCoord2D(X / length, Y / length) : new FCoord2D(0, 0);
+        return float.Abs(Length) >= float.Epsilon ? new FCoord2D(X / length, Y / length) : new FCoord2D(0, 0);
     }
 
     /// <summary>

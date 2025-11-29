@@ -25,6 +25,7 @@ namespace Sage.Net.BaseTypes;
 /// </summary>
 /// <param name="X">The X coordinate.</param>
 /// <param name="Y">The Y coordinate.</param>
+/// <seealso cref="Coord2D"/>
 public record FCoord2D(float X, float Y)
 {
     /// <summary>

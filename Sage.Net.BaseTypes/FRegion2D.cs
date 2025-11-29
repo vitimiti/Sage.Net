@@ -25,6 +25,7 @@ namespace Sage.Net.BaseTypes;
 /// </summary>
 /// <param name="Low">The <see cref="FCoord2D"/> representing the lower part of the region.</param>
 /// <param name="High">The <see cref="FCoord2D"/> representing the higher part of the region.</param>
+/// <seealso cref="Region2D"/>
 public record FRegion2D(FCoord2D Low, FCoord2D High)
 {
     /// <summary>

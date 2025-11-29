@@ -27,6 +27,7 @@ namespace Sage.Net.BaseTypes;
 /// </summary>
 /// <param name="Low">The <see cref="FCoord3D"/> that represents the lower part of the range.</param>
 /// <param name="High">The <see cref="FCoord3D"/> that represents the higher part of the range.</param>
+/// <seealso cref="Region3D"/>
 public record FRegion3D(FCoord3D Low, FCoord3D High)
 {
     /// <summary>

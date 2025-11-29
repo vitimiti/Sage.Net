@@ -33,13 +33,15 @@ public record FCoord2D(float X, float Y)
     public float Length => float.Sqrt(float.Pow(X, 2) + float.Pow(Y, 2));
 
     /// <summary>
-    /// Returns a normalized <see cref="FCoord2D"/>.
+    /// Gets a normalized <see cref="FCoord2D"/>.
     /// </summary>
-    /// <returns>A new, normalized <see cref="FCoord2D"/>, or the zero coordinate.</returns>
-    public FCoord2D Normalized()
+    public FCoord2D Normalized
     {
-        var length = Length;
-        return float.Abs(Length) >= float.Epsilon ? new FCoord2D(X / length, Y / length) : new FCoord2D(0, 0);
+        get
+        {
+            var length = Length;
+            return float.Abs(Length) >= float.Epsilon ? new FCoord2D(X / length, Y / length) : new FCoord2D(0, 0);
+        }
     }
 
     /// <summary>

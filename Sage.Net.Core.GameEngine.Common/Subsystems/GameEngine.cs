@@ -18,7 +18,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using Sage.Net.Core.GameEngine.Common.Ini;
 using Sage.Net.Core.GameEngine.Common.Transfer;
 
 namespace Sage.Net.Core.GameEngine.Common.Subsystems;

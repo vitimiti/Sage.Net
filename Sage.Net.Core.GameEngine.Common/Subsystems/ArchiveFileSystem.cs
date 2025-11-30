@@ -267,7 +267,7 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
 #else
             _
 #endif
-            = LoadBigFilesFromDirectory(options.ModDir, "*.big", overwrite: true);
+            = LoadBigFilesFromDirectory(options.ModDir, $"*.{options.ModBigCustomExtension ?? "big"}", overwrite: true);
             Debug.Assert(result, $"Loading mods from {options.ModDir} failed.");
         }
     }

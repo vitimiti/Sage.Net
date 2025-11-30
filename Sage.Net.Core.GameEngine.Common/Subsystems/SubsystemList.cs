@@ -40,11 +40,6 @@ public class SubsystemList
 #endif
 
     /// <summary>
-    /// Gets or sets the singleton instance.
-    /// </summary>
-    public static SubsystemList? Instance { get; set; }
-
-    /// <summary>
     /// Adds a subsystem.
     /// </summary>
     /// <param name="subsystem">The subsystem inheriting <see cref="SubsystemBase"/> to add.</param>

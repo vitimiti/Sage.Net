@@ -34,7 +34,7 @@ public abstract class SubsystemBase
     /// <summary>
     /// Initializes a new instance of the <see cref="SubsystemBase"/> class.
     /// </summary>
-    protected SubsystemBase() => SubsystemList.Instance?.AddSubsystem(this);
+    protected SubsystemBase() => GameEngine.TheSubsystemList?.AddSubsystem(this);
 
 #if DUMP_PERF_STATS
     /// <summary>

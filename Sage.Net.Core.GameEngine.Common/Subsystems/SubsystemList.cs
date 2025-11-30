@@ -19,6 +19,7 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using Sage.Net.Core.GameEngine.Common.Transfer;
 #if DUMP_PERF_STATS
 using System.Globalization;
 using System.Text;
@@ -89,6 +90,16 @@ public class SubsystemList
         _ = _allSubsystems.Remove(subsystem);
 #endif
     }
+
+    /// <summary>
+    /// Initializes the subsystem.
+    /// </summary>
+    /// <param name="subsystem">The subsystem that inherits from <see cref="SubsystemBase"/> to initialize.</param>
+    /// <param name="path1">The first path to load INI files from.</param>
+    /// <param name="path2">The second path to load INI files from.</param>
+    /// <param name="xfer">The transfer class that inherits from <see cref="Xfer"/>.</param>
+    public void InitializeSubsystem(SubsystemBase subsystem, string? path1, string? path2, Xfer? xfer) =>
+        throw new NotImplementedException();
 
     /// <summary>
     /// Calls the post-load processing on all subsystems.

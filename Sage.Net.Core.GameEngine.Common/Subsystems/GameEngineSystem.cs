@@ -18,8 +18,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics;
 using Sage.Net.Core.GameEngine.Common.Ini;
 using Sage.Net.Core.GameEngine.Common.Transfer;
+#if PERF_TIMERS || DUMP_PERF_STATS
+using System.Runtime.CompilerServices;
+using Sage.Net.Core.GameEngine.Common.Performance;
+#endif
 
 namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 
@@ -60,6 +65,27 @@ public class GameEngineSystem : SubsystemBase
     public override void Initialize()
     {
         IniReader ini = new();
+
+        Debug.WriteLine(
+            $"""
+            ================================================================================
+            Sage.Net version:          {VersionHelper.GetVersion()}
+            Build date:                {VersionHelper.GetBuildDate()}
+            Build location:            {VersionHelper.GetBuildLocation()}
+            Build user:                {VersionHelper.GetBuildUser()}
+            Build git revision:        {VersionHelper.GetGitRevision()}
+            Build git version:         {VersionHelper.GetGitVersion()}
+            Build git commit time:     {VersionHelper.GetGitCommitTime()}
+            Build git commit author:   {VersionHelper.GetGitAuthor()}
+            ================================================================================
+            """
+        );
+
+#if PERF_TIMERS || DUMP_PERF_STATS
+        Debug.WriteLine("Calculating CPU frequency for performance timers.");
+
+        RuntimeHelpers.RunClassConstructor(typeof(PerformanceSystem).TypeHandle);
+#endif
 
         // Only "Run\INI\Data\INIZH.big" should exist. Remove repeats.
         var patchPath = Path.Combine("Data", "INI", "INIZH.big");

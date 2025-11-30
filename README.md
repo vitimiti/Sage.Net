@@ -14,3 +14,4 @@ Configurations:
 Extra Properties:
 
 - `DumpPerfStats`: Dump performance statistics
+- `PerfTimers`: Enable performance timers

@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Ini;
 
 /// <summary>
 /// INI file loading types.

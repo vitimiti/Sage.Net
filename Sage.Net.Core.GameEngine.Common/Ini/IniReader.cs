@@ -22,10 +22,10 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using Sage.Net.Core.GameEngine.Common.Exceptions.IniExceptions;
+using Sage.Net.Core.GameEngine.Common.Ini.IniExceptions;
 using Sage.Net.Core.GameEngine.Common.Transfer;
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Ini;
 
 /// <summary>
 /// An INI file reader.

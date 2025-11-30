@@ -19,6 +19,7 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using Sage.Net.Core.GameEngine.Common.Ini;
 using Sage.Net.Core.GameEngine.Common.Transfer;
 #if DUMP_PERF_STATS
 using System.Globalization;

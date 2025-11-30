@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common.Exceptions.IniExceptions;
+namespace Sage.Net.Core.GameEngine.Common.Ini.IniExceptions;
 
 /// <summary>
 /// The base INI exception.

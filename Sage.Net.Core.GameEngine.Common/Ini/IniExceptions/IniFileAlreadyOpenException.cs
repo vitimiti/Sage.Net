@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common.Exceptions.IniExceptions;
+namespace Sage.Net.Core.GameEngine.Common.Ini.IniExceptions;
 
 /// <summary>
 /// Exception thrown when the INI file is already open.

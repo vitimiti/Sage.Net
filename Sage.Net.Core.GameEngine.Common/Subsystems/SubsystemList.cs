@@ -98,8 +98,31 @@ public class SubsystemList
     /// <param name="path1">The first path to load INI files from.</param>
     /// <param name="path2">The second path to load INI files from.</param>
     /// <param name="xfer">The transfer class that inherits from <see cref="Xfer"/>.</param>
-    public void InitializeSubsystem(SubsystemBase subsystem, string? path1, string? path2, Xfer? xfer) =>
-        throw new NotImplementedException();
+    /// <param name="name">The <paramref name="subsystem"/> name.</param>
+    public void InitializeSubsystem(
+        [NotNull] SubsystemBase subsystem,
+        string? path1,
+        string? path2,
+        Xfer? xfer,
+        string name
+    )
+    {
+        subsystem.Name = name;
+        subsystem.Initialize();
+
+        IniReader ini = new();
+        if (path1 is not null)
+        {
+            _ = ini.LoadFileDirectory(path1, IniLoadType.Overwrite, xfer);
+        }
+
+        if (path2 is not null)
+        {
+            _ = ini.LoadFileDirectory(path2, IniLoadType.Overwrite, xfer);
+        }
+
+        _subsystems.Add(subsystem);
+    }
 
     /// <summary>
     /// Calls the post-load processing on all subsystems.

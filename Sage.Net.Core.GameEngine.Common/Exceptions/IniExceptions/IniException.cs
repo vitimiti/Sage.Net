@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Xfer.cs" company="Sage.Net">
+// <copyright file="IniException.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,22 +18,30 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common.Transfer;
+namespace Sage.Net.Core.GameEngine.Common.Exceptions.IniExceptions;
 
 /// <summary>
-/// Base class for all transfer objects.
+/// The base INI exception.
 /// </summary>
-public abstract class Xfer
+public class IniException : Exception
 {
     /// <summary>
-    /// User defined transfer.
+    /// Initializes a new instance of the <see cref="IniException"/> class.
     /// </summary>
-    /// <param name="data">The data to transfer.</param>
-    public virtual void User(Span<byte> data) => TransferCore(data);
+    public IniException() { }
 
     /// <summary>
-    /// Implementation of the transfer object.
+    /// Initializes a new instance of the <see cref="IniException"/> class.
     /// </summary>
-    /// <param name="data">The data to transfer.</param>
-    protected abstract void TransferCore(Span<byte> data);
+    /// <param name="message">The exception message.</param>
+    public IniException(string? message)
+        : base(message) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IniException"/> class.
+    /// </summary>
+    /// <param name="message">The exception message.</param>
+    /// <param name="innerException">The inner exception that happened to trigger this exception.</param>
+    public IniException(string? message, Exception? innerException)
+        : base(message, innerException) { }
 }

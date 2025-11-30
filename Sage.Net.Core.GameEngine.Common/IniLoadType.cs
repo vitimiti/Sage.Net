@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Xfer.cs" company="Sage.Net">
+// <copyright file="IniLoadType.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,22 +18,30 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common.Transfer;
+namespace Sage.Net.Core.GameEngine.Common;
 
 /// <summary>
-/// Base class for all transfer objects.
+/// INI file loading types.
 /// </summary>
-public abstract class Xfer
+public enum IniLoadType
 {
     /// <summary>
-    /// User defined transfer.
+    /// Invalid INI load type.
     /// </summary>
-    /// <param name="data">The data to transfer.</param>
-    public virtual void User(Span<byte> data) => TransferCore(data);
+    Invalid,
 
     /// <summary>
-    /// Implementation of the transfer object.
+    /// Create new or load <b>over</b> existing data instance.
     /// </summary>
-    /// <param name="data">The data to transfer.</param>
-    protected abstract void TransferCore(Span<byte> data);
+    Overwrite,
+
+    /// <summary>
+    /// Create new or load into <b>new</b> override data instance.
+    /// </summary>
+    CreateOverrides,
+
+    /// <summary>
+    /// Create new or continue loading into existing data instance.
+    /// </summary>
+    Multifile,
 }

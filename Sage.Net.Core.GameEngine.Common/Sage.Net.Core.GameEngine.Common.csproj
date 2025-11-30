@@ -3,5 +3,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <DefineConstants Condition="'$(ExtraDefineConstants)' != ''">
+      <!-- Allow extra definitions -->
+      <!-- Currently supported extra definitions: -->
+      <!--     - DUMP_PERF_STATS -->
+      $(DefineConstants);$(ExtraDefineConstants)
+      <!-- Do `dotnet build -p:ExtraDefineConstants=<constants>` -->
+    </DefineConstants>
   </PropertyGroup>
 </Project>

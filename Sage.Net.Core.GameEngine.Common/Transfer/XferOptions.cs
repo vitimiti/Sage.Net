@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="AddonCompat.cs" company="Sage.Net">
+// <copyright file="XferOptions.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,30 +18,43 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Sage.Net.Core.GameEngine.Common.Transfer;
 
 /// <summary>
-/// Addon compatibility methods.
+/// Transfer options.
 /// </summary>
-public static class AddonCompat
+[Flags]
+[SuppressMessage(
+    "Design",
+    "CA1028:Enum Storage should be Int32",
+    Justification = "Required due to maximum integer allowed being 0xFFFF_FFFF."
+)]
+[SuppressMessage(
+    "Usage",
+    "CA2217:Do not mark enums with FlagsAttribute",
+    Justification = "Required for runtime options support."
+)]
+[SuppressMessage(
+    "csharpsquid",
+    "S4070: Non-flags enums should not be marked with \"FlagsAttribute\"",
+    Justification = "Required for runtime options support."
+)]
+public enum XferOptions : uint
 {
     /// <summary>
-    /// Checks if the full viewport data file exists.
+    /// No options.
     /// </summary>
-    /// <returns><see langword="true"/> if the full viewpoert data file exists AND had data in it; otherwise <see langword="false"/>.</returns>
-    public static bool HasFullViewportDataFile()
-    {
-        var filePath = Path.Combine(
-            Subsystems.GameEngine.TheGlobalData?.CustomGamePath ?? Environment.CurrentDirectory,
-            "GenTool",
-            "fullviewport.dat"
-        );
-        if (!File.Exists(filePath))
-        {
-            return false;
-        }
+    None = 0,
 
-        using FileStream fileStream = File.OpenRead(filePath);
-        return fileStream.Length > 0;
-    }
+    /// <summary>
+    /// Processing flag.
+    /// </summary>
+    Processing = 1 << 0,
+
+    /// <summary>
+    /// All options.
+    /// </summary>
+    All = 0xFFFF_FFFF,
 }

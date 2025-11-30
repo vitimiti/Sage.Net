@@ -51,11 +51,24 @@ public class GameEngine : SubsystemBase
     public static AudioManager? TheAudio { get; private set; }
 
     /// <summary>
+    /// Gets the writable global data.
+    /// </summary>
+    public static GlobalData? TheWritableGlobalData { get; private set; }
+
+    /// <summary>
+    /// Gets the global data in a read-only state.
+    /// </summary>
+    public static GlobalData? TheGlobalData => TheWritableGlobalData;
+
+    /// <summary>
     /// Initializes the game engine.
     /// </summary>
     /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
     public override void Initialize()
     {
+        XferCrc xferCrc = new();
+        xferCrc.Open("lightCRC");
+
         TheSubsystemList = new SubsystemList();
         TheSubsystemList.AddSubsystem(this);
 
@@ -74,6 +87,17 @@ public class GameEngine : SubsystemBase
 
         TheArchiveFileSystem = new ArchiveFileSystem(_options);
         InitSubsystem(TheArchiveFileSystem, "TheArchiveFileSystem", null);
+
+        TheWritableGlobalData = new GlobalData();
+        InitSubsystem(
+            TheWritableGlobalData,
+            "TheWritableGlobalData",
+            xferCrc,
+            Path.Combine("Data", "INI", "Default", "GameData"),
+            Path.Combine("Data", "INI", "GameData")
+        );
+
+        TheWritableGlobalData.ParseCustomDefinition();
 
         TheArchiveFileSystem.LoadMods();
 

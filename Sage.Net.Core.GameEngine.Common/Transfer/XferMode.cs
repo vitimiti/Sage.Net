@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="AddonCompat.cs" company="Sage.Net">
+// <copyright file="XferMode.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,30 +18,30 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Transfer;
 
 /// <summary>
-/// Addon compatibility methods.
+/// The transfer mode.
 /// </summary>
-public static class AddonCompat
+public enum XferMode
 {
     /// <summary>
-    /// Checks if the full viewport data file exists.
+    /// Invalid transfer mode.
     /// </summary>
-    /// <returns><see langword="true"/> if the full viewpoert data file exists AND had data in it; otherwise <see langword="false"/>.</returns>
-    public static bool HasFullViewportDataFile()
-    {
-        var filePath = Path.Combine(
-            Subsystems.GameEngine.TheGlobalData?.CustomGamePath ?? Environment.CurrentDirectory,
-            "GenTool",
-            "fullviewport.dat"
-        );
-        if (!File.Exists(filePath))
-        {
-            return false;
-        }
+    Invalid,
 
-        using FileStream fileStream = File.OpenRead(filePath);
-        return fileStream.Length > 0;
-    }
+    /// <summary>
+    /// Save mode.
+    /// </summary>
+    Save,
+
+    /// <summary>
+    /// Load mode.
+    /// </summary>
+    Load,
+
+    /// <summary>
+    /// CRC mode.
+    /// </summary>
+    Crc,
 }

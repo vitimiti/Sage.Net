@@ -26,6 +26,32 @@ namespace Sage.Net.Core.GameEngine.Common.Transfer;
 public abstract class Xfer
 {
     /// <summary>
+    /// Gets or sets the transfer options.
+    /// </summary>
+    protected XferOptions Options { get; set; }
+
+    /// <summary>
+    /// Gets or sets the transfer mode.
+    /// </summary>
+    protected XferMode Mode { get; set; }
+
+    /// <summary>
+    /// Gets or sets the identifier.
+    /// </summary>
+    protected string? Identifier { get; set; }
+
+    /// <summary>
+    /// Opens the transfer object.
+    /// </summary>
+    /// <param name="identifier">The identifier for the transfer object.</param>
+    public virtual void Open(string identifier) => Identifier = identifier;
+
+    /// <summary>
+    /// Closes the transfer object.
+    /// </summary>
+    public abstract void Close();
+
+    /// <summary>
     /// User defined transfer.
     /// </summary>
     /// <param name="data">The data to transfer.</param>

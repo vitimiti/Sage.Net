@@ -260,16 +260,18 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
             }
         }
 
-        if (!string.IsNullOrEmpty(options.ModDir))
+        if (string.IsNullOrEmpty(options.ModDir))
         {
-#if DEBUG
-            var result
-#else
-            _
-#endif
-            = LoadBigFilesFromDirectory(options.ModDir, $"*.{options.ModBigCustomExtension ?? "big"}", overwrite: true);
-            Debug.Assert(result, $"Loading mods from {options.ModDir} failed.");
+            return;
         }
+
+#if DEBUG
+        var result
+#else
+        _
+#endif
+        = LoadBigFilesFromDirectory(options.ModDir, $"*.{options.ModBigCustomExtension ?? "big"}", overwrite: true);
+        Debug.Assert(result, $"Loading mods from {options.ModDir} failed.");
     }
 
     /// <summary>

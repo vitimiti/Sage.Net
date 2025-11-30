@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Crc.cs" company="Sage.Net">
+// <copyright file="CrcCalculator.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -25,12 +25,12 @@ namespace Sage.Net.Core.GameEngine.Common;
 /// <summary>
 /// CRC calculator.
 /// </summary>
-public class Crc
+public class CrcCalculator
 {
     /// <summary>
     /// Gets or sets the CRC value.
     /// </summary>
-    public uint Value { get; set; }
+    public uint Crc { get; set; }
 
     /// <summary>
     /// Computes the CRC value.
@@ -52,15 +52,15 @@ public class Crc
     /// <summary>
     /// Clears the CRC value.
     /// </summary>
-    public void Clear() => Value = 0;
+    public void Clear() => Crc = 0;
 
     private void Add(byte value)
     {
-        var hiBit = (Value & 0x8000_0000) != 0 ? 1U : 0U;
-        Value <<= 1;
-        Value += value;
-        Value += hiBit;
+        var hiBit = (Crc & 0x8000_0000) != 0 ? 1U : 0U;
+        Crc <<= 1;
+        Crc += value;
+        Crc += hiBit;
 
-        Debug.WriteLine($"CRC: 0x{Value:X8}.");
+        Debug.WriteLine($"CRC: 0x{Crc:X8}.");
     }
 }

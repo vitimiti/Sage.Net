@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Options.cs" company="Sage.Net">
+// <copyright file="DetailedArchivedDirectoryInfo.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,15 +18,25 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Io;
 
 /// <summary>
-/// Options for the engine.
+/// Detailed archived directory information.
 /// </summary>
-public record Options
+public class DetailedArchivedDirectoryInfo
 {
     /// <summary>
-    /// Gets or sets the custom game path.
+    /// Gets or sets the directory name.
     /// </summary>
-    public string? CustomGamePath { get; set; }
+    public string DirectoryName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Gets the directories.
+    /// </summary>
+    public Dictionary<string, DetailedArchivedDirectoryInfo> Directories { get; } = [];
+
+    /// <summary>
+    /// Gets the files.
+    /// </summary>
+    public Dictionary<string, ArchivedFileInfo> Files { get; } = [];
 }

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="GameEngine.cs" company="Sage.Net">
+// <copyright file="AudioManager.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,43 +18,33 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Sage.Net.Core.GameEngine.Common.Audio;
+
 namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 
 /// <summary>
-/// The game engine subsystem.
+/// To be implemented.
 /// </summary>
-public class GameEngine : SubsystemBase
+public class AudioManager : SubsystemBase
 {
     /// <summary>
-    /// Gets the list of subsystems.
+    /// To be implemented.
     /// </summary>
-    public static SubsystemList? TheSubsystemList { get; private set; }
-
-    /// <summary>
-    /// Gets the archive file system.
-    /// </summary>
-    public static ArchiveFileSystem? TheArchiveFileSystem { get; private set; }
-
-    /// <summary>
-    /// Gets the audio manager.
-    /// </summary>
-    public static AudioManager? TheAudio { get; private set; }
-
-    /// <summary>
-    /// Initializes the game engine.
-    /// </summary>
-    /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
     public override void Initialize() => throw new NotImplementedException();
 
     /// <summary>
-    /// Resets the game engine.
+    /// To be implemented.
     /// </summary>
-    /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
     public override void Reset() => throw new NotImplementedException();
 
     /// <summary>
-    /// Updates the game engine.
+    /// To be implemented.
     /// </summary>
-    /// <exception cref="NotImplementedException">This is not imlemented yet.</exception>
     public override void UpdateBase() => throw new NotImplementedException();
+
+    /// <summary>
+    /// To be implemented.
+    /// </summary>
+    /// <param name="which">The <see cref="AudioAffects"/> to stop.</param>
+    public void StopAudio(AudioAffects which) => throw new NotImplementedException();
 }

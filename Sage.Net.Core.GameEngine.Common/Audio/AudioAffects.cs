@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="GameEngine.cs" company="Sage.Net">
+// <copyright file="AudioAffects.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,43 +18,46 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Core.GameEngine.Common.Subsystems;
+namespace Sage.Net.Core.GameEngine.Common.Audio;
 
 /// <summary>
-/// The game engine subsystem.
+/// Audio affect flags.
 /// </summary>
-public class GameEngine : SubsystemBase
+[Flags]
+public enum AudioAffects
 {
     /// <summary>
-    /// Gets the list of subsystems.
+    /// No flags.
     /// </summary>
-    public static SubsystemList? TheSubsystemList { get; private set; }
+    None = 0,
 
     /// <summary>
-    /// Gets the archive file system.
+    /// The music flag.
     /// </summary>
-    public static ArchiveFileSystem? TheArchiveFileSystem { get; private set; }
+    Music = 1 << 0,
 
     /// <summary>
-    /// Gets the audio manager.
+    /// The sound flag.
     /// </summary>
-    public static AudioManager? TheAudio { get; private set; }
+    Sound = 1 << 1,
 
     /// <summary>
-    /// Initializes the game engine.
+    /// The sound 3D flag.
     /// </summary>
-    /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
-    public override void Initialize() => throw new NotImplementedException();
+    Sound3D = 1 << 2,
 
     /// <summary>
-    /// Resets the game engine.
+    /// The speech flag.
     /// </summary>
-    /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
-    public override void Reset() => throw new NotImplementedException();
+    Speech = 1 << 3,
 
     /// <summary>
-    /// Updates the game engine.
+    /// All flags.
     /// </summary>
-    /// <exception cref="NotImplementedException">This is not imlemented yet.</exception>
-    public override void UpdateBase() => throw new NotImplementedException();
+    All = Music | Sound | Sound3D | Speech,
+
+    /// <summary>
+    /// The system setting flag.
+    /// </summary>
+    SystemSetting = 1 << 4,
 }

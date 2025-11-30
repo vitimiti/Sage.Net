@@ -31,8 +31,14 @@ public record EngineOptions
     public string? CustomGamePath { get; set; }
 
     /// <summary>
-    /// Gets or sets the custom big files extension.
+    /// Gets or sets the custom big files.
     /// </summary>
     /// <remarks>This is to support modding.</remarks>
-    public string? CustomBigFilesExtension { get; set; }
+    public string? ModBig { get; set; }
+
+    /// <summary>
+    /// Gets or sets the mod directory.
+    /// </summary>
+    /// <remarks>This is to support modding.</remarks>
+    public string? ModDir { get; set; }
 }

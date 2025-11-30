@@ -169,9 +169,9 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
         }
 
         _ = LoadBigFilesFromDirectory(path ?? Environment.CurrentDirectory, "*.big");
-        if (!string.IsNullOrEmpty(options.CustomBigFilesExtension))
+        if (!string.IsNullOrEmpty(options.ModBig))
         {
-            _ = LoadBigFilesFromDirectory(path ?? Environment.CurrentDirectory, $"*{options.CustomBigFilesExtension}");
+            _ = LoadBigFilesFromDirectory(path ?? Environment.CurrentDirectory, $"*{options.ModBig}");
         }
     }
 
@@ -237,6 +237,39 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
         }
 
         return actuallyAdded;
+    }
+
+    /// <summary>
+    /// Loads mods into the directory tree.
+    /// </summary>
+    public void LoadMods()
+    {
+        if (!string.IsNullOrEmpty(options.ModBig))
+        {
+            using BigFile? archiveFile = OpenArchiveFile(options.ModBig);
+            if (archiveFile is not null)
+            {
+                Debug.WriteLine($"Loading {options.ModBig} into the directory tree.");
+                LoadIntoDirectoryTree(archiveFile, overwrite: true);
+                ArchiveFiles[options.ModBig] = archiveFile;
+                Debug.WriteLine($"{options.ModBig} inserted into the archive file map.");
+            }
+            else
+            {
+                Debug.WriteLine($"Could not load {options.ModBig} into the directory tree.");
+            }
+        }
+
+        if (!string.IsNullOrEmpty(options.ModDir))
+        {
+#if DEBUG
+            var result
+#else
+            _
+#endif
+            = LoadBigFilesFromDirectory(options.ModDir, "*.big", overwrite: true);
+            Debug.Assert(result, $"Loading mods from {options.ModDir} failed.");
+        }
     }
 
     /// <summary>

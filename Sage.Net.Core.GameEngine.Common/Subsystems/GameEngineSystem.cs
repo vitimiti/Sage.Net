@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="GameEngine.cs" company="Sage.Net">
+// <copyright file="GameEngineSystem.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,6 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Sage.Net.Core.GameEngine.Common.Ini;
 using Sage.Net.Core.GameEngine.Common.Transfer;
 
 namespace Sage.Net.Core.GameEngine.Common.Subsystems;
@@ -25,16 +26,8 @@ namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 /// <summary>
 /// The game engine subsystem.
 /// </summary>
-public class GameEngine : SubsystemBase
+public class GameEngineSystem : SubsystemBase
 {
-    private readonly EngineOptions _options = new();
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GameEngine"/> class.
-    /// </summary>
-    /// <param name="options">The engine options.</param>
-    public GameEngine(Action<EngineOptions>? options) => options?.Invoke(_options);
-
     /// <summary>
     /// Gets the list of subsystems.
     /// </summary>
@@ -66,26 +59,22 @@ public class GameEngine : SubsystemBase
     /// <exception cref="NotImplementedException">This is not implemented yet.</exception>
     public override void Initialize()
     {
+        IniReader ini = new();
+
+        // Only "Run\INI\Data\INIZH.big" should exist. Remove repeats.
+        var patchPath = Path.Combine("Data", "INI", "INIZH.big");
+        if (File.Exists(patchPath))
+        {
+            File.Delete(patchPath);
+        }
+
         XferCrc xferCrc = new();
         xferCrc.Open("lightCRC");
 
         TheSubsystemList = new SubsystemList();
         TheSubsystemList.AddSubsystem(this);
 
-        var patchPath = Path.Combine(
-            _options.CustomGamePath ?? Environment.CurrentDirectory,
-            "Data",
-            "INI",
-            "INIZH.big"
-        );
-
-        // Only "Run\INI\Data\INIZH.big" should exist. Remove repeats.
-        if (File.Exists(patchPath))
-        {
-            File.Delete(patchPath);
-        }
-
-        TheArchiveFileSystem = new ArchiveFileSystem(_options);
+        TheArchiveFileSystem = new ArchiveFileSystem();
         InitSubsystem(TheArchiveFileSystem, "TheArchiveFileSystem", null);
 
         TheWritableGlobalData = new GlobalData();

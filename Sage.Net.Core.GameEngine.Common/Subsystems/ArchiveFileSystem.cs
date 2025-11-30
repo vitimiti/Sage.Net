@@ -32,8 +32,7 @@ namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 /// <summary>
 /// Archive file system.
 /// </summary>
-/// <param name="options">The engine options.</param>
-public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
+public class ArchiveFileSystem : SubsystemBase
 {
     /// <summary>
     /// The name of the music big file.
@@ -148,15 +147,14 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
     /// <remarks>
     /// This will load all BIG files from the game directory. The game directory is resolved as follows:
     /// <list type="number">
-    /// <item>If <see cref="EngineOptions.CustomGamePath"/> is set, use that.</item>
     /// <item>If running on Windows, use the registry to find the game directory.</item>
-    /// <item>Otherwise, use the current working directory.</item>
+    /// <item>Otherwise, use the current directory.</item>
     /// </list>
     /// </remarks>
     public override void Initialize()
     {
         string? path = null;
-        if (options.CustomGamePath is null && OperatingSystem.IsWindows())
+        if (OperatingSystem.IsWindows())
         {
             path =
                 Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Electronic Arts\EA Games\Generals", "InstallPath", null)
@@ -168,10 +166,10 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
                 ) as string;
         }
 
-        _ = LoadBigFilesFromDirectory(path ?? Environment.CurrentDirectory, "*.big");
-        if (!string.IsNullOrEmpty(options.ModBig))
+        _ = LoadBigFilesFromDirectory(path ?? string.Empty, "*.big");
+        if (!string.IsNullOrEmpty(GameEngineSystem.TheGlobalData?.ModBig))
         {
-            _ = LoadBigFilesFromDirectory(path ?? Environment.CurrentDirectory, $"*{options.ModBig}");
+            _ = LoadBigFilesFromDirectory(path ?? string.Empty, $"*{GameEngineSystem.TheGlobalData.ModBig}");
         }
     }
 
@@ -196,7 +194,7 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
 
         if (fileName.Equals(MusicBig, StringComparison.OrdinalIgnoreCase))
         {
-            GameEngine.TheAudio!.StopAudio(AudioAffects.Music);
+            GameEngineSystem.TheAudio!.StopAudio(AudioAffects.Music);
 
             // No need to turn off other audio, as the lookups will just fail.
         }
@@ -244,23 +242,23 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
     /// </summary>
     public void LoadMods()
     {
-        if (!string.IsNullOrEmpty(options.ModBig))
+        if (!string.IsNullOrEmpty(GameEngineSystem.TheGlobalData?.ModBig))
         {
-            using BigFile? archiveFile = OpenArchiveFile(options.ModBig);
+            using BigFile? archiveFile = OpenArchiveFile(GameEngineSystem.TheGlobalData.ModBig);
             if (archiveFile is not null)
             {
-                Debug.WriteLine($"Loading {options.ModBig} into the directory tree.");
+                Debug.WriteLine($"Loading {GameEngineSystem.TheGlobalData.ModBig} into the directory tree.");
                 LoadIntoDirectoryTree(archiveFile, overwrite: true);
-                ArchiveFiles[options.ModBig] = archiveFile;
-                Debug.WriteLine($"{options.ModBig} inserted into the archive file map.");
+                ArchiveFiles[GameEngineSystem.TheGlobalData.ModBig] = archiveFile;
+                Debug.WriteLine($"{GameEngineSystem.TheGlobalData.ModBig} inserted into the archive file map.");
             }
             else
             {
-                Debug.WriteLine($"Could not load {options.ModBig} into the directory tree.");
+                Debug.WriteLine($"Could not load {GameEngineSystem.TheGlobalData.ModBig} into the directory tree.");
             }
         }
 
-        if (string.IsNullOrEmpty(options.ModDir))
+        if (string.IsNullOrEmpty(GameEngineSystem.TheGlobalData?.ModDir))
         {
             return;
         }
@@ -270,8 +268,12 @@ public class ArchiveFileSystem(EngineOptions options) : SubsystemBase
 #else
         _
 #endif
-        = LoadBigFilesFromDirectory(options.ModDir, $"*.{options.ModBigCustomExtension ?? "big"}", overwrite: true);
-        Debug.Assert(result, $"Loading mods from {options.ModDir} failed.");
+        = LoadBigFilesFromDirectory(
+            GameEngineSystem.TheGlobalData.ModDir,
+            $"*.{GameEngineSystem.TheGlobalData.ModBigCustomExtension ?? "big"}",
+            overwrite: true
+        );
+        Debug.Assert(result, $"Loading mods from {GameEngineSystem.TheGlobalData.ModDir} failed.");
     }
 
     /// <summary>

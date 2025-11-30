@@ -31,11 +31,7 @@ public static class AddonCompat
     /// <returns><see langword="true"/> if the full viewpoert data file exists AND had data in it; otherwise <see langword="false"/>.</returns>
     public static bool HasFullViewportDataFile()
     {
-        var filePath = Path.Combine(
-            Subsystems.GameEngine.TheGlobalData?.CustomGamePath ?? Environment.CurrentDirectory,
-            "GenTool",
-            "fullviewport.dat"
-        );
+        var filePath = Path.Combine("GenTool", "fullviewport.dat");
         if (!File.Exists(filePath))
         {
             return false;

@@ -75,6 +75,7 @@ public class BigFile(string name, string path) : IDisposable, IAsyncDisposable
     {
         if (searchSubdirectories)
         {
+#pragma warning disable IDE0055 // Fix formatting
             foreach (
                 var file in from subDirInfo in dirInfo.Directories.Values
                 let subPath = AppendPath(currentDirectory, subDirInfo.DirectoryName)
@@ -84,6 +85,7 @@ public class BigFile(string name, string path) : IDisposable, IAsyncDisposable
             {
                 yield return file;
             }
+#pragma warning restore IDE0055 // Fix formatting
         }
 
         foreach (var fileName in dirInfo.Files.Keys.Where(fileName => SearchStringMatches(fileName, searchName)))
@@ -200,7 +202,6 @@ public class BigFile(string name, string path) : IDisposable, IAsyncDisposable
     /// <param name="searchName">The search name.</param>
     /// <param name="searchSubdirectories">Whether to search recursively.</param>
     /// <returns>A new <see cref="IEnumerable{T}"/> with the files in the directory.</returns>
-    /// <seealso cref="GetFileListInDirectory(ArchivedDirectoryInfo,string,string,bool)"/>
     public IEnumerable<string> GetFileListInDirectory(
         [NotNull] string originalDirectory,
         string searchName,

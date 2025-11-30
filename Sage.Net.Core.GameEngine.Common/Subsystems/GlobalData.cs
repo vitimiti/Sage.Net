@@ -31,11 +31,6 @@ public class GlobalData : SubsystemBase
     public float ViewportHeightScale { get; set; }
 
     /// <summary>
-    /// Gets or sets the custom game path.
-    /// </summary>
-    public string? CustomGamePath { get; set; }
-
-    /// <summary>
     /// Gets or sets the custom BIG file extension.
     /// </summary>
     /// <remarks>This is to support modding.</remarks>

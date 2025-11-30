@@ -27,13 +27,47 @@ namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 /// </summary>
 public abstract class SubsystemBase
 {
+#if DUMP_PERF_STATS
+    private static TimeSpan MinTimeThreshold => TimeSpan.FromMilliseconds(.2);
+#endif
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SubsystemBase"/> class.
+    /// </summary>
+    protected SubsystemBase() => SubsystemList.Instance?.AddSubsystem(this);
+
+#if DUMP_PERF_STATS
+    /// <summary>
+    /// Gets the total time.
+    /// </summary>
+    public static TimeSpan TotalTime => TimeConsumed;
+#endif
+
     /// <summary>
     /// Gets or sets the name of the subsystem.
     /// </summary>
-    protected string? Name { get; set; }
+    public string? Name { get; set; }
 
 #if DUMP_PERF_STATS
-    private static TimeSpan MinTimeThreshold => TimeSpan.FromMilliseconds(.2);
+    /// <summary>
+    /// Gets the update time.
+    /// </summary>
+    public TimeSpan UpdateTime => CurrentUpdateTime;
+
+    /// <summary>
+    /// Gets the draw time.
+    /// </summary>
+    public TimeSpan DrawTime => CurrentDrawTime;
+
+    /// <summary>
+    /// Gets a value indicating whether to dump the update process.
+    /// </summary>
+    public bool DoDumpUpdate => DumpUpdate;
+
+    /// <summary>
+    /// Gets a value indicating whether to dump the draw process.
+    /// </summary>
+    public bool DoDumpDraw => DumpDraw;
 
     /// <summary>
     /// Gets or sets the time consumed.
@@ -69,6 +103,13 @@ public abstract class SubsystemBase
     /// Gets or sets a value indicating whether to dump draw.
     /// </summary>
     protected bool DumpDraw { get; set; }
+#endif
+
+#if DUMP_PERF_STATS
+    /// <summary>
+    /// Clears the total time.
+    /// </summary>
+    public static void ClearTotalTime() => TimeConsumed = TimeSpan.Zero;
 #endif
 
     /// <summary>

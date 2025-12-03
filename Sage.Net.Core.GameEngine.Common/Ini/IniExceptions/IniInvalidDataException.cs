@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="IniInvalidDataExceptoin.cs" company="Sage.Net">
+// <copyright file="IniInvalidDataException.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -21,7 +21,7 @@
 namespace Sage.Net.Core.GameEngine.Common.Ini.IniExceptions;
 
 /// <summary>
-/// Exception thrown when the INI file is already open.
+/// Exception thrown when invalid INI data is encountered.
 /// </summary>
 public class IniInvalidDataException : IniException
 {

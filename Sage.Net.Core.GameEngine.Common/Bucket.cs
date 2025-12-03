@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="NameKeyType.cs" company="Sage.Net">
+// <copyright file="Bucket.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,36 +18,37 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
+using Sage.Net.Core.GameEngine.Common.GameMemory;
 
 namespace Sage.Net.Core.GameEngine.Common;
 
 /// <summary>
-/// The name key type.
+/// A class representing a bucket for the name key generator.
 /// </summary>
-/// <param name="Value">The value.</param>
-public record NameKeyType(int Value)
+public record Bucket : IPooledObject
 {
     /// <summary>
-    /// Implicitly converts a <see cref="NameKeyType"/> to an <see cref="int"/>.
+    /// Gets or sets the next bucket in the socket.
     /// </summary>
-    /// <param name="key">The name key to convert.</param>
-    /// <returns>A new <see cref="int"/> with the value of the <paramref name="key"/>.</returns>
-    public static implicit operator int([NotNull] NameKeyType key) => key.ToInt32();
+    public Bucket? NextInSocket { get; set; }
 
     /// <summary>
-    /// Gets the invalid name key type value.
+    /// Gets or sets the key.
     /// </summary>
-    public static NameKeyType Invalid => new(0);
+    public NameKeyType Key { get; set; } = NameKeyType.Invalid;
 
     /// <summary>
-    /// Gets the max name key type value.
+    /// Gets or sets the name.
     /// </summary>
-    public static int Max => 1 << 23;
+    public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Converts to <see cref="int"/>.
+    /// Resets the bucket.
     /// </summary>
-    /// <returns>A new <see cref="int"/> with the name key type value.</returns>
-    public int ToInt32() => Value;
+    public void Reset()
+    {
+        NextInSocket = null;
+        Key = NameKeyType.Invalid;
+        Name = string.Empty;
+    }
 }

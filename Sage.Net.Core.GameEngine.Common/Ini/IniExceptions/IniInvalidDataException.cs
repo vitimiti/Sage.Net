@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="NameKeyType.cs" company="Sage.Net">
+// <copyright file="IniInvalidDataExceptoin.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,36 +18,30 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Diagnostics.CodeAnalysis;
-
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Ini.IniExceptions;
 
 /// <summary>
-/// The name key type.
+/// Exception thrown when the INI file is already open.
 /// </summary>
-/// <param name="Value">The value.</param>
-public record NameKeyType(int Value)
+public class IniInvalidDataException : IniException
 {
     /// <summary>
-    /// Implicitly converts a <see cref="NameKeyType"/> to an <see cref="int"/>.
+    /// Initializes a new instance of the <see cref="IniInvalidDataException"/> class.
     /// </summary>
-    /// <param name="key">The name key to convert.</param>
-    /// <returns>A new <see cref="int"/> with the value of the <paramref name="key"/>.</returns>
-    public static implicit operator int([NotNull] NameKeyType key) => key.ToInt32();
+    public IniInvalidDataException() { }
 
     /// <summary>
-    /// Gets the invalid name key type value.
+    /// Initializes a new instance of the <see cref="IniInvalidDataException"/> class.
     /// </summary>
-    public static NameKeyType Invalid => new(0);
+    /// <param name="message">The exception message.</param>
+    public IniInvalidDataException(string? message)
+        : base(message) { }
 
     /// <summary>
-    /// Gets the max name key type value.
+    /// Initializes a new instance of the <see cref="IniInvalidDataException"/> class.
     /// </summary>
-    public static int Max => 1 << 23;
-
-    /// <summary>
-    /// Converts to <see cref="int"/>.
-    /// </summary>
-    /// <returns>A new <see cref="int"/> with the name key type value.</returns>
-    public int ToInt32() => Value;
+    /// <param name="message">The exception message.</param>
+    /// <param name="innerException">The inner exception that happened to trigger this exception.</param>
+    public IniInvalidDataException(string? message, Exception? innerException)
+        : base(message, innerException) { }
 }

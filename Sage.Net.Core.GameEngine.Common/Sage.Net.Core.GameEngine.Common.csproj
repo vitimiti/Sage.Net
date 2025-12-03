@@ -17,6 +17,11 @@
         <DefineConstants>$(DefineConstants);PERF_TIMERS</DefineConstants>
       </PropertyGroup>
     </When>
+    <When Condition="'$(RetailCompatibleCrc)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);RETAIL_COMPATIBLE_CRC</DefineConstants>
+      </PropertyGroup>
+    </When>
   </Choose>
   <Target Name="InjectGitInfo" BeforeTargets="GetAssemblyAttributes">
     <!-- Get Git Data -->

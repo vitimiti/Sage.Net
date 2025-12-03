@@ -98,6 +98,51 @@ public class IniReader
     private static Xfer? Xfer { get; set; }
 
     /// <summary>
+    /// Parses the specified token into an integer value.
+    /// </summary>
+    /// <param name="token">The token string to parse as an integer.</param>
+    /// <returns>The parsed integer value from the token.</returns>
+    /// <exception cref="IniInvalidDataException">Thrown when the token cannot be parsed as an integer.</exception>
+    public static int ScanInt32([NotNull] string token) =>
+        !int.TryParse(token, out var result)
+            ? throw new IniInvalidDataException($"Unable to parse the token {token} as an {nameof(Int32)}")
+            : result;
+
+    /// <summary>
+    /// Searches for the specified token within a list of valid names, returning its index.
+    /// </summary>
+    /// <param name="token">The token string to locate in the name list.</param>
+    /// <param name="nameList">A list of valid names to search through. Cannot be null or empty.</param>
+    /// <returns>The zero-based index of the token within the name list.</returns>
+    /// <exception cref="IniInvalidNameListException">
+    /// Thrown when the name list is null, empty, or if the token is not found within the list.
+    /// </exception>
+    public static int ScanIndexList(string token, IList<string>? nameList)
+    {
+        if (nameList is null || nameList.Count == 0)
+        {
+            const string message = "Invalid name list";
+            Debug.Fail(message);
+            throw new IniInvalidNameListException(message);
+        }
+
+        var count = 0;
+        foreach (var name in nameList)
+        {
+            if (name.Equals(token, StringComparison.OrdinalIgnoreCase))
+            {
+                return count;
+            }
+
+            count++;
+        }
+
+        var secondMessage = $"Token {token} is not a valid member of the index list";
+        Debug.Fail(secondMessage);
+        throw new IniInvalidNameListException(secondMessage);
+    }
+
+    /// <summary>
     /// Loads the INI file.
     /// </summary>
     /// <param name="filePath">The path to the INI file to load.</param>
@@ -270,6 +315,74 @@ public class IniReader
             _currentTokenLine = null;
             _currentTokenIndex = 0;
         }
+    }
+
+    /// <summary>
+    /// Retrieves the next token from the current line or subsequent lines in the INI file,
+    /// using the specified set of separators. If no separators are provided, a default set is used.
+    /// </summary>
+    /// <param name="separators">
+    /// An optional array of characters to use as delimiters for separating tokens.
+    /// If <see langword="null"/>, the default set of separators is used.
+    /// </param>
+    /// <returns>
+    /// The next token as a string extracted from the INI file. If no more tokens are available, it returns <see langword="null"/>.
+    /// </returns>
+    public string? GetNextTokenOrNull(char[]? separators = null)
+    {
+        try
+        {
+            return GetNextToken(separators);
+        }
+        catch (IniInvalidDataException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the next string from the input, handling quoted and unquoted tokens appropriately.
+    /// </summary>
+    /// <returns>The next string from the input. If the token is enclosed in quotes, the string within the quotes is returned. If no token is available, an empty string is returned.</returns>
+    public string GetNextString()
+    {
+        var result = string.Empty;
+        var token = GetNextTokenOrNull();
+        if (token is null)
+        {
+            return result;
+        }
+
+        if (token[0] != '\"')
+        {
+            return token;
+        }
+
+        StringBuilder sb = new();
+        if (token.Length > 1)
+        {
+            _ = sb.Append(token.AsSpan(1));
+        }
+
+        token = GetNextTokenOrNull([.. SeparatorsQuote]);
+        if (token is not null)
+        {
+            if (token.Length > 1 && token[1] != '\t')
+            {
+                _ = sb.Append(' ');
+            }
+
+            _ = sb.Append(token);
+        }
+        else
+        {
+            if (sb.Length > 0 && sb[^1] == '"')
+            {
+                sb.Length--;
+            }
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>

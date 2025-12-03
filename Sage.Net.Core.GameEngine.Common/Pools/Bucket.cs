@@ -20,7 +20,7 @@
 
 using Sage.Net.Core.GameEngine.Common.GameMemory;
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.Core.GameEngine.Common.Pools;
 
 /// <summary>
 /// A class representing a bucket for the name key generator.

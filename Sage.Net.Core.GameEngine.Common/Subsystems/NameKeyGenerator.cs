@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Sage.Net.Core.GameEngine.Common.GameMemory;
 using Sage.Net.Core.GameEngine.Common.Ini;
+using Sage.Net.Core.GameEngine.Common.Pools;
 
 namespace Sage.Net.Core.GameEngine.Common.Subsystems;
 

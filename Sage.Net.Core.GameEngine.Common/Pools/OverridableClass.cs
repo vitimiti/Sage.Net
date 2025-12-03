@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Overridable.cs" company="Sage.Net">
+// <copyright file="OverridableClass.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -66,8 +66,8 @@ public class OverridableClass : IPooledObject, IDisposable
     /// </summary>
     /// <returns>
     /// Returns <see langword="null"/> if this node is an override (it will be disposed),
-    /// otherwise returns <see cref="this"/> with its <see cref="NextOverride"/> updated to
-    /// reflect removed overrides.
+    /// otherwise returns the current <see cref="OverridableClass"/> instance with its
+    /// <see cref="NextOverride"/> updated to reflect removed overrides.
     /// </returns>
     public OverridableClass? DeleteOverrides()
     {

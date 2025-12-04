@@ -68,6 +68,11 @@
     <None Remove="..\BannedSymbols.txt" />
   </ItemGroup>
   <Choose>
+    <When Condition="'$(BuildExpansion)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);BUILD_EXPANSION</DefineConstants>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(DumpPerfStats)' == 'true'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);DUMP_PERF_STATS</DefineConstants>
@@ -81,6 +86,16 @@
     <When Condition="'$(RetailCompatibleCrc)' == 'true'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);RETAIL_COMPATIBLE_CRC</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(MaintainLegacyFiles)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);MAINTAIN_LEGACY_FILES</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(Configuration)' == 'Debug'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);LOAD_TEST_ASSETS;LOOK_FOR_TEST_ART</DefineConstants>
       </PropertyGroup>
     </When>
   </Choose>

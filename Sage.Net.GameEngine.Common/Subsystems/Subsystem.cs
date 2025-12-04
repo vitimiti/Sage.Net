@@ -19,14 +19,13 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics;
-using Sage.Net.Core.GameEngine.Abstractions;
 
-namespace Sage.Net.GeneralsMd.GameEngine.Common;
+namespace Sage.Net.GameEngine.Common.Subsystems;
 
 /// <summary>
 /// The base class for all subsystems.
 /// </summary>
-public abstract class Subsystem : ISubsystem, IDisposable
+public abstract class Subsystem : IDisposable
 {
 #if DUMP_PERF_STATS
     private const float MinTimeThreshold = .0002F;
@@ -57,6 +56,7 @@ public abstract class Subsystem : ISubsystem, IDisposable
     /// </summary>
     protected float DrawTime { get; private set; }
 
+#if BUILD_EXPANSION
     /// <summary>
     /// Gets a value indicating whether to dump the update.
     /// </summary>
@@ -66,6 +66,7 @@ public abstract class Subsystem : ISubsystem, IDisposable
     /// Gets a value indicating whether to dump the draw.
     /// </summary>
     protected bool DoDumpDraw { get; private set; }
+#endif
 #endif
 
     /// <summary>
@@ -101,6 +102,7 @@ public abstract class Subsystem : ISubsystem, IDisposable
             return;
         }
 
+#if BUILD_EXPANSION
         if (UpdateTime > MinTimeThreshold)
         {
             DoDumpUpdate = true;
@@ -111,6 +113,13 @@ public abstract class Subsystem : ISubsystem, IDisposable
             UpdateTime -= subTime;
             TotalTime += UpdateTime;
         }
+#else
+        if (UpdateTime > .00001F)
+        {
+            UpdateTime -= subTime;
+            TotalTime += UpdateTime;
+        }
+#endif
         else
         {
             UpdateTime = 0;
@@ -138,6 +147,7 @@ public abstract class Subsystem : ISubsystem, IDisposable
             return;
         }
 
+#if BUILD_EXPANSION
         if (DrawTime > MinTimeThreshold)
         {
             DoDumpDraw = true;
@@ -148,6 +158,13 @@ public abstract class Subsystem : ISubsystem, IDisposable
             DrawTime -= subTime;
             TotalTime += DrawTime;
         }
+#else
+        if (DrawTime > .00001F)
+        {
+            DrawTime -= subTime;
+            TotalTime += DrawTime;
+        }
+#endif
         else
         {
             DrawTime = 0;

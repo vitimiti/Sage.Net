@@ -20,7 +20,7 @@
 
 using System.Reflection;
 
-namespace Sage.Net.Core.GameEngine.Common;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>
 /// The version information helper.

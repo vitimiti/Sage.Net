@@ -2,5 +2,9 @@
   <Folder Name="/GameEngine/">
     <Project Path="Sage.Net.GameEngine.Common/Sage.Net.GameEngine.Common.csproj" />
   </Folder>
+  <Folder Name="/GameEngine/Libraries/" />
+  <Folder Name="/GameEngine/Libraries/WestWoodVegas/">
+    <Project Path="Sage.Net.GameEngine.Libraries.WestWoodVegas.Math/Sage.Net.GameEngine.Libraries.WestWoodVegas.Math.csproj" />
+  </Folder>
   <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
 </Solution>

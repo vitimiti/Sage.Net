@@ -1,7 +1,16 @@
 <Solution>
   <Folder Name="/Core/" />
   <Folder Name="/Core/GameEngine/">
+    <Project Path="Sage.Net.Core.GameEngine.Abstractions/Sage.Net.Core.GameEngine.Abstractions.csproj" />
     <Project Path="Sage.Net.Core.GameEngine.Common/Sage.Net.Core.GameEngine.Common.csproj" />
+  </Folder>
+  <Folder Name="/Generals/" />
+  <Folder Name="/Generals/GameEngine/">
+    <Project Path="Sage.Net.Generals.GameEngine.Common/Sage.Net.Generals.GameEngine.Common.csproj" />
+  </Folder>
+  <Folder Name="/GeneralsMd/" />
+  <Folder Name="/GeneralsMd/GameEngine/">
+    <Project Path="Sage.Net.GeneralsMd.GameEngine.Common/Sage.Net.GeneralsMd.GameEngine.Common.csproj" />
   </Folder>
   <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
 </Solution>

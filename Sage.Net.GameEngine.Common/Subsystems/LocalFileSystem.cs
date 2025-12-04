@@ -20,16 +20,29 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Sage.Net.GameEngine.Common.Io;
 
-namespace Sage.Net.GameEngine.Common.Io;
+namespace Sage.Net.GameEngine.Common.Subsystems;
 
 /// <summary>
 /// Provides helper methods for interacting with the local file system, including opening files,
 /// checking for existence, enumerating files, retrieving file information, creating directories,
 /// and normalizing paths.
 /// </summary>
-public static class LocalFileSystem
+public class LocalFileSystem : Subsystem, ILocalFileSystem
 {
+    /// <inheritdoc/>
+    /// <remarks>This is a no-op.</remarks>
+    public override void Initialize() { }
+
+    /// <inheritdoc/>
+    /// <remarks>This is a no-op.</remarks>
+    public override void Reset() { }
+
+    /// <inheritdoc/>
+    /// <remarks>This is a no-op.</remarks>
+    public override void UpdateCore() { }
+
     /// <summary>
     /// Opens a file at the specified <paramref name="path"/> with the provided <paramref name="access"/>.
     /// If the access allows writing, the parent directory is created if it does not exist.
@@ -45,7 +58,7 @@ public static class LocalFileSystem
         "CA1031:Do not catch general exception types",
         Justification = "We want to log the error and return null."
     )]
-    public static FileStream? OpenFile(string path, FileAccess access)
+    public FileStream? OpenFile(string path, FileAccess access)
     {
         if (string.IsNullOrEmpty(path) || Path.EndsInDirectorySeparator(path))
         {
@@ -79,7 +92,7 @@ public static class LocalFileSystem
     /// </summary>
     /// <param name="path">The path to the file.</param>
     /// <returns><see langword="true"/> if the file exists; otherwise, <see langword="false"/>.</returns>
-    public static bool DoesFileExist(string path) => File.Exists(path);
+    public bool DoesFileExist(string path) => File.Exists(path);
 
     /// <summary>
     /// Gets a list of files under a directory that match the given <paramref name="searchName"/> pattern.
@@ -96,7 +109,7 @@ public static class LocalFileSystem
         "CA1031:Do not catch general exception types",
         Justification = "We want to log the error and return an empty list."
     )]
-    public static IEnumerable<string> GetFileListInDirectory(
+    public IEnumerable<string> GetFileListInDirectory(
         string currentDirectory,
         string originalDirectory,
         string searchName,
@@ -147,7 +160,7 @@ public static class LocalFileSystem
         "CA1031:Do not catch general exception types",
         Justification = "We want to log the error and return false."
     )]
-    public static bool TryGetFileInformation(string path, out FileInformation? fileInformation)
+    public bool TryGetFileInformation(string path, out FileInformation? fileInformation)
     {
         fileInformation = null;
         if (string.IsNullOrEmpty(path))
@@ -187,7 +200,7 @@ public static class LocalFileSystem
         "CA1031:Do not catch general exception types",
         Justification = "We want to log the error and return false."
     )]
-    public static bool TryCreateDirectory(string path)
+    public bool TryCreateDirectory(string path)
     {
         var result = false;
         if (string.IsNullOrEmpty(path))
@@ -213,7 +226,7 @@ public static class LocalFileSystem
     /// <param name="path">The path to normalize. Must not be <see langword="null"/>.</param>
     /// <returns>The normalized path string.</returns>
     /// <remarks>Does not resolve relative segments such as <c>..</c> or <c>.</c>.</remarks>
-    public static string NormalizePath([NotNull] string path)
+    public string NormalizePath([NotNull] string path)
     {
         var tokens = path.Split(
             Path.DirectorySeparatorChar,

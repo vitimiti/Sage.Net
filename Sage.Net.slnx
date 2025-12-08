@@ -1,1 +1,5 @@
-<Solution />
+<Solution>
+  <Folder Name="/Io/">
+    <Project Path="Sage.Net.Io.ArchiveFiles\Sage.Net.Io.ArchiveFiles.csproj" />
+  </Folder>
+</Solution>

@@ -4,7 +4,7 @@ TODO: Complete me
 
 ## Build
 
-To build the project run `dotnet build -c <Configuration> [-p:<ExtraProperty>=true]`
+To build the project run `dotnet build -c <Configuration> [-p:<ExtraProperty>=true [-p:<ExtraProperty>=true ...]]`
 
 Configurations:
 
@@ -13,8 +13,8 @@ Configurations:
 
 Extra Properties:
 
-- `BuildExpansion`: Whether to build the Zero Hour expansion
 - `DumpPerfStats`: Dump performance statistics
 - `PerfTimers`: Enable performance timers
 - `RetailCompatibleCrc`: Enable the retail compatible CRC checks
 - `MaintainLegacyFiles`: Whether to maintain legacy files
+- `RtsZeroHour`: Whether to build with the Zero Hour expansion

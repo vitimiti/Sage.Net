@@ -68,11 +68,6 @@
     <None Remove="..\BannedSymbols.txt" />
   </ItemGroup>
   <Choose>
-    <When Condition="'$(BuildExpansion)' == 'true'">
-      <PropertyGroup>
-        <DefineConstants>$(DefineConstants);BUILD_EXPANSION</DefineConstants>
-      </PropertyGroup>
-    </When>
     <When Condition="'$(DumpPerfStats)' == 'true'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);DUMP_PERF_STATS</DefineConstants>
@@ -91,6 +86,11 @@
     <When Condition="'$(MaintainLegacyFiles)' == 'true'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);MAINTAIN_LEGACY_FILES</DefineConstants>
+      </PropertyGroup>
+    </When>
+    <When Condition="'$(RtsZeroHour)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);RTS_ZEROHOUR</DefineConstants>
       </PropertyGroup>
     </When>
     <When Condition="'$(Configuration)' == 'Debug'">

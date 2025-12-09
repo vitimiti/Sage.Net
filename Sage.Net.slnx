@@ -2,4 +2,5 @@
   <Folder Name="/Io/">
     <Project Path="Sage.Net.Io.ArchiveFiles\Sage.Net.Io.ArchiveFiles.csproj" />
   </Folder>
+  <Project Path="Sage.Net.Subsystems/Sage.Net.Subsystems.csproj" />
 </Solution>

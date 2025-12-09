@@ -33,10 +33,7 @@ public abstract class SubsystemBase : IDisposable
 
     /// <summary>Initializes a new instance of the <see cref="SubsystemBase"/> class.</summary>
     /// <remarks>This will add the initialized subsystem to the subsystem list.</remarks>
-    protected SubsystemBase()
-    {
-        // TODO add itself to the subsystem list
-    }
+    protected SubsystemBase() => SubsystemsList.TheSubsystemsList?.AddSubsystem(this);
 
 #if DUMP_PERF_STATS
     /// <summary>Gets or sets the total time spent in an action.</summary>
@@ -186,7 +183,7 @@ public abstract class SubsystemBase : IDisposable
 
         if (disposing)
         {
-            // TODO remove itself from the subsystem list
+            SubsystemsList.TheSubsystemsList?.RemoveSubsystem(this);
         }
 
         _disposed = true;

@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.GameMemory;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>An attribute to indicate how a memory pooled object will be generated.</summary>
 /// <param name="poolName">A <see cref="string"/> with the pool name.</param>

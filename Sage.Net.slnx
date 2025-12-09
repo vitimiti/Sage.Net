@@ -1,10 +1,8 @@
 <Solution>
+  <Folder Name="/GameEngine/">
+    <Project Path="Sage.Net.GameEngine.Common/Sage.Net.GameEngine.Common.csproj" />
+  </Folder>
   <Folder Name="/Generators/">
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />
   </Folder>
-  <Folder Name="/Io/">
-    <Project Path="Sage.Net.Io.ArchiveFiles\Sage.Net.Io.ArchiveFiles.csproj" />
-  </Folder>
-  <Project Path="Sage.Net.GameMemory/Sage.Net.GameMemory.csproj" />
-  <Project Path="Sage.Net.Subsystems/Sage.Net.Subsystems.csproj" />
 </Solution>

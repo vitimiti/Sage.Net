@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Io.ArchiveFiles;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>A record representing information about an archived directory.</summary>
 /// <param name="Path">A <see cref="string"/> with the archived directory path.</param>

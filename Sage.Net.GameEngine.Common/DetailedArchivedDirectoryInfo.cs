@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="ArchivedFileInfo.cs" company="Sage.Net">
+// <copyright file="DetailedArchivedDirectoryInfo.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,11 +18,14 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Io.ArchiveFiles;
+namespace Sage.Net.GameEngine.Common;
 
-/// <summary>A record representing information about an archived file.</summary>
-/// <param name="FileName">A <see cref="string"/> with the name of the archived file.</param>
-/// <param name="ArchiveFileName">A <see cref="string"/> with the name of the archive file.</param>
-/// <param name="Offset">A <see cref="uint"/> with the offset of the file within the archive file.</param>
-/// <param name="Size">A <see cref="uint"/> with the size of the data of the file within the archive file.</param>
-public record ArchivedFileInfo(string FileName, string ArchiveFileName, uint Offset, uint Size);
+/// <summary>A record that represents detailed information about an archived directory.</summary>
+/// <param name="DirectoryName">A <see cref="string"/> with the directory name.</param>
+/// <param name="Directories">A <see cref="Dictionary{TKey,TValue}"/> of <see cref="string"/> keys and <see cref="DetailedArchivedDirectoryInfo"/> values with the list of directories in the archived directory.</param>
+/// <param name="Files">A <see cref="Dictionary{TKey,TValue}"/> of <see cref="string"/> keys and <see cref="ArchivedFileInfo"/> values with the list of files in the archived directory.</param>
+public record DetailedArchivedDirectoryInfo(
+    string DirectoryName,
+    Dictionary<string, DetailedArchivedDirectoryInfo> Directories,
+    Dictionary<string, ArchivedFileInfo> Files
+);

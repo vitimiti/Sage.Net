@@ -20,7 +20,7 @@
 
 using System.Diagnostics;
 
-namespace Sage.Net.Subsystems;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>The base class for all subsystems.</summary>
 public abstract class SubsystemBase : IDisposable

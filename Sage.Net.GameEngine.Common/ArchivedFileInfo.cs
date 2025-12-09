@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="IPooledObject.cs" company="Sage.Net">
+// <copyright file="ArchivedFileInfo.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,14 +18,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.GameMemory;
+namespace Sage.Net.GameEngine.Common;
 
-/// <summary>An interface to indicate an object is poolable.</summary>
-public interface IPooledObject
-{
-    /// <summary>What to do when the object is being acquired from the pool.</summary>
-    void OnAcquire();
-
-    /// <summary>What to do when the object is being released to the pool.</summary>
-    void OnRelease();
-}
+/// <summary>A record representing information about an archived file.</summary>
+/// <param name="FileName">A <see cref="string"/> with the name of the archived file.</param>
+/// <param name="ArchiveFileName">A <see cref="string"/> with the name of the archive file.</param>
+/// <param name="Offset">A <see cref="uint"/> with the offset of the file within the archive file.</param>
+/// <param name="Size">A <see cref="uint"/> with the size of the data of the file within the archive file.</param>
+public record ArchivedFileInfo(string FileName, string ArchiveFileName, uint Offset, uint Size);

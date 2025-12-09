@@ -18,7 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.GameMemory;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>A class to manage memory pools.</summary>
 /// <typeparam name="T">The type of the object that is being pooled.</typeparam>
@@ -46,6 +46,18 @@ public class MemoryPool<T>
 
     /// <summary>Gets the pool name.</summary>
     public string Name { get; }
+
+    /// <summary>Gets the stats of the current <see cref="MemoryPool{T}"/> state.</summary>
+    public string Stats
+    {
+        get
+        {
+            lock (_lock)
+            {
+                return $"Pool: {Name} | Total: {_totalAllocated} | Free: {_freeObjects.Count} | Used: {_totalAllocated - _freeObjects.Count}";
+            }
+        }
+    }
 
     /// <summary>Allocates a new object from the pool.</summary>
     /// <returns>An existing instance of the given <typeparamref name="T"/> object, or an existing one if there is any left in the pool.</returns>
@@ -88,16 +100,6 @@ public class MemoryPool<T>
         lock (_lock)
         {
             _freeObjects.Push(item);
-        }
-    }
-
-    /// <summary>Gets the stats of the give, <see cref="MemoryPool{T}"/>.</summary>
-    /// <returns>A new <see cref="string"/> with stats about the memory pool.</returns>
-    public string GetStats()
-    {
-        lock (_lock)
-        {
-            return $"Pool: {Name} | Total: {_totalAllocated} | Free: {_freeObjects.Count} | Used: {_totalAllocated - _freeObjects.Count}";
         }
     }
 

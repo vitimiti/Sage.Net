@@ -20,7 +20,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Sage.Net.Io.ArchiveFiles;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>A class that represents an archive file.</summary>
 public abstract class ArchiveFile : IDisposable, IAsyncDisposable

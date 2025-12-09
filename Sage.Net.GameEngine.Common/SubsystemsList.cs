@@ -25,7 +25,7 @@ using System.Globalization;
 using System.Text;
 #endif
 
-namespace Sage.Net.Subsystems;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>A class that manages all subsystems.</summary>
 public sealed class SubsystemsList : IDisposable

@@ -21,7 +21,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Sage.Net.Io.ArchiveFiles;
+namespace Sage.Net.GameEngine.Common;
 
 /// <summary>Represents an archived directory called BIG file.</summary>
 /// <param name="name">A <see cref="string"/> with the file name.</param>

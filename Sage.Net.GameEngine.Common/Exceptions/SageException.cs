@@ -20,13 +20,20 @@
 
 namespace Sage.Net.GameEngine.Common.Exceptions;
 
+/// <summary>The base exception for all SAGE exceptions.</summary>
 public class SageException : Exception
 {
+    /// <summary>Initializes a new instance of the <see cref="SageException"/> class.</summary>
     public SageException() { }
 
+    /// <summary>Initializes a new instance of the <see cref="SageException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
     public SageException(string? message)
         : base(message) { }
 
+    /// <summary>Initializes a new instance of the <see cref="SageException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
     public SageException(string? message, Exception? innerException)
         : base(message, innerException) { }
 }

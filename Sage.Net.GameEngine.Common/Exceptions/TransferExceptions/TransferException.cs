@@ -20,13 +20,20 @@
 
 namespace Sage.Net.GameEngine.Common.Exceptions.TransferExceptions;
 
+/// <summary>The base exception for all transfer operations exceptions.</summary>
 public class TransferException : SageException
 {
+    /// <summary>Initializes a new instance of the <see cref="TransferException"/> class.</summary>
     public TransferException() { }
 
+    /// <summary>Initializes a new instance of the <see cref="TransferException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
     public TransferException(string? message)
         : base(message) { }
 
+    /// <summary>Initializes a new instance of the <see cref="TransferException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
     public TransferException(string? message, Exception? innerException)
         : base(message, innerException) { }
 }

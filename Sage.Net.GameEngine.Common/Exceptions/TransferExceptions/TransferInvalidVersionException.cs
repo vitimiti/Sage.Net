@@ -20,13 +20,20 @@
 
 namespace Sage.Net.GameEngine.Common.Exceptions.TransferExceptions;
 
+/// <summary>Thrown when a transferred version value was invalid.</summary>
 public class TransferInvalidVersionException : TransferException
 {
+    /// <summary>Initializes a new instance of the <see cref="TransferInvalidVersionException"/> class.</summary>
     public TransferInvalidVersionException() { }
 
+    /// <summary>Initializes a new instance of the <see cref="TransferInvalidVersionException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
     public TransferInvalidVersionException(string? message)
         : base(message) { }
 
+    /// <summary>Initializes a new instance of the <see cref="TransferInvalidVersionException"/> class.</summary>
+    /// <param name="message">The message that describes the error.</param>
+    /// <param name="innerException">The exception that is the cause of the current exception.</param>
     public TransferInvalidVersionException(string? message, Exception? innerException)
         : base(message, innerException) { }
 }

@@ -21,8 +21,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.Marshalling;
 using System.Text;
+using Sage.Net.BaseTypes;
 using Sage.Net.GameEngine.Common.Exceptions.TransferExceptions;
 
 namespace Sage.Net.GameEngine.Common;
@@ -47,19 +47,17 @@ public abstract class TransferOperation
         "S2325:Methods and properties that don't access instance data should be static",
         Justification = "This is a false positive."
     )]
-    public TransferOptions Options
-    {
-        get;
-        set
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            field |= value;
-        }
-    } = TransferOptions.None;
+    public TransferOptions Options { get; set; } = TransferOptions.None;
+
+    /// <summary>Adds the given options.</summary>
+    /// <param name="options">The <see cref="TransferOptions"/> to add.</param>
+    public void AddOptions(TransferOptions options) =>
+        Options = new TransferOptions(BitUtility.BitSet((uint)Options, (uint)options));
 
     /// <summary>Clears the given options.</summary>
     /// <param name="options">The <see cref="TransferOptions"/> to clear.</param>
-    public void ClearOptions(TransferOptions options) => Options &= ~options;
+    public void ClearOptions(TransferOptions options) =>
+        Options = new TransferOptions(BitUtility.BitClear((uint)Options, (uint)options));
 
     /// <summary>Opens the data transfer operation.</summary>
     /// <param name="identifier">A <see cref="string"/> with an identifier for the data transfer operation.</param>

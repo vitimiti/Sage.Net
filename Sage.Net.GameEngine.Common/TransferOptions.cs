@@ -64,6 +64,10 @@ public record TransferOptions(uint Value)
     /// <returns>A new <see cref="TransferOptions"/> resulting of the one's complement operation on the <see cref="Value"/>.</returns>
     public TransferOptions OnesComplement() => new(~Value);
 
+    /// <summary>Returns the underlying <see cref="uint"/> value.</summary>
+    /// <returns>A new <see cref="uint"/> with the <see cref="TransferOptions"/> <see cref="Value"/>.</returns>
+    public uint ToUInt32() => Value;
+
     /// <summary>An operator that allows performing an OR operation between two <see cref="TransferOptions"/>.</summary>
     /// <param name="left">The left-handed <see cref="TransferOptions"/>.</param>
     /// <param name="right">The right-handed <see cref="TransferOptions"/>.</param>
@@ -101,5 +105,14 @@ public record TransferOptions(uint Value)
     {
         ArgumentNullException.ThrowIfNull(options);
         return options.OnesComplement();
+    }
+
+    /// <summary>An operator to explicitly convert <see cref="TransferOptions"/> to a <see cref="uint"/>.</summary>
+    /// <param name="options">The <see cref="TransferOptions"/> to convert.</param>
+    /// <returns>A <see cref="uint"/> with the underlying <see cref="Value"/>.</returns>
+    public static explicit operator uint(TransferOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return options.ToUInt32();
     }
 }

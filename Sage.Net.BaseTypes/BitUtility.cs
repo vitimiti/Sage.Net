@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="Utility.cs" company="Sage.Net">
+// <copyright file="BitUtility.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //

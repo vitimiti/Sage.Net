@@ -90,7 +90,7 @@
     </When>
     <When Condition="'$(RtsZeroHour)' == 'true'">
       <PropertyGroup>
-        <DefineConstants>$(DefineConstants);RTS_ZEROHOUR</DefineConstants>
+        <DefineConstants>$(DefineConstants);RTS_ZERO_HOUR</DefineConstants>
       </PropertyGroup>
     </When>
     <When Condition="'$(Configuration)' == 'Debug'">

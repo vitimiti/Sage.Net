@@ -152,6 +152,21 @@ public abstract class TransferOperation
         }
     }
 
+    /// <summary>Transfer a <see cref="SingleRange"/> value.</summary>
+    /// <param name="singleRangeData">A ref value to a <see cref="SingleRange"/> with the data to transfer.</param>
+    public void TransferSingleRange(ref SingleRange singleRangeData)
+    {
+        ArgumentNullException.ThrowIfNull(singleRangeData);
+
+        var hi = singleRangeData.Hi;
+        var lo = singleRangeData.Lo;
+
+        TransferSingle(ref hi);
+        TransferSingle(ref lo);
+
+        singleRangeData = new SingleRange(lo, hi);
+    }
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

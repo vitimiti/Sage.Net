@@ -291,6 +291,10 @@ public abstract class TransferOperation
         singleRangeData = new SingleRange(lo, hi);
     }
 
+    /// <summary>Transfer an <see cref="int"/> representing a color value.</summary>
+    /// <param name="colorData">A ref value to an <see cref="int"/> with the color data to transfer.</param>
+    public void TransferColor(ref int colorData) => TransferStruct(ref colorData);
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

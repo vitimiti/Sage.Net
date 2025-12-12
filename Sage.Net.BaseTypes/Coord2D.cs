@@ -20,10 +20,15 @@
 
 namespace Sage.Net.BaseTypes;
 
+/// <summary>A 2D coordinate.</summary>
+/// <param name="X">A <see cref="float"/> representing the X coordinate.</param>
+/// <param name="Y">A <see cref="float"/> representing the Y coordinate.</param>
 public record Coord2D(float X, float Y)
 {
+    /// <summary>Gets the length of the coordinate.</summary>
     public float Length => float.Sqrt((X * X) + (Y * Y));
 
+    /// <summary>Gets the normalized coordinate.</summary>
     public Coord2D Normalized
     {
         get
@@ -33,6 +38,8 @@ public record Coord2D(float X, float Y)
         }
     }
 
+    /// <summary>Converts the coordinate to an angle.</summary>
+    /// <returns>A <see cref="float"/> representing the angle.</returns>
     public float ToAngle()
     {
 #if RTS_ZERO_HOUR

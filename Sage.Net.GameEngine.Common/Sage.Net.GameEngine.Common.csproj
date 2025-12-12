@@ -12,5 +12,10 @@
       OutputItemType="Analyzer"
       ReferenceOutputAssembly="false"
     />
+    <ProjectReference
+      Include="..\Sage.Net.Generators.TrigonometryTablesGenerator\Sage.Net.Generators.TrigonometryTablesGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
 </Project>

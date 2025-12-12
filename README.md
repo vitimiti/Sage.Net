@@ -18,3 +18,4 @@ Extra Properties:
 - `RetailCompatibleCrc`: Enable the retail compatible CRC checks
 - `MaintainLegacyFiles`: Whether to maintain legacy files
 - `RtsZeroHour`: Whether to build with the Zero Hour expansion
+- `RegenerateTrigonometryTables`: Whether to regenerate trigonometry tables

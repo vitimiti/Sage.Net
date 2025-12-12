@@ -29,15 +29,6 @@ public static class Trigonometry
     /// <summary>An approximation of the number pi divided by 180.</summary>
     public const float Deg2Rad = 0.0174532925199F;
 
-    /// <summary>The resolution of trigonometry functions.</summary>
-    public const float TrigRes = 4096;
-
-    /// <summary>Same as <see cref="TrigRes"/>, but as an integer.</summary>
-    public const int IntOne = 4096;
-
-    /// <summary>2 * <see cref="TrigRes"/>, but as an integer.</summary>
-    public const int IntTwoPi = 25736;
-
     /// <summary>3 * pi / 2, but as an integer.</summary>
     public const int ThreePiOverTwo = 19302;
 

@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/Generators/">
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />
+    <Project Path="Sage.Net.Generators.TrigonometryTablesGenerator/Sage.Net.Generators.TrigonometryTablesGenerator.csproj" />
   </Folder>
   <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
 </Solution>

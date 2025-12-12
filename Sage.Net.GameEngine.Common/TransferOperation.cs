@@ -182,6 +182,36 @@ public abstract class TransferOperation
         int32Coord2DData = new Int32Coord2D(x, y);
     }
 
+    /// <summary>Transfer a <see cref="Region2D"/> value.</summary>
+    /// <param name="region2DData">A ref value to a <see cref="Region2D"/> with the data to transfer.</param>
+    public void TransferRegion2D(ref Region2D region2DData)
+    {
+        ArgumentNullException.ThrowIfNull(region2DData);
+
+        Coord2D lo = region2DData.Lo;
+        Coord2D hi = region2DData.Hi;
+
+        TransferCoord2D(ref lo);
+        TransferCoord2D(ref hi);
+
+        region2DData = new Region2D(lo, hi);
+    }
+
+    /// <summary>Transfer an <see cref="Int32Region2D"/> value.</summary>
+    /// <param name="int32Region2DData">A ref value to an <see cref="Int32Region2D"/> with the data to transfer.</param>
+    public void TransferInt32Region2D(ref Int32Region2D int32Region2DData)
+    {
+        ArgumentNullException.ThrowIfNull(int32Region2DData);
+
+        Int32Coord2D lo = int32Region2DData.Lo;
+        Int32Coord2D hi = int32Region2DData.Hi;
+
+        TransferInt32Coord2D(ref lo);
+        TransferInt32Coord2D(ref hi);
+
+        int32Region2DData = new Int32Region2D(lo, hi);
+    }
+
     /// <summary>Transfer a <see cref="SingleRange"/> value.</summary>
     /// <param name="singleRangeData">A ref value to a <see cref="SingleRange"/> with the data to transfer.</param>
     public void TransferSingleRange(ref SingleRange singleRangeData)

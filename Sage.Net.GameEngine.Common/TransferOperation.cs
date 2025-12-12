@@ -372,6 +372,183 @@ public abstract class TransferOperation
         drawableIdData = new DrawableId(value);
     }
 
+    /// <summary>Transfer a list of <see cref="ObjectId"/> values.</summary>
+    /// <param name="objectIdListData">A ref value to a list of <see cref="ObjectId"/> with the data to transfer.</param>
+    /// <exception cref="TransferListNotEmptyException">Thrown when the <paramref name="objectIdListData"/> is not empty and the transfer mode is <see cref="TransferMode.Load"/>.</exception>
+    /// <exception cref="TransferModeUnknownException">Thrown when the transfer mode is unknown.</exception>
+    public void TransferObjectIdList(ref IList<ObjectId> objectIdListData)
+    {
+        ArgumentNullException.ThrowIfNull(objectIdListData);
+
+        const byte currentVersion = 1;
+        var version = currentVersion;
+        TransferVersion(ref version, currentVersion);
+
+        var count = (ushort)objectIdListData.Count;
+        TransferUInt16(ref count);
+
+        ObjectId objectId = ObjectId.InvalidId;
+        switch (TransferMode)
+        {
+            case TransferMode.Save or TransferMode.Crc:
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    objectId = objectIdListData[i];
+                    TransferObjectId(ref objectId);
+                }
+
+                break;
+            }
+
+            case TransferMode.Load when objectIdListData.Count != 0:
+            {
+                const string message = $"{nameof(objectIdListData)} should be empty before loading.";
+                Debug.Fail(message);
+                throw new TransferListNotEmptyException(message);
+            }
+
+            case TransferMode.Load:
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    TransferObjectId(ref objectId);
+                    objectIdListData.Add(objectId);
+                }
+
+                break;
+            }
+
+            case TransferMode.Invalid:
+            default:
+            {
+                var message = $"Unknown transfer mode '{TransferMode}'.";
+                Debug.Fail(message);
+                throw new TransferModeUnknownException(message);
+            }
+        }
+    }
+
+    /// <summary>Transfer a <see cref="LinkedList{T}"/> of <see cref="ObjectId"/> values.</summary>
+    /// <param name="objectIdLinkedListData">A ref value to a <see cref="LinkedList{T}"/> of <see cref="ObjectId"/> with the data to transfer.</param>
+    /// <exception cref="TransferListNotEmptyException">Thrown when the <paramref name="objectIdLinkedListData"/> is not empty and the transfer mode is <see cref="TransferMode.Load"/>.</exception>
+    /// <exception cref="TransferModeUnknownException">Thrown when the transfer mode is unknown.</exception>
+    public void TransferObjectIdLinkedList(ref LinkedList<ObjectId> objectIdLinkedListData)
+    {
+        ArgumentNullException.ThrowIfNull(objectIdLinkedListData);
+
+        const byte currentVersion = 1;
+        var version = currentVersion;
+        TransferVersion(ref version, currentVersion);
+
+        var count = (ushort)objectIdLinkedListData.Count;
+        TransferUInt16(ref count);
+
+        ObjectId objectId = ObjectId.InvalidId;
+        switch (TransferMode)
+        {
+            case TransferMode.Save or TransferMode.Crc:
+            {
+                LinkedListNode<ObjectId>? node = objectIdLinkedListData.First;
+                while (node is not null)
+                {
+                    objectId = node.Value;
+                    TransferObjectId(ref objectId);
+
+                    node = node.Next;
+                }
+
+                break;
+            }
+
+            case TransferMode.Load when objectIdLinkedListData.Count != 0:
+            {
+                const string message = $"{nameof(objectIdLinkedListData)} should be empty before loading.";
+                Debug.Fail(message);
+                throw new TransferListNotEmptyException(message);
+            }
+
+            case TransferMode.Load:
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    TransferObjectId(ref objectId);
+                    _ = objectIdLinkedListData.Append(objectId);
+                }
+
+                break;
+            }
+
+            case TransferMode.Invalid:
+            default:
+            {
+                var message = $"Unknown transfer mode '{TransferMode}'.";
+                Debug.Fail(message);
+                throw new TransferModeUnknownException(message);
+            }
+        }
+    }
+
+    /// <summary>Transfer a <see cref="LinkedList{T}"/> of <see cref="int"/> values.</summary>
+    /// <param name="int32LinkedListData">A ref value to a <see cref="LinkedList{T}"/> of <see cref="int"/> with the data to transfer.</param>
+    /// <exception cref="TransferListNotEmptyException">Thrown when the <paramref name="int32LinkedListData"/> is not empty and the transfer mode is <see cref="TransferMode.Load"/>.</exception>
+    /// <exception cref="TransferModeUnknownException">Thrown when the transfer mode is unknown.</exception>
+    public void TransferInt32LinkedList(ref LinkedList<int> int32LinkedListData)
+    {
+        ArgumentNullException.ThrowIfNull(int32LinkedListData);
+
+        const byte currentVersion = 1;
+        var version = currentVersion;
+        TransferVersion(ref version, currentVersion);
+
+        var count = (ushort)int32LinkedListData.Count;
+        TransferUInt16(ref count);
+
+        var intData = 0;
+        switch (TransferMode)
+        {
+            case TransferMode.Save or TransferMode.Crc:
+            {
+                LinkedListNode<int>? node = int32LinkedListData.First;
+                while (node is not null)
+                {
+                    intData = node.Value;
+                    TransferInt32(ref intData);
+
+                    node = node.Next;
+                }
+
+                break;
+            }
+
+            case TransferMode.Load when int32LinkedListData.Count != 0:
+            {
+                const string message = $"{nameof(int32LinkedListData)} should be empty before loading.";
+                Debug.Fail(message);
+                throw new TransferListNotEmptyException(message);
+            }
+
+            case TransferMode.Load:
+            {
+                for (var i = 0; i < count; i++)
+                {
+                    TransferInt32(ref intData);
+                    _ = int32LinkedListData.Append(intData);
+                }
+
+                break;
+            }
+
+            case TransferMode.Invalid:
+            default:
+            {
+                var message = $"Unknown transfer mode '{TransferMode}'.";
+                Debug.Fail(message);
+                throw new TransferModeUnknownException(message);
+            }
+        }
+    }
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

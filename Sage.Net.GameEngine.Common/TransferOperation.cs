@@ -152,6 +152,36 @@ public abstract class TransferOperation
         }
     }
 
+    /// <summary>Transfer a <see cref="Coord2D"/> value.</summary>
+    /// <param name="coord2DData">A ref value to a <see cref="Coord2D"/> with the data to transfer.</param>
+    public void TransferCoord2D(ref Coord2D coord2DData)
+    {
+        ArgumentNullException.ThrowIfNull(coord2DData);
+
+        var x = coord2DData.X;
+        var y = coord2DData.Y;
+
+        TransferSingle(ref x);
+        TransferSingle(ref y);
+
+        coord2DData = new Coord2D(x, y);
+    }
+
+    /// <summary>Transfer an <see cref="Int32Coord2D"/> value.</summary>
+    /// <param name="int32Coord2DData">A ref value to an <see cref="Int32Coord2D"/> with the data to transfer.</param>
+    public void TransferInt32Coord2D(ref Int32Coord2D int32Coord2DData)
+    {
+        ArgumentNullException.ThrowIfNull(int32Coord2DData);
+
+        var x = int32Coord2DData.X;
+        var y = int32Coord2DData.Y;
+
+        TransferInt32(ref x);
+        TransferInt32(ref y);
+
+        int32Coord2DData = new Int32Coord2D(x, y);
+    }
+
     /// <summary>Transfer a <see cref="SingleRange"/> value.</summary>
     /// <param name="singleRangeData">A ref value to a <see cref="SingleRange"/> with the data to transfer.</param>
     public void TransferSingleRange(ref SingleRange singleRangeData)

@@ -350,6 +350,17 @@ public abstract class TransferOperation
         rgbaColorInt32Data = new RgbaColorInt32(red, green, blue, alpha);
     }
 
+    /// <summary>Transfer a <see cref="ObjectId"/> value.</summary>
+    /// <param name="objectIdData">A ref value to a <see cref="ObjectId"/> with the data to transfer.</param>
+    public void TransferObjectId(ref ObjectId objectIdData)
+    {
+        ArgumentNullException.ThrowIfNull(objectIdData);
+
+        var value = objectIdData.Value;
+        TransferInt32(ref value);
+        objectIdData = new ObjectId(value);
+    }
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

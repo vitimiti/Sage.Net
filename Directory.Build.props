@@ -93,6 +93,11 @@
         <DefineConstants>$(DefineConstants);RTS_ZERO_HOUR</DefineConstants>
       </PropertyGroup>
     </When>
+    <When Condition="'$(RegenerateTrigonometryTables)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);REGENERATE_TRIG_TABLES</DefineConstants>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);LOAD_TEST_ASSETS;LOOK_FOR_TEST_ART</DefineConstants>

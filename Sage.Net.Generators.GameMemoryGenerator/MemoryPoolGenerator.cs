@@ -27,7 +27,7 @@ namespace Sage.Net.Generators.GameMemoryGenerator;
 
 /// <summary>Generates code for a game memory pool.</summary>
 [Generator]
-public class MemoryPoolGenerator : IIncrementalGenerator
+public sealed class MemoryPoolGenerator : IIncrementalGenerator
 {
     /// <summary>Initializes the pool generator and calls the system to generate the glue code.</summary>
     /// <param name="context">The <see cref="IncrementalGeneratorInitializationContext"/> to use.</param>

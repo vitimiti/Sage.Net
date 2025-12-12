@@ -100,6 +100,7 @@ public sealed class MemoryPoolGenerator : IIncrementalGenerator
 
             namespace {{namespaceName}};
 
+            /// <summary>A memory pool for {{className}}.</summary>
             public partial class {{className}}
             {
                 private static readonly MemoryPool<{{className}}> _classMemoryPool

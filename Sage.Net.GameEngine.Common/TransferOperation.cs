@@ -361,6 +361,17 @@ public abstract class TransferOperation
         objectIdData = new ObjectId(value);
     }
 
+    /// <summary>Transfer a <see cref="DrawableId"/> value.</summary>
+    /// <param name="drawableIdData">A ref value to a <see cref="DrawableId"/> with the data to transfer.</param>
+    public void TransferDrawableId(ref DrawableId drawableIdData)
+    {
+        ArgumentNullException.ThrowIfNull(drawableIdData);
+
+        var value = drawableIdData.Value;
+        TransferInt32(ref value);
+        drawableIdData = new DrawableId(value);
+    }
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

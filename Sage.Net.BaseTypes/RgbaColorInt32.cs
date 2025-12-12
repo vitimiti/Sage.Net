@@ -20,4 +20,9 @@
 
 namespace Sage.Net.BaseTypes;
 
+/// <summary>A record representing a RGBA color.</summary>
+/// <param name="Red">A <see cref="uint"/> representing the red component.</param>
+/// <param name="Green">A <see cref="uint"/> representing the green component.</param>
+/// <param name="Blue">A <see cref="uint"/> representing the blue component.</param>
+/// <param name="Alpha">A <see cref="uint"/> representing the alpha component.</param>
 public record RgbaColorInt32(uint Red, uint Green, uint Blue, uint Alpha);

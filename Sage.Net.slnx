@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/GameEngine/">
-    <Project Path="Sage.Net.GameEngine.Common/Sage.Net.GameEngine.Common.csproj" />
+    <Project Path="Sage.Net.GameEngine\Sage.Net.GameEngine.csproj" />
   </Folder>
   <Folder Name="/Generators/">
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />

@@ -295,6 +295,61 @@ public abstract class TransferOperation
     /// <param name="colorData">A ref value to an <see cref="int"/> with the color data to transfer.</param>
     public void TransferColor(ref int colorData) => TransferStruct(ref colorData);
 
+    /// <summary>Transfer a <see cref="RgbColor"/> value.</summary>
+    /// <param name="rgbColorData">A ref value to a <see cref="RgbColor"/> with the data to transfer.</param>
+    public void TransferRgbColor(ref RgbColor rgbColorData)
+    {
+        ArgumentNullException.ThrowIfNull(rgbColorData);
+
+        var red = rgbColorData.Red;
+        var green = rgbColorData.Green;
+        var blue = rgbColorData.Blue;
+
+        TransferSingle(ref red);
+        TransferSingle(ref green);
+        TransferSingle(ref blue);
+
+        rgbColorData = new RgbColor(red, green, blue);
+    }
+
+    /// <summary>Transfer a <see cref="RgbaColorSingle"/> value.</summary>
+    /// <param name="rgbaColorSingleData">A ref value to a <see cref="RgbaColorSingle"/> with the data to transfer.</param>
+    public void TransferRgbaColorSingle(ref RgbaColorSingle rgbaColorSingleData)
+    {
+        ArgumentNullException.ThrowIfNull(rgbaColorSingleData);
+
+        var red = rgbaColorSingleData.Red;
+        var green = rgbaColorSingleData.Green;
+        var blue = rgbaColorSingleData.Blue;
+        var alpha = rgbaColorSingleData.Alpha;
+
+        TransferSingle(ref red);
+        TransferSingle(ref green);
+        TransferSingle(ref blue);
+        TransferSingle(ref alpha);
+
+        rgbaColorSingleData = new RgbaColorSingle(red, green, blue, alpha);
+    }
+
+    /// <summary>Transfer a <see cref="RgbaColorInt32"/> value.</summary>
+    /// <param name="rgbaColorInt32Data">A ref value to a <see cref="RgbaColorInt32"/> with the data to transfer.</param>
+    public void TransferRgbaColorInt32(ref RgbaColorInt32 rgbaColorInt32Data)
+    {
+        ArgumentNullException.ThrowIfNull(rgbaColorInt32Data);
+
+        var red = rgbaColorInt32Data.Red;
+        var green = rgbaColorInt32Data.Green;
+        var blue = rgbaColorInt32Data.Blue;
+        var alpha = rgbaColorInt32Data.Alpha;
+
+        TransferUInt32(ref red);
+        TransferUInt32(ref green);
+        TransferUInt32(ref blue);
+        TransferUInt32(ref alpha);
+
+        rgbaColorInt32Data = new RgbaColorInt32(red, green, blue, alpha);
+    }
+
     /// <summary>This is the way to call the base class defined core transfer implementation.</summary>
     /// <param name="data">A <see cref="nint"/> with the pointer to the data to transfer.</param>
     /// <param name="dataSize">An <see cref="int"/> with the size of the transferred data.</param>

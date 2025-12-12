@@ -152,6 +152,40 @@ public abstract class TransferOperation
         }
     }
 
+    /// <summary>Transfer a <see cref="Coord3D"/> value.</summary>
+    /// <param name="coord3DData">A ref value to a <see cref="Coord3D"/> with the data to transfer.</param>
+    public void TransferCoord3D(ref Coord3D coord3DData)
+    {
+        ArgumentNullException.ThrowIfNull(coord3DData);
+
+        var x = coord3DData.X;
+        var y = coord3DData.Y;
+        var z = coord3DData.Z;
+
+        TransferSingle(ref x);
+        TransferSingle(ref y);
+        TransferSingle(ref z);
+
+        coord3DData = new Coord3D(x, y, z);
+    }
+
+    /// <summary>Transfer an <see cref="Int32Coord3D"/> value.</summary>
+    /// <param name="int32Coord3DData">A ref value to an <see cref="Int32Coord3D"/> with the data to transfer.</param>
+    public void TransferInt32Coord3D(ref Int32Coord3D int32Coord3DData)
+    {
+        ArgumentNullException.ThrowIfNull(int32Coord3DData);
+
+        var x = int32Coord3DData.X;
+        var y = int32Coord3DData.Y;
+        var z = int32Coord3DData.Z;
+
+        TransferInt32(ref x);
+        TransferInt32(ref y);
+        TransferInt32(ref z);
+
+        int32Coord3DData = new Int32Coord3D(x, y, z);
+    }
+
     /// <summary>Transfer a <see cref="Coord2D"/> value.</summary>
     /// <param name="coord2DData">A ref value to a <see cref="Coord2D"/> with the data to transfer.</param>
     public void TransferCoord2D(ref Coord2D coord2DData)

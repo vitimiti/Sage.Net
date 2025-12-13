@@ -170,6 +170,123 @@ public class Ini : IDisposable
     /// <summary>Gets or sets the transfer operation.</summary>
     private static TransferOperation? Transfer { get; set; }
 
+    /// <summary>Determines whether the specified declaration is of the specified type.</summary>
+    /// <param name="blockType">The type of the declaration to check.</param>
+    /// <param name="blockName">The name of the declaration to check.</param>
+    /// <param name="bufferToCheck">The buffer to check.</param>
+    /// <returns><see langword="true"/> if the declaration is of the specified type; otherwise, <see langword="false"/>.</returns>
+    public static bool IsDeclarationOfType(string blockType, string blockName, ReadOnlySpan<byte> bufferToCheck)
+    {
+        if (bufferToCheck.IsEmpty || string.IsNullOrEmpty(blockType) || string.IsNullOrEmpty(blockName))
+        {
+            return false;
+        }
+
+        var len = bufferToCheck.IndexOf((byte)0);
+        if (len < 0)
+        {
+            len = bufferToCheck.Length;
+        }
+
+        var i = 0;
+
+        while (i < len && IsAsciiWhiteSpace(bufferToCheck[i]))
+        {
+            i++;
+        }
+
+        if (i + blockType.Length > len)
+        {
+            return false;
+        }
+
+        if (!EqualsAsciiIgnoreCase(bufferToCheck.Slice(i, blockType.Length), blockType))
+        {
+            return false;
+        }
+
+        i += blockType.Length;
+
+        if (i >= len || !IsAsciiWhiteSpace(bufferToCheck[i]))
+        {
+            return false;
+        }
+
+        i++;
+
+        while (i < len && IsAsciiWhiteSpace(bufferToCheck[i]))
+        {
+            i++;
+        }
+
+        if (i + blockName.Length > len)
+        {
+            return false;
+        }
+
+        if (!EqualsAsciiIgnoreCase(bufferToCheck.Slice(i, blockName.Length), blockName))
+        {
+            return false;
+        }
+
+        i += blockName.Length;
+
+        while (i < len && IsAsciiWhiteSpace(bufferToCheck[i]))
+        {
+            i++;
+        }
+
+        return i == len;
+    }
+
+    /// <summary>Determines whether the specified position marks the end of a block.</summary>
+    /// <param name="bufferToCheck">The buffer to check.</param>
+    /// <returns><see langword="true"/> if the position is at the end of the block; otherwise, <see langword="false"/>.</returns>
+    public static bool IsEndOfBLock(ReadOnlySpan<byte> bufferToCheck)
+    {
+        if (bufferToCheck.IsEmpty)
+        {
+            return false;
+        }
+
+        var len = bufferToCheck.IndexOf((byte)0);
+        if (len < 0)
+        {
+            len = bufferToCheck.Length;
+        }
+
+        var i = 0;
+
+        while (i < len && IsAsciiWhiteSpace(bufferToCheck[i]))
+        {
+            i++;
+        }
+
+        if (i + BlockEndToken.Length > len)
+        {
+            return false;
+        }
+
+        if (!EqualsAsciiIgnoreCase(bufferToCheck.Slice(i, BlockEndToken.Length), BlockEndToken))
+        {
+            return false;
+        }
+
+        i += BlockEndToken.Length;
+
+        while (i < len)
+        {
+            if (!IsAsciiWhiteSpace(bufferToCheck[i]))
+            {
+                return false;
+            }
+
+            i++;
+        }
+
+        return true;
+    }
+
     /// <summary>Releases all resources used by this <see cref="Ini"/> instance.</summary>
     public void Dispose()
     {
@@ -487,6 +604,35 @@ public class Ini : IDisposable
         userData = token;
         return parseTable[parseIndex].Parse;
     }
+
+    private static bool EqualsAsciiIgnoreCase(ReadOnlySpan<byte> span, string text)
+    {
+        if (span.Length != text.Length)
+        {
+            return false;
+        }
+
+        for (var j = 0; j < text.Length; j++)
+        {
+            var ch = text[j];
+            if (ch > 0x7F)
+            {
+                return false;
+            }
+
+            if (ToUpperAscii(span[j]) != ToUpperAscii((byte)ch))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static byte ToUpperAscii(byte b) => b is >= (byte)'a' and <= (byte)'z' ? (byte)(b - 32) : b;
+
+    private static bool IsAsciiWhiteSpace(byte b) =>
+        b is (byte)' ' or (byte)'\t' or (byte)'\r' or (byte)'\n' or (byte)'\f' or (byte)'\v';
 
 #if !RTS_ZERO_HOUR
     private static byte NormalizeChar(byte ch) => !char.IsWhiteSpace((char)ch) ? ch : (byte)' ';

@@ -61,7 +61,7 @@ public sealed class SubsystemsList : IDisposable
     /// <param name="subsystem">The <see cref="SubsystemBase"/> to add.</param>
     /// <remarks>This will only act if <c>DUMP_PERF_STATS</c> is enabled.</remarks>
     /// <seealso cref="RemoveSubsystem(SubsystemBase)"/>
-    /// <seealso cref="InitializeSubsystem(SubsystemBase, string)"/>
+    /// <seealso cref="InitializeSubsystem(SubsystemBase,string,string,TransferOperation,string)"/>
 #if !DUMP_PERF_STATS
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used for perf stats.")]
     [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "Used for perf stats.")]
@@ -77,7 +77,7 @@ public sealed class SubsystemsList : IDisposable
     /// <param name="subsystem">The <see cref="SubsystemBase"/> to remove.</param>
     /// <remarks>This will only act if <c>DUMP_PERF_STATS</c> is enabled.</remarks>
     /// <seealso cref="AddSubsystem(SubsystemBase)"/>
-    /// <seealso cref="InitializeSubsystem(SubsystemBase, string)"/>
+    /// <seealso cref="InitializeSubsystem(SubsystemBase,string,string,TransferOperation,string)"/>
 #if !DUMP_PERF_STATS
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Used for perf stats.")]
     [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "Used for perf stats.")]
@@ -125,17 +125,17 @@ public sealed class SubsystemsList : IDisposable
 
     /// <summary>Calls the <see cref="SubsystemBase.PostProcessLoad"/> method on all initialized subsystems.</summary>
     /// <seealso cref="SubsystemBase.PostProcessLoad"/>
-    /// <seealso cref="InitializeSubsystem(SubsystemBase, string)"/>
+    /// <seealso cref="InitializeSubsystem(SubsystemBase,string,string,TransferOperation,string)"/>
     public void PostProcessLoadAll() => _subsystems.ForEach(s => s.PostProcessLoad());
 
     /// <summary>Calls the <see cref="SubsystemBase.Reset"/> method on all initialized subsystems.</summary>
     /// <seealso cref="SubsystemBase.Reset"/>
-    /// <seealso cref="InitializeSubsystem(SubsystemBase, string)"/>
+    /// <seealso cref="InitializeSubsystem(SubsystemBase,string,string,TransferOperation,string)"/>
     public void ResetAll() => _subsystems.ForEach(s => s.Reset());
 
     /// <summary>Calls the <see cref="SubsystemBase.Dispose()"/> method on all initialized subsystems and clears the subsystem list.</summary>
     /// <seealso cref="SubsystemBase.Dispose()"/>
-    /// <seealso cref="InitializeSubsystem(SubsystemBase, string)"/>
+    /// <seealso cref="InitializeSubsystem(SubsystemBase,string,string,TransferOperation,string)"/>
     public void ShutdownAll()
     {
         _subsystems.ForEach(s => s.Dispose());

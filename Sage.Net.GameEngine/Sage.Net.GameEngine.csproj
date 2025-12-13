@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sage.Net.BaseTypes\Sage.Net.BaseTypes.csproj" />
+    <ProjectReference Include="..\Sage.Net.WwVegas\Sage.Net.WwVegas.csproj" />
     <ProjectReference
       Include="..\Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj"
       OutputItemType="Analyzer"

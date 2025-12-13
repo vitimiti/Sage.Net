@@ -20,7 +20,6 @@
 
 using System.Diagnostics;
 using System.Text;
-using Sage.Net.BaseTypes;
 using Sage.Net.GameEngine.Common.Exceptions.IniExceptions;
 
 namespace Sage.Net.GameEngine.Common;
@@ -438,6 +437,57 @@ public class Ini : IDisposable
         store = value * radsPerDegree;
     }
 
+    /// <summary>Parses a <see cref="float"/> value from the current line as angular velocity in degrees per second and stores the radians per frame value of that velocity.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting radian per frame value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseAngularVelocitySingle(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanSingle(token);
+        var converted = GameCommon.ConvertAngularVelocityInDegreesPerSecondToRadiansPerFrame(value);
+        store = converted;
+    }
+
+    /// <summary>Parses a <see cref="bool"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="bool"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseBool(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        store = ScanBool(token);
+    }
+
+    /// <summary>Parses a <see cref="bool"/> token from the current line and sets or clears the specified bit in a 32-bit bitfield.</summary>
+    /// <param name="ini">The <see cref="Ini"/> reader to read the next token from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> holding the 32-bit bitfield to update and store back.</param>
+    /// <param name="userData">An <see cref="uint"/> mask indicating the bit(s) to set or clear.</param>
+    public static void ParseBitInInt32(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var s = (uint)(store ?? 0);
+        var mask = (uint)(userData ?? 0);
+        if (ScanBool(ini.GetNextToken()))
+        {
+            s |= mask;
+        }
+        else
+        {
+            s &= ~mask;
+        }
+
+        store = s;
+    }
+
     /// <summary>Scans the specified token for an <see cref="int"/> value.</summary>
     /// <param name="token">A <see cref="string"/> with the token to parse.</param>
     /// <returns>A new <see cref="int"/> with the value held by the <paramref name="token"/>.</returns>
@@ -458,6 +508,29 @@ public class Ini : IDisposable
     /// <exception cref="IniInvalidDataException">When the <paramref name="token"/> can't be parsed into an <see cref="float"/>.</exception>
     public static float ScanSingle(string token) =>
         float.TryParse(token, out var value) ? value : throw new IniInvalidDataException("Invalid integer value.");
+
+    /// <summary>Scans the specified token for a <see cref="bool"/> value.</summary>
+    /// <param name="token">A <see cref="string"/> with the token to parse.</param>
+    /// <returns>A new <see cref="bool"/> with the value held by the <paramref name="token"/>.</returns>
+    /// <exception cref="IniInvalidDataException">When the <paramref name="token"/> can't be parsed into a <see cref="bool"/>.</exception>
+    public static bool ScanBool(string token)
+    {
+        ArgumentNullException.ThrowIfNull(token);
+
+        if (token.Equals("yes", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (token.Equals("no", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        var message = $"Invalid boolean value '{token}' - Expected 'yes' or 'no'.";
+        Debug.Fail(message);
+        throw new IniInvalidDataException(message);
+    }
 
     /// <summary>Releases all resources used by this <see cref="Ini"/> instance.</summary>
     public void Dispose()
@@ -699,6 +772,21 @@ public class Ini : IDisposable
         return tokenLength <= 0
             ? throw new IniInvalidDataException($"[LINE: {LineNumber} - FILE: '{FileName}'] Invalid token.")
             : Encoding.ASCII.GetString(_buffer, start, tokenLength);
+    }
+
+    /// <summary>Attempts to retrieve the next token from the current line buffer.</summary>
+    /// <param name="seps">Optional custom list of separator characters to use instead of the defaults.</param>
+    /// <returns>The next token as a <see cref="string"/>, or <see langword="null"/> when no valid token can be parsed (e.g., when the input is malformed and would cause an <see cref="IniInvalidDataException"/>).</returns>
+    public string? GetNextTokenOrNull(IList<char>? seps = null)
+    {
+        try
+        {
+            return GetNextToken(seps);
+        }
+        catch (IniInvalidDataException)
+        {
+            return null;
+        }
     }
 
     /// <summary>Determines whether the provided file name has the <c>.ini</c> extension (case-insensitive).</summary>

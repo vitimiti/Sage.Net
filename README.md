@@ -19,3 +19,4 @@ Extra Properties:
 - `MaintainLegacyFiles`: Whether to maintain legacy files
 - `RtsZeroHour`: Whether to build with the Zero Hour expansion
 - `RegenerateTrigonometryTables`: Whether to regenerate trigonometry tables
+- `ReleaseDebugLogging`: Whether to enable debug logging in release builds

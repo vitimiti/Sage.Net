@@ -7,6 +7,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DefineConstants>$(DefineConstants);NO_RELEASE_DEBUG_LOGGING</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>
@@ -98,9 +99,70 @@
         <DefineConstants>$(DefineConstants);REGENERATE_TRIG_TABLES</DefineConstants>
       </PropertyGroup>
     </When>
+    <When Condition="'$(ReleaseDebugLogging)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);ALLOW_DEBUG_UTILS;DEBUG_LOGGING;DISABLE_DEBUG_CRASHING;DISABLE_DEBUG_STACKTRACE;DISABLE_DEBUG_PROFILE</DefineConstants>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
-        <DefineConstants>$(DefineConstants);LOAD_TEST_ASSETS;LOOK_FOR_TEST_ART</DefineConstants>
+        <DefineConstants>$(DefineConstants);RTS_DEBUG;LOAD_TEST_ASSETS;LOOK_FOR_TEST_ART</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';RELEASE_DEBUG_LOGGING;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);ALLOW_DEBUG_UTILS;DEBUG_LOGGING;DISABLE_DEBUG_CRASHING;DISABLE_DEBUG_STACKTRACE;DISABLE_DEBUG_PROFILE</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';RTS_DEBUG;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_ALLOW_DEBUG_UTILS;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);ALLOW_DEBUG_UTILS</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="!$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And ($([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_LOGGING;')) Or $([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_CRASHING;')) Or $([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_STACKTRACE;')) Or $([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_PROFILE;')))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);ALLOW_DEBUG_UTILS</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_LOGGING;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_DEBUG_LOGGING;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_LOGGING</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_CRASHING;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_DEBUG_CRASHING;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_CRASHING</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_STACKTRACE;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_DEBUG_STACKTRACE;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_STACKTRACE</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_STACKTRACE;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_LOGGING;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_DEBUG_LOGGING;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_LOGGING</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition="$([System.String]::Copy(';$(DefineConstants);').Contains(';ALLOW_DEBUG_UTILS;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DEBUG_PROFILE;')) And !$([System.String]::Copy(';$(DefineConstants);').Contains(';DISABLE_DEBUG_PROFILE;'))">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_PROFILE</DefineConstants>
       </PropertyGroup>
     </When>
   </Choose>
@@ -138,14 +200,12 @@
     >
       <Output TaskParameter="ConsoleOutput" PropertyName="GitAuthor" />
     </Exec>
-
     <!-- Capture Build Environment -->
     <PropertyGroup>
       <BuildUser>$([System.Environment]::UserName)</BuildUser>
       <BuildMachine>$([System.Environment]::MachineName)</BuildMachine>
       <BuildDate>$([System.DateTime]::UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC"))</BuildDate>
     </PropertyGroup>
-
     <!-- Embed as AssemblyMetadata Attributes -->
     <ItemGroup>
       <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

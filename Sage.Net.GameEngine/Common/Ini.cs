@@ -128,6 +128,8 @@ public class Ini : IDisposable
 #if DEBUG_CRASHING
     private readonly byte[] _currentBlockStart = new byte[MaxCharsPerLine];
 #endif
+    private int _tokenBytePos;
+    private bool _disposed;
 
     /// <summary>Gets the default token separators used when tokenizing a line.</summary>
     public static IList<char> Separators => " \n\r\t=".ToCharArray();
@@ -472,6 +474,63 @@ public class Ini : IDisposable
         return 1;
     }
 
+    /// <summary>Returns the next token from the current line buffer using the provided separators.</summary>
+    /// <param name="seps">Token separators. When <see langword="null"/>, uses <see cref="Separators"/>.</param>
+    /// <returns>The next token.</returns>
+    /// <exception cref="IniInvalidDataException">Thrown when the line contains no further tokens.</exception>
+    public string GetNextToken(IList<char>? seps = null)
+    {
+        seps ??= Separators;
+
+        Span<bool> isSep = stackalloc bool[128];
+        foreach (var ch in seps.Where(static ch => ch <= 0x7F))
+        {
+            isSep[ch] = true;
+        }
+
+        var len = _buffer.AsSpan().IndexOf((byte)0);
+        if (len < 0)
+        {
+            len = _buffer.Length;
+        }
+
+        while (_tokenBytePos < len)
+        {
+            var b = _buffer[_tokenBytePos];
+            if (b <= 0x7F && isSep[b])
+            {
+                _tokenBytePos++;
+                continue;
+            }
+
+            break;
+        }
+
+        if (_tokenBytePos >= len)
+        {
+            throw new IniInvalidDataException(
+                $"[LINE: {LineNumber} - FILE: '{FileName}'] Expected token but reached end of line."
+            );
+        }
+
+        var start = _tokenBytePos;
+        while (_tokenBytePos < len)
+        {
+            var b = _buffer[_tokenBytePos];
+            if (b <= 0x7F && isSep[b])
+            {
+                break;
+            }
+
+            _tokenBytePos++;
+        }
+
+        var tokenLength = _tokenBytePos - start;
+        return tokenLength <= 0
+            ? throw new IniInvalidDataException($"[LINE: {LineNumber} - FILE: '{FileName}'] Invalid token.")
+            : Encoding.ASCII.GetString(_buffer, start, tokenLength);
+    }
+
     /// <summary>Determines whether the provided file name has the <c>.ini</c> extension (case-insensitive).</summary>
     /// <param name="fileName">The file name to validate.</param>
     /// <returns><see langword="true"/> if the file name ends with <c>.ini</c>; otherwise, <see langword="false"/>.</returns>
@@ -482,10 +541,17 @@ public class Ini : IDisposable
     /// <param name="disposing">When <see langword="true"/>, release both managed and unmanaged resources; otherwise release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         if (disposing)
         {
             IniFile?.Dispose();
         }
+
+        _disposed = true;
     }
 
     /// <summary>Opens the specified INI file for reading and prepares internal buffers.</summary>
@@ -566,6 +632,7 @@ public class Ini : IDisposable
         ReadLineUnbuffered();
 #endif
 
+        _tokenBytePos = 0;
         TransferLineIfNeeded();
     }
 

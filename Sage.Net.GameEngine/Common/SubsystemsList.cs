@@ -91,16 +91,35 @@ public sealed class SubsystemsList : IDisposable
 
     /// <summary>Initializes a subsystem.</summary>
     /// <param name="subsystem">The <see cref="SubsystemBase"/> to initialize.</param>
+    /// <param name="path1">The first path to load INI files from; or <see langword="null"/> if no path is required.</param>
+    /// <param name="path2">The second path to load INI files from; or <see langword="null"/> if no path is required.</param>
+    /// <param name="transfer">The <see cref="TransferOperation"/> to transfer the loaded data with; or <see langword="null"/> if no transfer operation is required.</param>
     /// <param name="name">A <see cref="string"/> with the <paramref name="subsystem"/> name.</param>
     /// <remarks>This is the main subsystem initialization system and will act regardless of compilation options. Use this to add a <see cref="SubsystemBase"/> to the subsystems list.</remarks>
-    public void InitializeSubsystem(SubsystemBase subsystem, string name)
+    public void InitializeSubsystem(
+        SubsystemBase subsystem,
+        string? path1,
+        string? path2,
+        TransferOperation? transfer,
+        string name
+    )
     {
         ArgumentNullException.ThrowIfNull(subsystem);
 
         subsystem.Name = name;
         subsystem.Initialize();
 
-        // TODO: implement INI loading here.
+        using Ini ini = new();
+        if (path1 is not null)
+        {
+            _ = ini.LoadFileDirectory(path1, IniLoadType.Overwrite, transfer);
+        }
+
+        if (path2 is not null)
+        {
+            _ = ini.LoadFileDirectory(path2, IniLoadType.Overwrite, transfer);
+        }
+
         _subsystems.Add(subsystem);
     }
 

@@ -20,6 +20,7 @@
 
 using System.Diagnostics;
 using System.Text;
+using Sage.Net.BaseTypes;
 using Sage.Net.GameEngine.Common.Exceptions.IniExceptions;
 
 namespace Sage.Net.GameEngine.Common;
@@ -288,6 +289,175 @@ public class Ini : IDisposable
 
         return true;
     }
+
+    /// <summary>Parses a byte value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting byte value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    /// <exception cref="IniInvalidDataException">When the parsed value was not a <see cref="byte"/>.</exception>
+    public static void ParseByte(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanInt32(token);
+        if (value is < 0 or > 255)
+        {
+            var message = $"[LINE: {ini.LineNumber} - FILE: '{ini.FileName}'] Invalid byte value '{token}'.";
+            Debug.Fail(message);
+            throw new IniInvalidDataException(message);
+        }
+
+        store = (byte)value;
+    }
+
+    /// <summary>Parses a <see cref="short"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="short"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    /// <exception cref="IniInvalidDataException">When the parsed value was not a <see cref="short"/>.</exception>
+    public static void ParseInt16(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanInt32(token);
+        if (value is < -32768 or > 32767)
+        {
+            var message = $"[LINE: {ini.LineNumber} - FILE: '{ini.FileName}'] Invalid short value '{token}'.";
+            Debug.Fail(message);
+            throw new IniInvalidDataException(message);
+        }
+
+        store = (short)value;
+    }
+
+    /// <summary>Parses an <see cref="ushort"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="ushort"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    /// <exception cref="IniInvalidDataException">When the parsed value was not an <see cref="ushort"/>.</exception>
+    public static void ParseUInt16(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanInt32(token);
+        if (value is < 0 or > 65535)
+        {
+            var message = $"[LINE: {ini.LineNumber} - FILE: '{ini.FileName}'] Invalid ushort value '{token}'.";
+            Debug.Fail(message);
+            throw new IniInvalidDataException(message);
+        }
+
+        store = (ushort)value;
+    }
+
+    /// <summary>Parses an <see cref="int"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="int"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseInt32(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanInt32(token);
+        store = value;
+    }
+
+    /// <summary>Parses an <see cref="uint"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="uint"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseUInt32(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanUInt32(token);
+        store = value;
+    }
+
+    /// <summary>Parses a <see cref="float"/> value from the current line.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="float"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseSingle(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanSingle(token);
+        store = value;
+    }
+
+    /// <summary>Parses a <see cref="float"/> value from the current line that is positive and non-zero.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting <see cref="float"/> value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    /// <exception cref="IniInvalidDataException">When the parsed value was not a positive non-zero <see cref="float"/>.</exception>
+    public static void ParsePositiveNonZeroSingle(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var token = ini.GetNextToken();
+        var value = ScanSingle(token);
+        if (value <= 0f)
+        {
+            var message =
+                $"[LINE: {ini.LineNumber} - FILE: '{ini.FileName}'] Invalid positive non-zero single value '{token}'.";
+
+            Debug.Fail(message);
+            throw new IniInvalidDataException(message);
+        }
+
+        store = value;
+    }
+
+    /// <summary>Parses a <see cref="float"/> value from the current line as a degree value (0 to 360) and store the radian value of that degree.</summary>
+    /// <param name="ini">The <see cref="Ini"/> file to parse from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> where the resulting radian value will be stored.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseAngleSingle(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        const float radsPerDegree = float.Pi / 180F;
+
+        var token = ini.GetNextToken();
+        var value = ScanSingle(token);
+        store = value * radsPerDegree;
+    }
+
+    /// <summary>Scans the specified token for an <see cref="int"/> value.</summary>
+    /// <param name="token">A <see cref="string"/> with the token to parse.</param>
+    /// <returns>A new <see cref="int"/> with the value held by the <paramref name="token"/>.</returns>
+    /// <exception cref="IniInvalidDataException">When the <paramref name="token"/> can't be parsed into an <see cref="int"/>.</exception>
+    public static int ScanInt32(string token) =>
+        int.TryParse(token, out var value) ? value : throw new IniInvalidDataException("Invalid integer value.");
+
+    /// <summary>Scans the specified token for an <see cref="uint"/> value.</summary>
+    /// <param name="token">A <see cref="string"/> with the token to parse.</param>
+    /// <returns>A new <see cref="uint"/> with the value held by the <paramref name="token"/>.</returns>
+    /// <exception cref="IniInvalidDataException">When the <paramref name="token"/> can't be parsed into an <see cref="uint"/>.</exception>
+    public static uint ScanUInt32(string token) =>
+        uint.TryParse(token, out var value) ? value : throw new IniInvalidDataException("Invalid integer value.");
+
+    /// <summary>Scans the specified token for an <see cref="float"/> value.</summary>
+    /// <param name="token">A <see cref="string"/> with the token to parse.</param>
+    /// <returns>A new <see cref="float"/> with the value held by the <paramref name="token"/>.</returns>
+    /// <exception cref="IniInvalidDataException">When the <paramref name="token"/> can't be parsed into an <see cref="float"/>.</exception>
+    public static float ScanSingle(string token) =>
+        float.TryParse(token, out var value) ? value : throw new IniInvalidDataException("Invalid integer value.");
 
     /// <summary>Releases all resources used by this <see cref="Ini"/> instance.</summary>
     public void Dispose()

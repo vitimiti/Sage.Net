@@ -194,7 +194,7 @@ public static class BaseTypesMath
     /// <summary>Converts a <see cref="float"/> to a 64-bit signed integer by rounding toward positive infinity.</summary>
     /// <param name="f">The <see cref="float"/> value to convert.</param>
     /// <returns>The ceiling of <paramref name="f"/> as a 64-bit signed integer.</returns>
-    public static long SingleToInt64Ceil(float f) => FastFloat2LongRound(FastFloatFloor(f));
+    public static long SingleToInt64Ceil(float f) => FastFloat2LongRound(FastFloatCeil(f));
 #else
     /// <summary>Converts a <see cref="float"/> to a 64-bit signed integer by rounding toward positive infinity.</summary>
     /// <param name="f">The <see cref="float"/> value to convert.</param>
@@ -206,7 +206,7 @@ public static class BaseTypesMath
     /// <summary>Converts a <see cref="float"/> to a 64-bit signed integer by rounding toward negative infinity.</summary>
     /// <param name="f">The <see cref="float"/> value to convert.</param>
     /// <returns>The floor of <paramref name="f"/> as a 64-bit signed integer.</returns>
-    public static long SingleToInt64Floor(float f) => FastFloat2LongRound(FastFloatCeil(f));
+    public static long SingleToInt64Floor(float f) => FastFloat2LongRound(FastFloatFloor(f));
 #else
     /// <summary>Converts a <see cref="float"/> to a 64-bit signed integer by rounding toward negative infinity.</summary>
     /// <param name="f">The <see cref="float"/> value to convert.</param>

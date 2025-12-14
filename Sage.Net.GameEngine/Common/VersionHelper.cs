@@ -33,6 +33,27 @@ public static class VersionHelper
     /// <returns>A new <see cref="string"/> with the assembly version.</returns>
     public static string GetVersion() => Asm.GetName().Version?.ToString() ?? "0.0.0.0";
 
+    /// <summary>Gets the numeric representation of the assembly version.</summary>
+    /// <returns>A <see cref="uint"/> value representing the major and minor version numbers packed into a 32-bit integer.</returns>
+    public static uint GetVersionNumber()
+    {
+        var versionStr = GetVersion();
+        var majorStr = versionStr.Split('.')[0];
+        var minorStr = versionStr.Split('.')[1];
+
+        if (!uint.TryParse(majorStr, out var major))
+        {
+            major = 1;
+        }
+
+        if (!uint.TryParse(minorStr, out var minor))
+        {
+            minor = 0;
+        }
+
+        return (major << 16) | minor;
+    }
+
     /// <summary>Gets the build date.</summary>
     /// <returns>A new <see cref="string"/> with the build date.</returns>
     public static string GetBuildDate() => Get("BuildDate");

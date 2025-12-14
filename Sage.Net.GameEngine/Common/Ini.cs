@@ -488,6 +488,67 @@ public class Ini : IDisposable
         store = s;
     }
 
+    /// <summary>Parses the next ASCII string token from the INI file and stores it in the provided storage object.</summary>
+    /// <param name="ini">The <see cref="Ini"/> reader to read the next token from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> holding the ASCII string to update and store back.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseAsciiString(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var asciiString = ini.GetNextAsciiString();
+        store = asciiString;
+    }
+
+    /// <summary>Parses the next quoted ASCII string token from the INI file and stores it in the provided storage object.</summary>
+    /// <param name="ini">The <see cref="Ini"/> reader to read the next token from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> holding the quoted ASCII string to update and store back.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseQuotedAsciiString(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        var asciiString = ini.GetNextQuotedAsciiString();
+        store = asciiString;
+    }
+
+    /// <summary>Parses a list of ASCII string tokens from the INI file and stores it in the provided storage object.</summary>
+    /// <param name="ini">The <see cref="Ini"/> reader to read the next token from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> holding the list of ASCII strings to update and store back. This will destroy (clear) any data passed as a <see cref="IList{T}"/> of <see cref="string"/>.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseAsciiStringList(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+        IList<string> list = store as IList<string> ?? [];
+        list.Clear();
+        for (var token = ini.GetNextTokenOrNull(); token is not null; token = ini.GetNextTokenOrNull())
+        {
+            list.Add(token);
+        }
+
+        store = list;
+    }
+
+    /// <summary>Parses a list of ASCII string tokens from the INI file and stores it in the provided storage object.</summary>
+    /// <param name="ini">The <see cref="Ini"/> reader to read the next token from.</param>
+    /// <param name="instance">The instance is unused.</param>
+    /// <param name="store">The target <see cref="object"/> holding the list of ASCII string to update and store back. This will append to any existing data passed as a <see cref="IList{T}"/> of <see cref="string"/>.</param>
+    /// <param name="userData">The user data is unused.</param>
+    public static void ParseAsciiStringListAppend(Ini ini, ref object? instance, ref object? store, object? userData)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+        IList<string> list = store as IList<string> ?? [];
+        for (var token = ini.GetNextTokenOrNull(); token is not null; token = ini.GetNextTokenOrNull())
+        {
+            list.Add(token);
+        }
+
+        store = list;
+    }
+
     /// <summary>Scans the specified token for an <see cref="int"/> value.</summary>
     /// <param name="token">A <see cref="string"/> with the token to parse.</param>
     /// <returns>A new <see cref="int"/> with the value held by the <paramref name="token"/>.</returns>
@@ -787,6 +848,117 @@ public class Ini : IDisposable
         {
             return null;
         }
+    }
+
+    /// <summary>Gets the next expected subtoken.</summary>
+    /// <param name="expected">A <see cref="string"/> with the expected subtoken.</param>
+    /// <returns>The value of the next tag.</returns>
+    /// <exception cref="IniInvalidDataException">When the returned value was not the same as <paramref name="expected"/>.</exception>
+    /// <remarks>This is called when you expect something like <c>Tag:value</c>. Pass <c>Tag</c> without the colon for <paramref name="expected"/>, and you will have the <c>value</c> returned.</remarks>
+    public string GetNextSubToken(string expected)
+    {
+        var token = GetNextToken(SeparatorsColon);
+        return !token.Equals(expected, StringComparison.OrdinalIgnoreCase)
+            ? throw new IniInvalidDataException(
+                $"[LINE: {LineNumber} - FILE: '{FileName}'] Expected '{expected}' but got '{token}'."
+            )
+            : GetNextToken(SeparatorsColon);
+    }
+
+    /// <summary>Retrieves the next ASCII string from the INI file content, processing quoted and unquoted tokens.</summary>
+    /// <returns>The next ASCII string extracted. If no valid token is found, an empty string is returned.</returns>
+    public string GetNextAsciiString()
+    {
+        var token = GetNextTokenOrNull();
+        if (token is null)
+        {
+            return string.Empty;
+        }
+
+        if (token[0] != '"')
+        {
+            return token;
+        }
+
+        StringBuilder sb = new(MaxCharsPerLine);
+        if (token.Length > 1)
+        {
+            _ = sb.Append(token, 1, token.Length - 1);
+        }
+
+#if RTS_ZERO_HOUR
+        token = GetNextTokenOrNull(SeparatorsQuote);
+        if (token is not null)
+        {
+#else
+        token = GetNextToken(SeparatorsQuote);
+#endif
+        if (token.Length > 1 && token[1] != '\t')
+        {
+            _ = sb.Append(' ');
+        }
+
+        _ = sb.Append(token);
+#if RTS_ZERO_HOUR
+        }
+        else
+        {
+            if (sb.Length > 0 && sb[^1] == '"')
+            {
+                _ = sb.Remove(sb.Length - 1, 1);
+            }
+        }
+#endif
+
+        return sb.ToString();
+    }
+
+    /// <summary>Retrieves the next valid ASCII string enclosed in quotes from the input stream or buffer.</summary>
+    /// <returns>A string representing the next quoted ASCII string found. If no quoted string is found, an empty string or an unquoted token is returned.</returns>
+    public string GetNextQuotedAsciiString()
+    {
+        var token = GetNextTokenOrNull();
+        if (token is null)
+        {
+            return string.Empty;
+        }
+
+        if (token[0] != '"')
+        {
+            return token;
+        }
+
+        var done = false;
+        StringBuilder sb = new(MaxCharsPerLine);
+        if (token.Length > 1)
+        {
+            _ = sb.Append(token, 1, token.Length - 1);
+            if (sb[token.Length - 2] == '"')
+            {
+                _ = sb.Remove(sb.Length - 2, 2);
+                done = true;
+            }
+        }
+
+        if (done)
+        {
+            return sb.ToString();
+        }
+
+        token = GetNextToken(SeparatorsQuote);
+        if (token.Length > 1 && token[1] != '\t')
+        {
+            _ = sb.Append(' ').Append(token);
+        }
+        else
+        {
+            if (sb[^1] == '"')
+            {
+                _ = sb.Remove(sb.Length - 1, 1);
+            }
+        }
+
+        return sb.ToString();
     }
 
     /// <summary>Determines whether the provided file name has the <c>.ini</c> extension (case-insensitive).</summary>

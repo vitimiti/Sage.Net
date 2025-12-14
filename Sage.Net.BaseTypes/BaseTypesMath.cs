@@ -217,16 +217,16 @@ public static class BaseTypesMath
     /// <summary>Performs a fast truncation on a <see cref="float"/> value.</summary>
     /// <param name="f">The <see cref="float"/> to truncate.</param>
     /// <returns>The truncated value of <paramref name="f"/>.</returns>
-    public static FastSingleTrunc(float f) => FastFloatTrunc(f);
+    public static float FastSingleTrunc(float f) => FastFloatTrunc(f);
 
     /// <summary>Performs a fast ceiling operation on a <see cref="float"/> value.</summary>
     /// <param name="f">The <see cref="float"/> to ceil.</param>
     /// <returns>The result of applying a fast ceiling to <paramref name="f"/>.</returns>
-    public static FastSingleCeil(float f) => FastFloatCeil(f);
+    public static float FastSingleCeil(float f) => FastFloatCeil(f);
 
     /// <summary>Performs a fast floor operation on a <see cref="float"/> value.</summary>
     /// <param name="f">The <see cref="float"/> to floor.</param>
     /// <returns>The result of applying a fast floor to <paramref name="f"/>.</returns>
-    public static FastSingleFloor(float f) => FastFloatFloor(f);
+    public static float FastSingleFloor(float f) => FastFloatFloor(f);
 #endif
 }

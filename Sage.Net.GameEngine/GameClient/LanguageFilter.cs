@@ -145,15 +145,20 @@ public class LanguageFilter : SubsystemBase
 
         var length = word.Length;
         StringBuilder newWord = new();
-        for (var i = 0; i < length; i++)
+        var i = 0;
+        while (i < length)
         {
             var c = word[i];
+
+            if (c is 'p' or 'P' && i + 1 < length && word[i + 1] is 'h' or 'H')
+            {
+                _ = newWord.Append('f');
+                i += 2; // Skip the 'h'
+                continue;
+            }
+
             switch (c)
             {
-                case 'p' or 'P' when i + 1 < length && word[i + 1] is 'h' or 'H':
-                    _ = newWord.Append('f');
-                    i++; // Skip the h
-                    break;
                 case 'p' or 'P':
                     _ = newWord.Append(c);
                     break;
@@ -197,6 +202,8 @@ public class LanguageFilter : SubsystemBase
                     break;
                 }
             }
+
+            i++;
         }
 
         return newWord.ToString();

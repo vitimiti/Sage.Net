@@ -18,16 +18,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+#if RTS_PROFILE
 namespace Sage.Net.PerformanceUtilities;
 
 /// <summary>Disposable token used to delimit a profiling scope. Instances are created via<see cref="Profile.Scope(string)"/>.</summary>
 public readonly record struct ScopeToken(int Marker) : IDisposable
 {
-#if RTS_PROFILE
     /// <summary>Ends the associated profiling scope.</summary>
     public void Dispose() => Profile.End(Marker);
-#else
-    /// <inheritdoc />
-    public void Dispose() { }
-#endif
 }
+#endif

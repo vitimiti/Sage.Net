@@ -18,6 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+#if RTS_PROFILE
 using System.Diagnostics;
 
 namespace Sage.Net.PerformanceUtilities;
@@ -35,3 +36,4 @@ public sealed class FrameSnapshot
     /// <summary>Gets or sets the total time, in ticks, spent aggregating the snapshot.</summary>
     public long TotalFrameTicks { get; set; }
 }
+#endif

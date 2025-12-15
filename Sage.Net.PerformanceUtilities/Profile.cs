@@ -18,13 +18,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+#if RTS_PROFILE
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-#if RTS_PROFILE
 using System.Text.Json;
-#endif
 
 namespace Sage.Net.PerformanceUtilities;
 
@@ -36,16 +35,13 @@ namespace Sage.Net.PerformanceUtilities;
 )]
 public static class Profile
 {
-#if RTS_PROFILE
     private const int TracePid = 1;
     private const string TraceCategory = "rts";
 
     // Cap per thread (count of B/E events). Tune as you like.
     private const int TraceEventsPerThreadCap = 480_000;
-#endif
-    private static readonly ConcurrentDictionary<int, ThreadState> AllThreads = new();
 
-#if RTS_PROFILE
+    private static readonly ConcurrentDictionary<int, ThreadState> AllThreads = new();
     private static readonly ThreadLocal<ThreadState> Tls = new(() =>
     {
         ThreadState ts = new()
@@ -57,9 +53,7 @@ public static class Profile
         _ = AllThreads.TryAdd(ts.ThreadId, ts);
         return ts;
     });
-#endif
 
-#if RTS_PROFILE
     private static int _nextMarker = 1;
 
     /// <summary>Begins a named profiling scope associated with the provided <paramref name="marker"/>. Prefer using <see cref="Scope(string)"/> which manages the lifetime automatically.</summary>
@@ -88,7 +82,6 @@ public static class Profile
 
         ts.Stack.Push(node);
     }
-#endif
 
     /// <summary>Creates a disposable token that profiles the lifetime of the current scope.</summary>
     /// <param name="name">Human-friendly scope name.</param>
@@ -96,16 +89,11 @@ public static class Profile
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ScopeToken Scope(string name)
     {
-#if RTS_PROFILE
         var marker = Interlocked.Increment(ref _nextMarker);
         Begin(name, marker);
         return new ScopeToken(marker);
-#else
-        return default;
-#endif
     }
 
-#if RTS_PROFILE
     /// <summary>Ends the profiling scope that was started with <see cref="Begin(string, int)"/>.</summary>
     /// <param name="marker">The marker obtained when the scope was started.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -217,7 +205,6 @@ public static class Profile
         writer.WriteEndObject();
         writer.Flush();
     }
-#endif
 
     /// <summary>Aggregates profiling results across all threads for the current frame and resets per-node counters for the next frame.</summary>
     /// <returns>A snapshot containing per-path accumulated ticks and counts.</returns>
@@ -250,7 +237,6 @@ public static class Profile
         return snap;
     }
 
-#if RTS_PROFILE
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static long TicksToMicroseconds(long ticks) => ticks * 1_000_000L / Stopwatch.Frequency;
 
@@ -261,9 +247,7 @@ public static class Profile
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void TraceEnd(ThreadState ts, long timestampTicks) =>
         ts.TraceEvents.Add(new TraceEvent(TicksToMicroseconds(timestampTicks), ts.ThreadId, string.Empty, 'E'));
-#endif
 
-#if RTS_PROFILE
     private readonly struct TraceEvent(long timestampUs, int threadId, string name, char phase)
     {
         public readonly long TimestampUs = timestampUs;
@@ -328,22 +312,12 @@ public static class Profile
             }
         }
     }
-#endif
 
-#if !RTS_PROFILE
-    [SuppressMessage(
-        "Performance",
-        "CA1812: Avoid uninstantiated internal classes",
-        Justification = "This is instantiated during RTS_PROFILE builds."
-    )]
-#endif
     private sealed class FrameNode
     {
         public string Path { get; init; } = string.Empty;
 
-#if RTS_PROFILE
         public int Marker { get; set; }
-#endif
 
         public long InclusiveTicks { get; set; }
 
@@ -351,34 +325,22 @@ public static class Profile
 
         public int Count { get; set; }
 
-#if RTS_PROFILE
         public long StartTicks { get; set; }
 
         public long ChildTicksAccum { get; set; }
-#endif
     }
 
-#if !RTS_PROFILE
-    [SuppressMessage(
-        "Performance",
-        "CA1812: Avoid uninstantiated internal classes",
-        Justification = "This is instantiated during RTS_PROFILE builds."
-    )]
-#endif
     private sealed class ThreadState
     {
         public Stack<FrameNode> Stack { get; } = new();
 
         public Dictionary<string, FrameNode> NodesByPath { get; } = new(StringComparer.Ordinal);
 
-#if RTS_PROFILE
         public int ThreadId { get; init; }
 
         public string ThreadName { get; set; } = string.Empty;
-#endif
 
-#if RTS_PROFILE
         public TraceRingBuffer TraceEvents { get; } = new(capacity: TraceEventsPerThreadCap);
-#endif
     }
 }
+#endif

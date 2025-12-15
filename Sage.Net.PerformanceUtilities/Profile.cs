@@ -162,20 +162,35 @@ public static class Profile
         writer.WritePropertyName("traceEvents");
         writer.WriteStartArray();
 
+        // Process metadata (helps viewers label the process)
+        writer.WriteStartObject();
+        writer.WriteString("cat", "__metadata");
+        writer.WriteString("ph", "M");
+        writer.WriteString("name", "process_name");
+        writer.WriteNumber("pid", TracePid);
+        writer.WriteNumber("tid", 0);
+        writer.WriteNumber("ts", 0);
+        writer.WritePropertyName("args");
+        writer.WriteStartObject();
+        writer.WriteString("name", "Sage.Net");
+        writer.WriteEndObject();
+        writer.WriteEndObject();
+
         foreach (ThreadState ts in threads)
         {
             writer.WriteStartObject();
+            writer.WriteString("cat", "__metadata");
             writer.WriteString("ph", "M");
             writer.WriteString("name", "thread_name");
             writer.WriteNumber("pid", TracePid);
             writer.WriteNumber("tid", ts.ThreadId);
+            writer.WriteNumber("ts", 0);
             writer.WritePropertyName("args");
             writer.WriteStartObject();
             writer.WriteString(
                 "name",
                 string.IsNullOrWhiteSpace(ts.ThreadName) ? $"Thread {ts.ThreadId}" : ts.ThreadName
             );
-
             writer.WriteEndObject();
             writer.WriteEndObject();
         }

@@ -28,14 +28,5 @@ internal sealed class Game : IDisposable
 {
     public void Dispose() { }
 
-    public void Initialize()
-    {
-#if RTS_PROFILE
-        using (Profile.Scope($"{nameof(Game)}.{nameof(Initialize)}"))
-        {
-#endif
-#if RTS_PROFILE
-        }
-#endif
-    }
+    public void Initialize() { }
 }

@@ -34,8 +34,4 @@ catch (Exception ex)
     throw;
 }
 #if RTS_PROFILE
-finally
-{
-    Profile.DumpChromeTrace("trace.json");
-}
 #endif

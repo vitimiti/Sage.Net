@@ -104,6 +104,11 @@
         <DefineConstants>$(DefineConstants);ALLOW_DEBUG_UTILS;DEBUG_LOGGING;DISABLE_DEBUG_CRASHING;DISABLE_DEBUG_STACKTRACE;DISABLE_DEBUG_PROFILE</DefineConstants>
       </PropertyGroup>
     </When>
+    <When Condition="'$(RtsProfile)' == 'true'">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);RTS_PROFILE</DefineConstants>
+      </PropertyGroup>
+    </When>
     <When Condition="'$(Configuration)' == 'Debug'">
       <PropertyGroup>
         <DefineConstants>$(DefineConstants);RTS_DEBUG;LOAD_TEST_ASSETS;LOOK_FOR_TEST_ART</DefineConstants>

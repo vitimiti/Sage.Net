@@ -6,5 +6,6 @@
   <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
   <Project Path="Sage.Net.Extensions/Sage.Net.Extensions.csproj" />
   <Project Path="Sage.Net.GameEngine\Sage.Net.GameEngine.csproj" />
+  <Project Path="Sage.Net.PerformanceUtilities\Sage.Net.PerformanceUtilities.csproj" />
   <Project Path="Sage.Net.WwVegas/Sage.Net.WwVegas.csproj" />
 </Solution>

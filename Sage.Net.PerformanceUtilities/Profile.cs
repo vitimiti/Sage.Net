@@ -41,7 +41,7 @@ public static class Profile
     private const string TraceCategory = "rts";
 
     // Cap per thread (count of B/E events). Tune as you like.
-    private const int TraceEventsPerThreadCap = 200_000;
+    private const int TraceEventsPerThreadCap = 480_000;
 #endif
     private static readonly ConcurrentDictionary<int, ThreadState> AllThreads = new();
 

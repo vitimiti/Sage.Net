@@ -164,8 +164,15 @@ public static class CrashDumper
                 .OrderByDescending(f => f.LastWriteTimeUtc)
                 .ToList();
 
-            // 1) Enforce count cap first
-            for (var i = _keepNewest; i < dumps.Count; i++)
+            if (dumps.Count == 0)
+            {
+                return;
+            }
+
+            // --- 1) Enforce count cap, but keep at least 1 (the newest) ---
+            // Never delete index 0 (newest).
+            var allowedCount = int.Max(1, _keepNewest);
+            for (var i = allowedCount; i < dumps.Count; i++)
             {
                 _ = TryDelete(dumps[i]);
             }
@@ -176,27 +183,29 @@ public static class CrashDumper
                 .. di.EnumerateFiles("*.dmp", SearchOption.TopDirectoryOnly).OrderByDescending(f => f.LastWriteTimeUtc),
             ];
 
-            // 2) Enforce size cap by deleting oldest until under cap
-            var total = dumps.Sum(SafeLength);
-
-            if (_maxTotalBytes == 0)
+            if (dumps.Count == 0)
             {
-                // Special case: keep nothing if size cap is zero (but still "best effort").
-                foreach (FileInfo f in dumps)
-                {
-                    _ = TryDelete(f);
-                }
-
                 return;
             }
 
-            for (var i = dumps.Count - 1; i >= 0 && total > _maxTotalBytes; i--)
+            // --- 2) Enforce size cap by deleting oldest first, but keep at least 1 dump ---
+            var total = dumps.Sum(SafeLength);
+
+            // If maxTotalBytes is 0, we still keep 1 newest dump.
+            if (dumps.Count == 1)
+            {
+                return;
+            }
+
+            for (var i = dumps.Count - 1; i >= 1 && total > _maxTotalBytes; i--)
             {
                 var len = SafeLength(dumps[i]);
                 if (TryDelete(dumps[i]))
                 {
                     total -= len;
                 }
+
+                // Keep at least one dump (index 0). Loop condition i >= 1 enforces that.
             }
         }
         catch

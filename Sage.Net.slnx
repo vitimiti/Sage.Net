@@ -8,11 +8,11 @@
     <BuildType Name="Release_ZeroHour" />
   </Configurations>
   <Folder Name="/Games/">
-    <Project Path="Sage.Net.Generals.ZeroHour/Sage.Net.Generals.ZeroHour.csproj">
+    <Project Path="Sage.Net.Games.Generals.ZeroHour\Sage.Net.Games.Generals.ZeroHour.csproj">
       <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
     </Project>
-    <Project Path="Sage.Net.Generals/Sage.Net.Generals.csproj">
+    <Project Path="Sage.Net.Games.Generals\Sage.Net.Games.Generals.csproj">
       <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
     </Project>

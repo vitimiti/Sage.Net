@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Sage.Net.Generals.GameEngine\Sage.Net.Generals.GameEngine.csproj" />
+    <ProjectReference Include="..\Sage.Net.Core.GameEngine\Sage.Net.Core.GameEngine.csproj" />
   </ItemGroup>
 </Project>

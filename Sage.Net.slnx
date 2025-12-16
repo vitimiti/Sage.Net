@@ -20,8 +20,11 @@
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
     </Project>
   </Folder>
-  <Folder Name="/Games/" />
   <Folder Name="/Generals/">
+    <Project Path="Sage.Net.Generals.GameEngine/Sage.Net.Generals.GameEngine.csproj">
+      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
+      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
+    </Project>
     <Project Path="Sage.Net.Generals.Game\Sage.Net.Generals.Game.csproj">
       <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />

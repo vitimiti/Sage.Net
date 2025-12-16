@@ -75,6 +75,8 @@ internal sealed class GameClass(ILogger logger)
     private void Initialize()
     {
         InstallUnhandledExceptionHandlers(logger);
+
+        // TODO: Allow users to change the screen bitmap
         _loadScreenBitmap = Surface.LoadBmp("Install_Final.bmp");
     }
 }

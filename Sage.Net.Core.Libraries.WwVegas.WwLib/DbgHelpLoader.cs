@@ -23,6 +23,8 @@ using Microsoft.Diagnostics.NETCore.Client;
 
 namespace Sage.Net.Core.Libraries.WwVegas.WwLib;
 
+/// <summary>Provides functionality for managing the loading, unloading, and usage of diagnostics dump writing capabilities.</summary>
+/// <remarks>This class acts as a utility to manage the state of the required library for generating diagnostic dumps (e.g., for crash reporting or debugging purposes).</remarks>
 public static class DbgHelpLoader
 {
     private static readonly Lock Sync = new();
@@ -31,6 +33,7 @@ public static class DbgHelpLoader
     private static bool _failed;
     private static bool _loaded;
 
+    /// <summary>Gets a value indicating whether the diagnostics dump writing library is loaded.</summary>
     public static bool IsLoaded
     {
         get
@@ -42,6 +45,7 @@ public static class DbgHelpLoader
         }
     }
 
+    /// <summary>Gets a value indicating whether the diagnostics dump writing library failed to load.</summary>
     public static bool IsFailed
     {
         get
@@ -53,8 +57,13 @@ public static class DbgHelpLoader
         }
     }
 
+    /// <summary>Gets a value indicating whether the diagnostics dump writing library is loaded from the system.</summary>
     public static bool IsLoadedFromSystem => false;
 
+    /// <summary>Attempts to load the diagnostics dump writing library.</summary>
+    /// <returns><see langword="true"/> if the library was successfully loaded; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>This method is idempotent.</remarks>
+    /// <seealso cref="Unload"/>
     public static bool Load()
     {
         lock (Sync)
@@ -79,6 +88,9 @@ public static class DbgHelpLoader
         }
     }
 
+    /// <summary>Attempts to unload the diagnostics dump writing library.</summary>
+    /// <remarks>This method is idempotent.</remarks>
+    /// <seealso cref="Load"/>
     public static void Unload()
     {
         lock (Sync)
@@ -100,6 +112,11 @@ public static class DbgHelpLoader
         }
     }
 
+    /// <summary>Attempts to write a diagnostics dump for the current process.</summary>
+    /// <param name="dumpPath">The path to the dump file to write.</param>
+    /// <param name="dumpType">The type of dump to write.</param>
+    /// <returns><see langword="true"/> if the dump was successfully written; otherwise, <see langword="false"/>.</returns>
+    /// <remarks>This method is idempotent.</remarks>
     [SuppressMessage(
         "Design",
         "CA1031:Do not catch general exception types",

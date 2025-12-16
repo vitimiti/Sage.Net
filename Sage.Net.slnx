@@ -7,7 +7,12 @@
     <BuildType Name="Release_Profile" />
     <BuildType Name="Release_ZeroHour" />
   </Configurations>
-  <Folder Name="/Core/" />
+  <Folder Name="/Core/">
+    <Project Path="Sage.Net.Core.GameEngine/Sage.Net.Core.GameEngine.csproj">
+      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
+      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
+    </Project>
+  </Folder>
   <Folder Name="/Core/Libraries/" />
   <Folder Name="/Core/Libraries/WwVegas/">
     <Project Path="Sage.Net.Core.Libraries.WwVegas.WwLib/Sage.Net.Core.Libraries.WwVegas.WwLib.csproj">

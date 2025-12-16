@@ -25,7 +25,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Sage.Net.Generals.GameEngine;
+namespace Sage.Net.Generals.GameEngine.Common;
 
 /// <summary>Provides functionality for capturing and logging unhandled exceptions.</summary>
 public static partial class StackDump

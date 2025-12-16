@@ -21,7 +21,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
-using Sage.Net.Generals.GameEngine;
+using Sage.Net.Generals.GameEngine.Common;
 using Sage.Net.NativeHelpers.Sdl3;
 
 namespace Sage.Net.Generals.Game;
@@ -43,7 +43,6 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         }
 
         _loadScreenBitmap?.Dispose();
-        throw new Exception("Not implemented");
 
         _disposed = true;
     }

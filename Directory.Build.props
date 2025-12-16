@@ -7,7 +7,17 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DefineConstants>$(DefineConstants);NO_RELEASE_DEBUG_LOGGING</DefineConstants>
+    <Configurations>Debug;Release;Debug_Profile;Release_Profile</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Debug_Profile'">
+    <DefineConstants>$(DefineConstants);RTS_DEBUG</DefineConstants>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release' Or '$(Configuration)' == 'Release_Profile'">
+    <Optimize>true</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug_Profile' Or '$(Configuration)' == 'Release_Profile'">
+    <DefineConstants>$(DefineConstants);RTS_PROFILE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

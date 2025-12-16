@@ -27,13 +27,13 @@ using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
         .SetMinimumLevel(LogLevel.Information)
         .AddSimpleConsole(o =>
         {
-            o.SingleLine = true;
+            o.SingleLine = false;
             o.TimestampFormat = "HH:mm:ss.fff ";
         });
 });
 
 ILogger logger = loggerFactory.CreateLogger("Sage.Net.Generals");
 
-var game = new GameClass(logger);
+using var game = new GameClass(logger);
 
 game.Run();

@@ -26,13 +26,27 @@ using Sage.Net.NativeHelpers.Sdl3;
 
 namespace Sage.Net.Generals.Game;
 
-internal sealed class GameClass(ILogger logger)
+internal sealed class GameClass(ILogger logger) : IDisposable
 {
     private static int _handlersInstalled; // 0: not installed, 1: installed
 
     private Surface? _loadScreenBitmap;
+    private bool _disposed;
 
     public void Run() => Initialize();
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _loadScreenBitmap?.Dispose();
+        throw new Exception("Not implemented");
+
+        _disposed = true;
+    }
 
     [SuppressMessage(
         "csharpsquid",
@@ -78,5 +92,19 @@ internal sealed class GameClass(ILogger logger)
 
         // TODO: Allow users to change the screen bitmap
         _loadScreenBitmap = Surface.LoadBmp("Install_Final.bmp");
+
+#if RTS_ENABLE_CRASHDUMP
+        MiniDumper.InitMiniDumper(
+            Path.Combine(
+                Environment.GetFolderPath(
+                    OperatingSystem.IsWindows()
+                        ? Environment.SpecialFolder.LocalApplicationData
+                        : Environment.SpecialFolder.ApplicationData
+                ),
+                "GeneralsGame"
+            ),
+            "GeneralsGame"
+        );
+#endif
     }
 }

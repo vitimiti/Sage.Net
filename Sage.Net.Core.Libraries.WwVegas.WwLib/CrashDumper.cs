@@ -19,6 +19,7 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Microsoft.Diagnostics.NETCore.Client;
 
 namespace Sage.Net.Core.Libraries.WwVegas.WwLib;
@@ -26,26 +27,33 @@ namespace Sage.Net.Core.Libraries.WwVegas.WwLib;
 /// <summary>Provides functionality for managing crash dumps in .NET applications.</summary>
 public static class CrashDumper
 {
+    private const string MarkerFileName = "last_crash.json";
+
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
+
     private static int _installed; // 0/1
     private static int _dumpAttempted; // 0/1
 
     private static string _dumpDirectory = string.Empty;
-    private static DumpType _dumpType = DumpType.WithHeap;
+    private static DumpType _dumpType;
     private static int _keepNewest;
     private static long _maxTotalBytes;
+    private static string _appId = "App";
 
-    /// <summary>Installs the crash dump handler, configuring the application to generate crash dump files in case of unhandled exceptions or unobserved task exceptions.</summary>
-    /// <param name="dumpDirectory">The directory where the crash dump files will be stored. The directory must be non-empty and writable.</param>
-    /// <param name="dumpType">The type of the crash dump files to be created. Defaults to <see cref="DumpType.WithHeap"/>.</param>
-    /// <param name="keepNewest">The maximum number of crash dump files to retain. Defaults to 10. Must be at least 1.</param>
-    /// <param name="maxTotalBytes">The maximum total size, in bytes, of all retained crash dump files. Defaults to 2 GB. Must be non-negative.</param>
-    /// <exception cref="ArgumentException">Thrown when <paramref name="dumpDirectory"/> is null, empty, or contains only white space.</exception>
+    /// <summary>Installs the crash dumping mechanism to enable the creation and management of crash dumps in the event of unhandled exceptions or unobserved task exceptions.</summary>
+    /// <param name="dumpDirectory">The directory where crash dump files will be stored. Must be a non-empty string.</param>
+    /// <param name="dumpType">The type of crash dump to generate. Defaults to <see cref="DumpType.WithHeap"/>.</param>
+    /// <param name="keepNewest">The maximum number of most recent dump files to retain. Must be greater than or equal to 1. Defaults to 10.</param>
+    /// <param name="maxTotalBytes">The maximum total size of all retained dump files in bytes. Must be a non-negative value. Defaults to 2GB.</param>
+    /// <param name="appId">An application-specific identifier to prefix the metadata of the crash dumps. Defaults to "App".</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="dumpDirectory"/> is null, empty, or whitespace.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="keepNewest"/> is less than 1 or <paramref name="maxTotalBytes"/> is negative.</exception>
     public static void Install(
         string dumpDirectory,
         DumpType dumpType = DumpType.WithHeap,
         int keepNewest = 10,
-        long maxTotalBytes = 2L * 1024 * 1024 * 1024
+        long maxTotalBytes = 2L * 1024 * 1024 * 1024,
+        string appId = "App"
     )
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(keepNewest, 1);
@@ -64,6 +72,7 @@ public static class CrashDumper
         _dumpType = dumpType;
         _keepNewest = keepNewest;
         _maxTotalBytes = maxTotalBytes;
+        _appId = string.IsNullOrWhiteSpace(appId) ? "App" : appId;
 
         _ = Directory.CreateDirectory(_dumpDirectory);
 
@@ -74,6 +83,58 @@ public static class CrashDumper
             TryWriteDumpOnce("unobserved-task");
             e.SetObserved();
         };
+    }
+
+    /// <summary>Attempts to read the metadata of the last recorded crash from a predefined marker file.</summary>
+    /// <param name="marker">When this method returns, contains the deserialized <see cref="CrashMarker"/> object representing the last recorded crash, or <see langword="null"/> if no valid marker was found or an error occurred during reading.</param>
+    /// <returns><see langword="true"/> if the last crash metadata is successfully read and deserialized; <see langword="false"/> otherwise.</returns>
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Avoid exceptions escaping from crash paths."
+    )]
+    public static bool TryReadLastCrash(out CrashMarker? marker)
+    {
+        marker = null;
+        try
+        {
+            var path = Path.Combine(_dumpDirectory, MarkerFileName);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            var json = File.ReadAllText(path);
+            marker = JsonSerializer.Deserialize<CrashMarker>(json);
+            return marker != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>Clears the file that records metadata about the last crash, if it exists in the configured dump directory.</summary>
+    /// <remarks>This method removes the "last_crash.json" file from the dump directory if it exists. It silently ignores errors to prevent exceptions from propagating during critical crash handling scenarios.</remarks>
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Avoid exceptions escaping from crash paths."
+    )]
+    public static void ClearLastCrashMarker()
+    {
+        try
+        {
+            var path = Path.Combine(_dumpDirectory, MarkerFileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // Avoid exceptions escaping from crash paths.
+        }
     }
 
     private static string Sanitize(string s) =>
@@ -91,15 +152,74 @@ public static class CrashDumper
             return;
         }
 
+        DateTimeOffset nowUtc = DateTimeOffset.UtcNow;
+        var pid = Environment.ProcessId;
+
         try
         {
-            var dumpPath = Path.Combine(
-                _dumpDirectory,
-                $"crash_{DateTime.UtcNow:yyyyMMdd_HHmmss}_{Environment.ProcessId}_{Sanitize(reason)}.dmp"
+            var dumpFileName = $"crash_{nowUtc:yyyyMMdd_HHmmss}_{pid}_{Sanitize(reason)}.dmp";
+
+            var dumpPath = Path.Combine(_dumpDirectory, dumpFileName);
+
+            var client = new DiagnosticsClient(pid);
+            client.WriteDump(_dumpType, dumpPath, logDumpGeneration: false);
+
+            // Write marker after dump succeeds (so marker implies a dump exists).
+            TryWriteMarker(
+                new CrashMarker
+                {
+                    AppId = _appId,
+                    TimestampUtc = nowUtc,
+                    ProcessId = pid,
+                    Reason = reason,
+                    DumpFileName = dumpFileName,
+                }
             );
 
-            var client = new DiagnosticsClient(Environment.ProcessId);
-            client.WriteDump(_dumpType, dumpPath, logDumpGeneration: false);
+            TryEnforceRetention();
+        }
+        catch
+        {
+            TryWriteMarker(
+                new CrashMarker
+                {
+                    AppId = _appId,
+                    TimestampUtc = nowUtc,
+                    ProcessId = pid,
+                    Reason = reason,
+                    DumpFileName = null,
+                }
+            );
+        }
+    }
+
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Avoid exceptions escaping from crash paths."
+    )]
+    private static void TryWriteMarker(CrashMarker marker)
+    {
+        try
+        {
+            var path = Path.Combine(_dumpDirectory, MarkerFileName);
+            var json = JsonSerializer.Serialize(marker, JsonOptions);
+
+            // Best effort atomic-ish write: write temp then replace.
+            var tmp = $"{path}.tmp";
+            File.WriteAllText(tmp, json);
+
+            try
+            {
+                // Replace is atomic on Windows; on Unix it replaces the target path.
+                File.Move(tmp, path, overwrite: true);
+            }
+            catch
+            {
+                // Fallback if replace/move fails
+                File.Copy(tmp, path, overwrite: true);
+                File.Delete(tmp);
+            }
         }
         catch
         {

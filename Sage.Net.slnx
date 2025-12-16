@@ -1,51 +1,23 @@
 <Solution>
-  <Configurations>
-    <BuildType Name="Debug" />
-    <BuildType Name="Debug_Profile" />
-    <BuildType Name="Debug_ZeroHour" />
-    <BuildType Name="Release" />
-    <BuildType Name="Release_Profile" />
-    <BuildType Name="Release_ZeroHour" />
-  </Configurations>
   <Folder Name="/Core/">
-    <Project Path="Sage.Net.Core.GameEngine/Sage.Net.Core.GameEngine.csproj">
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
+    <Project Path="Sage.Net.Core.GameEngine/Sage.Net.Core.GameEngine.csproj" />
   </Folder>
   <Folder Name="/Core/Libraries/" />
   <Folder Name="/Core/Libraries/WwVegas/">
-    <Project Path="Sage.Net.Core.Libraries.WwVegas.WwLib/Sage.Net.Core.Libraries.WwVegas.WwLib.csproj">
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
+    <Project Path="Sage.Net.Core.Libraries.WwVegas.WwLib/Sage.Net.Core.Libraries.WwVegas.WwLib.csproj" />
   </Folder>
   <Folder Name="/Generals/">
-    <Project Path="Sage.Net.Generals.GameEngine/Sage.Net.Generals.GameEngine.csproj">
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
-    <Project Path="Sage.Net.Generals.Game\Sage.Net.Generals.Game.csproj">
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
+    <Project Path="Sage.Net.Generals.GameEngine/Sage.Net.Generals.GameEngine.csproj" />
+    <Project Path="Sage.Net.Generals.Game\Sage.Net.Generals.Game.csproj" />
   </Folder>
   <Folder Name="/GeneralsMd/">
-    <Project Path="Sage.Net.GeneralsMd.Game\Sage.Net.GeneralsMd.Game.csproj">
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
+    <Project Path="Sage.Net.GeneralsMd.Game\Sage.Net.GeneralsMd.Game.csproj" />
   </Folder>
   <Folder Name="/Generators/">
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />
     <Project Path="Sage.Net.Generators.TrigonometryTablesGenerator/Sage.Net.Generators.TrigonometryTablesGenerator.csproj" />
   </Folder>
   <Folder Name="/NativeHelpers/">
-    <Project Path="Sage.Net.NativeHelpers.Sdl3/Sage.Net.NativeHelpers.Sdl3.csproj">
-      <BuildType Solution="Debug_Profile|*" Project="Debug" />
-      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-      <BuildType Solution="Release_Profile|*" Project="Debug" />
-      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-    </Project>
+    <Project Path="Sage.Net.NativeHelpers.Sdl3/Sage.Net.NativeHelpers.Sdl3.csproj" />
   </Folder>
 </Solution>

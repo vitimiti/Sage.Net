@@ -4,6 +4,7 @@
     <Project Path="Sage.Net.Generators.TrigonometryTablesGenerator/Sage.Net.Generators.TrigonometryTablesGenerator.csproj" />
   </Folder>
   <Project Path="Sage.Net.BaseTypes/Sage.Net.BaseTypes.csproj" />
+  <Project Path="Sage.Net.DebugUtilities/Sage.Net.DebugUtilities.csproj" />
   <Project Path="Sage.Net.Extensions/Sage.Net.Extensions.csproj" />
   <Project Path="Sage.Net.GameEngine\Sage.Net.GameEngine.csproj" />
   <Project Path="Sage.Net.Generals/Sage.Net.Generals.csproj" />

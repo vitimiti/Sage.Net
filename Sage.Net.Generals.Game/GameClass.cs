@@ -18,17 +18,31 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
+using Sage.Net.Generals.GameEngine;
 
 namespace Sage.Net.Generals.Game;
 
 internal sealed class GameClass
 {
-    private static void UnhandledExceptionFilter()
+    private static void UnhandledExceptionFilter(ILogger logger)
     {
-        MiniDumper.Instance?.TriggerMiniDumpForException("unhandled", DumpType.Minimal);
-        MiniDumper.Instance?.TriggerMiniDumpForException("unhandled", DumpType.Full);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var ex = e.ExceptionObject as Exception;
 
-        MiniDumper.ShutdownMiniDumper();
+            StackDump.DumpExceptionInfo(logger, "unhandled", ex);
+            MiniDumper.Instance?.TriggerMiniDumpsForException("unhandled");
+            MiniDumper.ShutdownMiniDumper();
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            StackDump.DumpExceptionInfo(logger, "unobserved-task", e.Exception);
+            MiniDumper.Instance?.TriggerMiniDumpsForException("unobserved-task");
+
+            e.SetObserved();
+        };
     }
 }

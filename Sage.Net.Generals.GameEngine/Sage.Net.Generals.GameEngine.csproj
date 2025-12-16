@@ -8,4 +8,11 @@
   <ItemGroup>
     <ProjectReference Include="..\Sage.Net.Core.GameEngine\Sage.Net.Core.GameEngine.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
+    <PackageReference Update="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+    <PackageReference Update="Microsoft.Extensions.Options" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.1" />
+  </ItemGroup>
 </Project>

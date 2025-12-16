@@ -7,12 +7,16 @@
     <BuildType Name="Release_Profile" />
     <BuildType Name="Release_ZeroHour" />
   </Configurations>
-  <Folder Name="/Games/">
-    <Project Path="Sage.Net.Games.Generals.ZeroHour\Sage.Net.Games.Generals.ZeroHour.csproj">
+  <Folder Name="/Core/" />
+  <Folder Name="/Games/" />
+  <Folder Name="/Generals/">
+    <Project Path="Sage.Net.Generals.Game\Sage.Net.Generals.Game.csproj">
       <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
     </Project>
-    <Project Path="Sage.Net.Games.Generals\Sage.Net.Games.Generals.csproj">
+  </Folder>
+  <Folder Name="/GeneralsMd/">
+    <Project Path="Sage.Net.GeneralsMd.Game\Sage.Net.GeneralsMd.Game.csproj">
       <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
       <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
     </Project>
@@ -21,16 +25,4 @@
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />
     <Project Path="Sage.Net.Generators.TrigonometryTablesGenerator/Sage.Net.Generators.TrigonometryTablesGenerator.csproj" />
   </Folder>
-  <Project Path="Sage.Net.Core/Sage.Net.Core.csproj">
-    <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-    <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-  </Project>
-  <Project Path="Sage.Net.Generals.GameEngine/Sage.Net.Generals.GameEngine.csproj">
-    <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-    <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-  </Project>
-  <Project Path="Sage.Net.GeneralsMd.GameEngine/Sage.Net.GeneralsMd.GameEngine.csproj">
-    <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
-    <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
-  </Project>
 </Solution>

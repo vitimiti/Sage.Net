@@ -7,6 +7,16 @@
     <BuildType Name="Release_Profile" />
     <BuildType Name="Release_ZeroHour" />
   </Configurations>
+  <Folder Name="/Games/">
+    <Project Path="Sage.Net.Generals.ZeroHour/Sage.Net.Generals.ZeroHour.csproj">
+      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
+      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
+    </Project>
+    <Project Path="Sage.Net.Generals/Sage.Net.Generals.csproj">
+      <BuildType Solution="Debug_ZeroHour|*" Project="Debug" />
+      <BuildType Solution="Release_ZeroHour|*" Project="Debug" />
+    </Project>
+  </Folder>
   <Folder Name="/Generators/">
     <Project Path="Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj" />
     <Project Path="Sage.Net.Generators.TrigonometryTablesGenerator/Sage.Net.Generators.TrigonometryTablesGenerator.csproj" />

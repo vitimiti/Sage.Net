@@ -31,18 +31,25 @@ public static class CrashDumper
 
     private static string _dumpDirectory = string.Empty;
     private static DumpType _dumpType = DumpType.WithHeap;
-    private static int _keepNewest = 10;
+    private static int _keepNewest;
+    private static long _maxTotalBytes;
 
-    /// <summary>Installs a crash dump handler for the application, enabling the creation of diagnostic dumps during unhandled exceptions or unobserved task exceptions.</summary>
-    /// <param name="dumpDirectory">The directory where crash dump files will be stored. This must be a non-empty string pointing to a valid file system path.</param>
-    /// <param name="dumpType">Specifies the type of crash dump to create. Defaults to <see cref="DumpType.WithHeap"/>.</param>
-    /// <param name="keepNewest">The maximum number of most recent crash dump files to retain in the specified directory. This must be a positive integer greater than or equal to 1. Older files exceeding this number will be automatically deleted.</param>
-    /// <exception cref="ArgumentException">Thrown if the <paramref name="dumpDirectory"/> is null, empty, or contains only whitespace.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="keepNewest"/> is less than 1.</exception>
-    public static void Install(string dumpDirectory, DumpType dumpType = DumpType.WithHeap, int keepNewest = 10)
+    /// <summary>Installs the crash dump handler, configuring the application to generate crash dump files in case of unhandled exceptions or unobserved task exceptions.</summary>
+    /// <param name="dumpDirectory">The directory where the crash dump files will be stored. The directory must be non-empty and writable.</param>
+    /// <param name="dumpType">The type of the crash dump files to be created. Defaults to <see cref="DumpType.WithHeap"/>.</param>
+    /// <param name="keepNewest">The maximum number of crash dump files to retain. Defaults to 10. Must be at least 1.</param>
+    /// <param name="maxTotalBytes">The maximum total size, in bytes, of all retained crash dump files. Defaults to 2 GB. Must be non-negative.</param>
+    /// <exception cref="ArgumentException">Thrown when <paramref name="dumpDirectory"/> is null, empty, or contains only white space.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="keepNewest"/> is less than 1 or <paramref name="maxTotalBytes"/> is negative.</exception>
+    public static void Install(
+        string dumpDirectory,
+        DumpType dumpType = DumpType.WithHeap,
+        int keepNewest = 10,
+        long maxTotalBytes = 2L * 1024 * 1024 * 1024
+    )
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(keepNewest, 1);
-
+        ArgumentOutOfRangeException.ThrowIfNegative(maxTotalBytes);
         if (string.IsNullOrWhiteSpace(dumpDirectory))
         {
             throw new ArgumentException("Dump directory must be non-empty.", nameof(dumpDirectory));
@@ -56,6 +63,7 @@ public static class CrashDumper
         _dumpDirectory = dumpDirectory;
         _dumpType = dumpType;
         _keepNewest = keepNewest;
+        _maxTotalBytes = maxTotalBytes;
 
         _ = Directory.CreateDirectory(_dumpDirectory);
 
@@ -104,6 +112,42 @@ public static class CrashDumper
         "CA1031:Do not catch general exception types",
         Justification = "Avoid exceptions escaping from crash paths."
     )]
+    private static long SafeLength(FileInfo f)
+    {
+        try
+        {
+            return f.Length;
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Avoid exceptions escaping from crash paths."
+    )]
+    private static bool TryDelete(FileInfo f)
+    {
+        try
+        {
+            f.Delete();
+            return true;
+        }
+        catch
+        {
+            // Avoid exceptions escaping from crash paths.
+            return false;
+        }
+    }
+
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "Avoid exceptions escaping from crash paths."
+    )]
     private static void TryEnforceRetention()
     {
         try
@@ -113,21 +157,45 @@ public static class CrashDumper
                 return;
             }
 
-            // Enumerate only dumps; if we later add metadata files, they won't be touched.
-            var files = new DirectoryInfo(_dumpDirectory)
-                .EnumerateFiles("*.dmp", SearchOption.TopDirectoryOnly)
+            var di = new DirectoryInfo(_dumpDirectory);
+
+            // Newest first
+            var dumps = di.EnumerateFiles("*.dmp", SearchOption.TopDirectoryOnly)
                 .OrderByDescending(f => f.LastWriteTimeUtc)
                 .ToList();
 
-            for (var i = _keepNewest; i < files.Count; i++)
+            // 1) Enforce count cap first
+            for (var i = _keepNewest; i < dumps.Count; i++)
             {
-                try
+                _ = TryDelete(dumps[i]);
+            }
+
+            // Refresh list after deletes
+            dumps =
+            [
+                .. di.EnumerateFiles("*.dmp", SearchOption.TopDirectoryOnly).OrderByDescending(f => f.LastWriteTimeUtc),
+            ];
+
+            // 2) Enforce size cap by deleting oldest until under cap
+            var total = dumps.Sum(SafeLength);
+
+            if (_maxTotalBytes == 0)
+            {
+                // Special case: keep nothing if size cap is zero (but still "best effort").
+                foreach (FileInfo f in dumps)
                 {
-                    files[i].Delete();
+                    _ = TryDelete(f);
                 }
-                catch
+
+                return;
+            }
+
+            for (var i = dumps.Count - 1; i >= 0 && total > _maxTotalBytes; i--)
+            {
+                var len = SafeLength(dumps[i]);
+                if (TryDelete(dumps[i]))
                 {
-                    // Avoid exceptions escaping from crash paths.
+                    total -= len;
                 }
             }
         }

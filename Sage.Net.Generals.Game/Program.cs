@@ -18,6 +18,22 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-#pragma warning disable CA1303 // Do not pass literals as localized parameters
-Console.WriteLine("Running the game \"Command and Conquer: Generals\".");
-#pragma warning restore CA1303 // Do not pass literals as localized parameters
+using Microsoft.Extensions.Logging;
+using Sage.Net.Generals.Game;
+
+using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
+{
+    _ = builder
+        .SetMinimumLevel(LogLevel.Information)
+        .AddSimpleConsole(o =>
+        {
+            o.SingleLine = true;
+            o.TimestampFormat = "HH:mm:ss.fff ";
+        });
+});
+
+ILogger logger = loggerFactory.CreateLogger("Sage.Net.Generals");
+
+var game = new GameClass(logger);
+
+game.Run();

@@ -1,23 +1,6 @@
 # Sage.Net
 
+This is a studying project, and for now won't accept any pull requests. Once I have learned enough
+and have a good idea of what I want to do, and the project is stable, I will accept pull requests.
+
 TODO: Complete me
-
-## Build
-
-To build the project run `dotnet build -c <Configuration> [-p:<ExtraProperty>=true [-p:<ExtraProperty>=true ...]]`
-
-Configurations:
-
-- `Debug`: Build with debug symbols
-- `Release`: Build with release symbols
-
-Extra Properties:
-
-- `DumpPerfStats`: Dump performance statistics
-- `PerfTimers`: Enable performance timers
-- `RetailCompatibleCrc`: Enable the retail compatible CRC checks
-- `MaintainLegacyFiles`: Whether to maintain legacy files
-- `RtsZeroHour`: Whether to build with the Zero Hour expansion
-- `RegenerateTrigonometryTables`: Whether to regenerate trigonometry tables
-- `ReleaseDebugLogging`: Whether to enable debug logging in release builds
-- `RtsProfile`: Whether to enable profiling

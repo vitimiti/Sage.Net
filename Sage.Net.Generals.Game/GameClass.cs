@@ -24,25 +24,44 @@ using Sage.Net.Generals.GameEngine;
 
 namespace Sage.Net.Generals.Game;
 
-internal sealed class GameClass
+internal sealed class GameClass(ILogger logger)
 {
-    private static void UnhandledExceptionFilter(ILogger logger)
+    private static int _handlersInstalled; // 0: not installed, 1: installed
+
+    public void Run() => Initialize();
+
+    private static void InstallUnhandledExceptionHandlers(ILogger logger)
     {
+        if (Interlocked.Exchange(ref _handlersInstalled, 1) != 0)
+        {
+            return;
+        }
+
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
+#if RTS_DEBUG
             var ex = e.ExceptionObject as Exception;
-
             StackDump.DumpExceptionInfo(logger, "unhandled", ex);
+#endif
+
+#if RTS_ENABLE_CRASHDUMP
             MiniDumper.Instance?.TriggerMiniDumpsForException("unhandled");
             MiniDumper.ShutdownMiniDumper();
+#endif
         };
 
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
+#if RTS_DEBUG
             StackDump.DumpExceptionInfo(logger, "unobserved-task", e.Exception);
-            MiniDumper.Instance?.TriggerMiniDumpsForException("unobserved-task");
+#endif
 
+#if RTS_ENABLE_CRASHDUMP
+            MiniDumper.Instance?.TriggerMiniDumpsForException("unobserved-task");
+#endif
             e.SetObserved();
         };
     }
+
+    private void Initialize() => InstallUnhandledExceptionHandlers(logger);
 }

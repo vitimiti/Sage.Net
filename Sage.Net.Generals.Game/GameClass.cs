@@ -18,9 +18,11 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
 using Sage.Net.Generals.GameEngine;
+using Sage.Net.NativeHelpers.Sdl3;
 
 namespace Sage.Net.Generals.Game;
 
@@ -28,8 +30,15 @@ internal sealed class GameClass(ILogger logger)
 {
     private static int _handlersInstalled; // 0: not installed, 1: installed
 
+    private Surface? _loadScreenBitmap;
+
     public void Run() => Initialize();
 
+    [SuppressMessage(
+        "csharpsquid",
+        "S1172: Unused method parameters should be removed.",
+        Justification = "This is a false positive."
+    )]
     private static void InstallUnhandledExceptionHandlers(ILogger logger)
     {
         if (Interlocked.Exchange(ref _handlersInstalled, 1) != 0)
@@ -63,5 +72,9 @@ internal sealed class GameClass(ILogger logger)
         };
     }
 
-    private void Initialize() => InstallUnhandledExceptionHandlers(logger);
+    private void Initialize()
+    {
+        InstallUnhandledExceptionHandlers(logger);
+        _loadScreenBitmap = Surface.LoadBmp("Install_Final.bmp");
+    }
 }

@@ -92,6 +92,10 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
 
         InitializeSubsystem(GlobalData.TheWritableGlobalData, "TheWritableGlobalData", null);
         GlobalData.TheWritableGlobalData.ParseCustomDefinition();
+
+#if DEBUG
+        ini.LoadFileDirectory(Path.Combine("Data", "INI", "GameDataDebug"), IniLoadType.Overwrite, null);
+#endif
     }
 
     /// <summary>Resets the game engine.</summary>

@@ -9,6 +9,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RtsEnableCrashdump Condition="'$(RtsEnableCrashdump)' == ''">false</RtsEnableCrashdump>
     <RtsEnableCrashdump Condition="'$(DumpPerfStats)' == ''">false</RtsEnableCrashdump>
+    <RegenerateTrigonometryTables Condition="'$(RegenerateTrigonometryTables)' == ''"
+      >false</RegenerateTrigonometryTables
+    >
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DefineConstants>$(DefineConstants);RTS_DEBUG</DefineConstants>
@@ -22,6 +25,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(DumpPerfStats)' == 'true'">
     <DefineConstants>$(DefineConstants);DUMP_PERF_STATS</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(RegenerateTrigonometryTables)' == 'true'">
+    <DefineConstants>$(DefineConstants);REGENERATE_TRIGONOMETRY_TABLES</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

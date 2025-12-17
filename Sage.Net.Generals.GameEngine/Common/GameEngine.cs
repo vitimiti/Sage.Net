@@ -18,6 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Logging;
@@ -80,6 +81,16 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
 
         NameKeyGenerator.TheNameKeyGenerator = new NameKeyGenerator(logger);
         NameKeyGenerator.TheNameKeyGenerator.Initialize();
+
+        TransferCrc transferCrc = new();
+        transferCrc.Open("lightCRC");
+
+        Debug.Assert(
+            GlobalData.TheWritableGlobalData is not null,
+            $"{nameof(GlobalData.TheWritableGlobalData)} expected to be created."
+        );
+
+        InitializeSubsystem(GlobalData.TheWritableGlobalData, "TheWritableGlobalData", null);
     }
 
     /// <summary>Resets the game engine.</summary>
@@ -98,6 +109,14 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
 
         base.Dispose(disposing);
     }
+
+    private static void InitializeSubsystem(
+        SubsystemBase system,
+        string name,
+        TransferOperation? transfer,
+        string? path1 = null,
+        string? path2 = null
+    ) => SubsystemList.TheSubsystemList!.InitializeSubsystem(system, path1, path2, transfer, name);
 
     private static partial class Log
     {

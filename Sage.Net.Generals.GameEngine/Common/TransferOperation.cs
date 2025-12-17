@@ -35,7 +35,7 @@ public abstract class TransferOperation
     /// <summary>Opens a transfer operation using the specified identifier.</summary>
     /// <param name="identifier">The unique identifier for the transfer operation to be opened.</param>
     /// <remarks>This method is intended to initialize and prepare the transfer operation with the given <paramref name="identifier"/>.</remarks>
-    public abstract void Open(string identifier);
+    public virtual void Open(string identifier) => Identifier = identifier;
 
     /// <summary>Closes the transfer operation, finalizing and releasing any associated resources.</summary>
     /// <remarks>This method is intended to complete the transfer process and clean up any resources allocated during the operation.</remarks>
@@ -58,7 +58,7 @@ public abstract class TransferOperation
     /// <summary>Transfers a snapshot using the specified snapshot object.</summary>
     /// <param name="snapshot">The snapshot instance that implements <see cref="ISnapshot"/> and will be processed in the transfer operation.</param>
     /// <remarks>This method is intended to facilitate the transfer of state information encapsulated in the specified <paramref name="snapshot"/> during save, load, or CRC operations.</remarks>
-    public abstract void TransferSnapshot(ISnapshot snapshot);
+    public abstract void TransferSnapshot(ISnapshot? snapshot);
 
     /// <summary>Sets the transfer options for the transfer operation.</summary>
     /// <param name="options">The transfer options to be applied.</param>

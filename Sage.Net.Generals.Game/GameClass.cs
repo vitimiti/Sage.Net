@@ -58,6 +58,7 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         _window?.Dispose();
         SdlSubsystems.QuitAll();
 
+        FramePacer.TheFramePacer = null;
         VersionHelper.TheVersion = null;
 
 #if RTS_ENABLE_CRASHDUMP
@@ -261,5 +262,7 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         (int Major, int Minor, int BuildNumber, int LocalBuildNumber) versionNumbers = GetVersionNumbers();
         (string User, string Location, string BuildTime, string BuildDate) buildInfo = GetBuildInfo();
         VersionHelper.TheVersion.SetVersion(versionNumbers, buildInfo);
+
+        FramePacer.TheFramePacer = new FramePacer { FramesPerSecondLimitEnabled = true };
     }
 }

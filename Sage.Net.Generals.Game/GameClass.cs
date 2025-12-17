@@ -236,9 +236,7 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         InstallUnhandledExceptionHandlers(logger);
 
         // TODO: Allow users to change the screen bitmap
-        _loadScreenBitmap = SurfaceHandle.LoadBmp(
-            "/home/vitimiti/.steam/steam/steamapps/common/Command and Conquer Generals/Install_Final.bmp"
-        );
+        _loadScreenBitmap = SurfaceHandle.LoadBmp("Install_Final.bmp");
 
         CommandLine.ParseCommandLineForStartup(logger);
 

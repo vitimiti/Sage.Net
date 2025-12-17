@@ -36,6 +36,8 @@ internal sealed class GameClass(ILogger logger) : IDisposable
 
     private static int _handlersInstalled; // 0: not installed, 1: installed
 
+    private volatile bool _initCompleted;
+
     private WindowHandle? _window;
     private SurfaceHandle? _loadScreenBitmap;
     private bool _running = true;
@@ -198,14 +200,6 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         }
     }
 
-    private void Update()
-    {
-        while (_running)
-        {
-            SdlEvents.PollEvents();
-        }
-    }
-
     private void PaintBitmap1To1()
     {
         if (_window is null || _loadScreenBitmap is null)
@@ -242,35 +236,59 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         InstallUnhandledExceptionHandlers(logger);
 
         // TODO: Allow users to change the screen bitmap
-        _loadScreenBitmap = SurfaceHandle.LoadBmp("Install_Final.bmp");
+        _loadScreenBitmap = SurfaceHandle.LoadBmp(
+            "/home/vitimiti/.steam/steam/steamapps/common/Command and Conquer Generals/Install_Final.bmp"
+        );
 
         CommandLine.ParseCommandLineForStartup(logger);
 
         InitializeAppSdl(GlobalData.TheGlobalData!.Windowed);
-
-#if RTS_ENABLE_CRASHDUMP
-        MiniDumper.InitMiniDumper(
-            Path.Combine(
-                Environment.GetFolderPath(
-                    OperatingSystem.IsWindows()
-                        ? Environment.SpecialFolder.LocalApplicationData
-                        : Environment.SpecialFolder.ApplicationData
-                ),
-                "GeneralsGame"
-            ),
-            "GeneralsGame"
-        );
-#endif
         PaintBitmap1To1();
 
-        VersionHelper.TheVersion = new VersionHelper();
-        (int Major, int Minor, int BuildNumber, int LocalBuildNumber) versionNumbers = GetVersionNumbers();
-        (string User, string Location, string BuildTime, string BuildDate) buildInfo = GetBuildInfo();
-        VersionHelper.TheVersion.SetVersion(versionNumbers, buildInfo);
+        _ = Task.Run(() =>
+        {
+#if RTS_ENABLE_CRASHDUMP
+            MiniDumper.InitMiniDumper(
+                Path.Combine(
+                    Environment.GetFolderPath(
+                        OperatingSystem.IsWindows()
+                            ? Environment.SpecialFolder.LocalApplicationData
+                            : Environment.SpecialFolder.ApplicationData
+                    ),
+                    "GeneralsGame"
+                ),
+                "GeneralsGame"
+            );
+#endif
 
-        FramePacer.TheFramePacer = new FramePacer { FramesPerSecondLimitEnabled = true };
-        GameEngine.Common.GameEngine.TheGameEngine = CreateGameEngine();
-        GameEngine.Common.GameEngine.TheGameEngine.Initialize();
+            VersionHelper.TheVersion = new VersionHelper();
+            (int Major, int Minor, int BuildNumber, int LocalBuildNumber) versionNumbers = GetVersionNumbers();
+            (string User, string Location, string BuildTime, string BuildDate) buildInfo = GetBuildInfo();
+            VersionHelper.TheVersion.SetVersion(versionNumbers, buildInfo);
+
+            FramePacer.TheFramePacer = new FramePacer { FramesPerSecondLimitEnabled = true };
+
+            GameEngine.Common.GameEngine.TheGameEngine = CreateGameEngine();
+            GameEngine.Common.GameEngine.TheGameEngine.Initialize();
+
+            _initCompleted = true;
+        });
+    }
+
+    private void Update()
+    {
+        while (_running)
+        {
+            SdlEvents.PollEvents();
+
+            if (!_initCompleted)
+            {
+                PaintBitmap1To1();
+                continue;
+            }
+
+            _paintSplash = false;
+        }
     }
 
     private SdlGameEngine CreateGameEngine() => new(logger);

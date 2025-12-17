@@ -59,7 +59,9 @@ internal static partial class Sdl
 
     public record struct WindowFlags(ulong Value)
     {
-        public static WindowFlags Hidden => new(0x00008UL);
+        public static WindowFlags Hidden => new(0x0008UL);
+
+        public static WindowFlags Borderless => new(0x0010UL);
 
         public static WindowFlags FromUInt64(ulong value) => new(value);
 
@@ -67,6 +69,6 @@ internal static partial class Sdl
 
         public static implicit operator ulong(WindowFlags flags) => flags.ToUInt64();
 
-        public static implicit operator WindowFlags(uint value) => FromUInt64(value);
+        public static implicit operator WindowFlags(ulong value) => FromUInt64(value);
     }
 }

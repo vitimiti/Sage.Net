@@ -44,7 +44,7 @@ public class WindowHandle : SafeHandle
     /// <param name="h">The height of the window, in pixels.</param>
     /// <returns>A new <see cref="WindowHandle"/> object representing the created window.</returns>
     public static WindowHandle CreateSplashWindow(string windowTitle, int w, int h) =>
-        Sdl.CreateWindow($"{windowTitle} (Loading...)", w, h, Sdl.WindowFlags.Hidden);
+        Sdl.CreateWindow($"{windowTitle} (Loading...)", w, h, Sdl.WindowFlags.Hidden | Sdl.WindowFlags.Borderless);
 
     /// <summary>Attempts to display the window associated with this instance.</summary>
     /// <returns>A boolean value indicating whether the window was successfully shown.</returns>

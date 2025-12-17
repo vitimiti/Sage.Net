@@ -229,7 +229,7 @@ public class Ini
     /// <summary>Initializes the specified object from the current INI data stream.</summary>
     /// <param name="what">The object to be initialized.</param>
     /// <param name="parseTable">The parse table containing the field names and their corresponding parsing processes.</param>
-    public void InitializeFromIni(ref object what, FieldParse parseTable)
+    public void InitializeFromIni(ref object what, ReadOnlySpan<FieldParse> parseTable)
     {
         MultiIniFieldParse p = new();
         p.Add(parseTable);

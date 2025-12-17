@@ -33,6 +33,8 @@ public partial class GlobalData : SubsystemBase
 {
     private const int MaxGlobalLights = 3;
 
+    private static readonly FieldParse[] GlobalDataFieldParseTable = [];
+
     private readonly ILogger _logger;
     private readonly RgbColor[] _terrainAmbient = new RgbColor[MaxGlobalLights];
     private readonly RgbColor[] _terrainDiffuse = new RgbColor[MaxGlobalLights];
@@ -122,6 +124,10 @@ public partial class GlobalData : SubsystemBase
         {
             TheWritableGlobalData ??= new GlobalData(logger);
         }
+
+        object writableGlobalData = TheWritableGlobalData;
+        ini.InitializeFromIni(ref writableGlobalData, GlobalDataFieldParseTable);
+        TheWritableGlobalData = (GlobalData)writableGlobalData;
     }
 
     /// <inheritdoc/>

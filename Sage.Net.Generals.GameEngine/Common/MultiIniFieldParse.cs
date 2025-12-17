@@ -54,6 +54,17 @@ public class MultiIniFieldParse
         }
     }
 
+    /// <summary>Adds multiple fields to the multi-field list.</summary>
+    /// <param name="parseTable">The parse table to add.</param>
+    /// <param name="extraOffset">The extra offset to apply to the fields.</param>
+    public void Add(ReadOnlySpan<FieldParse> parseTable, uint extraOffset = 0)
+    {
+        foreach (FieldParse field in parseTable)
+        {
+            Add(field, extraOffset);
+        }
+    }
+
     /// <summary>Gets the field parse for the specified index.</summary>
     /// <param name="i">The index of the field to get.</param>
     /// <returns>The field parse for the specified index.</returns>

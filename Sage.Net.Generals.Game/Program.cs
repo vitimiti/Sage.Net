@@ -24,7 +24,11 @@ using Sage.Net.Generals.Game;
 using ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
 {
     _ = builder
+#if DEBUG
+        .SetMinimumLevel(LogLevel.Debug)
+#else
         .SetMinimumLevel(LogLevel.Information)
+#endif
         .AddSimpleConsole(o =>
         {
             o.SingleLine = false;

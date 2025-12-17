@@ -18,6 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 #if !DUMP_PERF_STATS
@@ -206,6 +207,7 @@ public class SubsystemList : IDisposable
 
         if (disposing)
         {
+            Debug.Assert(_subsystems.Count == 0, "Not empty");
             ShutdownAll();
         }
 

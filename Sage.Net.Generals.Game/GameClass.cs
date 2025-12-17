@@ -24,6 +24,7 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
 using Sage.Net.Generals.GameEngine.Common;
+using Sage.Net.Generals.GameEngine.GameEngineDevice.SdlDevice;
 using Sage.Net.NativeHelpers.Sdl3;
 
 namespace Sage.Net.Generals.Game;
@@ -59,6 +60,10 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         SdlSubsystems.QuitAll();
 
         FramePacer.TheFramePacer = null;
+
+        GameEngine.Common.GameEngine.TheGameEngine?.Dispose();
+        GameEngine.Common.GameEngine.TheGameEngine = null;
+
         VersionHelper.TheVersion = null;
 
 #if RTS_ENABLE_CRASHDUMP
@@ -264,5 +269,9 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         VersionHelper.TheVersion.SetVersion(versionNumbers, buildInfo);
 
         FramePacer.TheFramePacer = new FramePacer { FramesPerSecondLimitEnabled = true };
+        GameEngine.Common.GameEngine.TheGameEngine = CreateGameEngine();
+        GameEngine.Common.GameEngine.TheGameEngine.Initialize();
     }
+
+    private SdlGameEngine CreateGameEngine() => new(logger);
 }

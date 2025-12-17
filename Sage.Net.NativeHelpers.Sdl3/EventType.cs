@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="CommandLineData.cs" company="Sage.Net">
+// <copyright file="EventType.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,21 +18,20 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Generals.GameEngine.Common;
+using System.Diagnostics.CodeAnalysis;
 
-/// <summary>Represents data parsed from the command line, typically used for startup and initialization within the game engine.</summary>
-public class CommandLineData
+namespace Sage.Net.NativeHelpers.Sdl3;
+
+/// <summary>Defines the types of events that can occur within the SDL environment.</summary>
+[SuppressMessage("Design", "CA1028: Enum storage should be Int32", Justification = "This is used in interop.")]
+public enum EventType : uint
 {
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for startup.</summary>
-    public bool HasParsedCommandLineForStartup { get; set; }
+    /// <summary>Indicates that the first event is in the queue.</summary>
+    First,
 
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for engine initialization.</summary>
-    public bool HasParsedCommandLineForEngineInitialization { get; set; }
+    /// <summary>Indicates that the application should quit.</summary>
+    Quit = 0x0100,
 
-    internal CommandLineData CloneForGlobalDataOverride() =>
-        new()
-        {
-            HasParsedCommandLineForStartup = HasParsedCommandLineForStartup,
-            HasParsedCommandLineForEngineInitialization = HasParsedCommandLineForEngineInitialization,
-        };
+    /// <summary>Indicates that the window has been exposed and should be redrawn.</summary>
+    WindowExposed = 0x0204,
 }

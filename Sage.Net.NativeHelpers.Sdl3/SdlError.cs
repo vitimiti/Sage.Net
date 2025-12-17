@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="CommandLineData.cs" company="Sage.Net">
+// <copyright file="SdlError.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,21 +18,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Generals.GameEngine.Common;
+using Sage.Net.NativeHelpers.Sdl3.NativeImports;
 
-/// <summary>Represents data parsed from the command line, typically used for startup and initialization within the game engine.</summary>
-public class CommandLineData
+namespace Sage.Net.NativeHelpers.Sdl3;
+
+/// <summary>Provides access to SDL error-handling functionality.</summary>
+public static class SdlError
 {
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for startup.</summary>
-    public bool HasParsedCommandLineForStartup { get; set; }
-
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for engine initialization.</summary>
-    public bool HasParsedCommandLineForEngineInitialization { get; set; }
-
-    internal CommandLineData CloneForGlobalDataOverride() =>
-        new()
-        {
-            HasParsedCommandLineForStartup = HasParsedCommandLineForStartup,
-            HasParsedCommandLineForEngineInitialization = HasParsedCommandLineForEngineInitialization,
-        };
+    /// <summary>Gets the last error message.</summary>
+    public static string? LastMessage => Sdl.GetError();
 }

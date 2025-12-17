@@ -150,7 +150,7 @@ public abstract class SubsystemBase : IDisposable
     }
 
     /// <summary>Disposes the subsystem.</summary>
-    /// <param name="disposing">Indicates whether the method is called from <see cref="Dispose"/>.</param>
+    /// <param name="disposing">Indicates whether the method is called from <see cref="Dispose()"/>.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)

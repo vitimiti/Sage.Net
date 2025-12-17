@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="CommandLineData.cs" company="Sage.Net">
+// <copyright file="SdlSubsystems.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,21 +18,17 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Generals.GameEngine.Common;
+using Sage.Net.NativeHelpers.Sdl3.NativeImports;
 
-/// <summary>Represents data parsed from the command line, typically used for startup and initialization within the game engine.</summary>
-public class CommandLineData
+namespace Sage.Net.NativeHelpers.Sdl3;
+
+/// <summary>Provides access to SDL subsystem initialization functionality.</summary>
+public static class SdlSubsystems
 {
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for startup.</summary>
-    public bool HasParsedCommandLineForStartup { get; set; }
+    /// <summary>Initializes the video subsystem.</summary>
+    /// <returns><see langword="true"/> if the video subsystem was successfully initialized; otherwise, <see langword="false"/>.</returns>
+    public static bool TryInitVideo() => Sdl.Init(Sdl.InitFlags.Video);
 
-    /// <summary>Gets or sets a value indicating whether the command line has been parsed for engine initialization.</summary>
-    public bool HasParsedCommandLineForEngineInitialization { get; set; }
-
-    internal CommandLineData CloneForGlobalDataOverride() =>
-        new()
-        {
-            HasParsedCommandLineForStartup = HasParsedCommandLineForStartup,
-            HasParsedCommandLineForEngineInitialization = HasParsedCommandLineForEngineInitialization,
-        };
+    /// <summary>Quits all initialized subsystems.</summary>
+    public static void QuitAll() => Sdl.Quit();
 }

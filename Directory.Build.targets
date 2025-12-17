@@ -3,52 +3,61 @@
   <Target Name="InjectGitInfo" BeforeTargets="GetAssemblyAttributes">
     <!-- Git describe (tag/hash + "-dirty" when dirty) -->
     <Exec
-          Command="git describe --tags --always --dirty"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitVersion" />
+      Command="git describe --tags --always --dirty"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitVersion" />
     </Exec>
     <!-- Commit count -->
     <Exec
-          Command="git rev-list --count HEAD"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitRevision" />
+      Command="git rev-list --count HEAD"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitRevision" />
     </Exec>
     <!-- Commit time: unix seconds since epoch (UTC) -->
     <Exec
-          Command="git log -1 --format=%ct"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitCommitUnixTime" />
+      Command="git log -1 --format=%ct"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitUnixTime" />
     </Exec>
     <!-- Commit author name -->
     <Exec
-          Command="git log -1 --format=%an"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitAuthor" />
+      Command="git log -1 --format=%an"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitAuthor" />
     </Exec>
     <!-- Short SHA -->
     <Exec
-          Command="git rev-parse --short HEAD"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitShortSha" />
+      Command="git rev-parse --short HEAD"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitShortSha" />
     </Exec>
     <!-- Tag only if HEAD is exactly on a tag -->
     <Exec
-          Command="git describe --tags --exact-match"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitTag" />
+      Command="git describe --tags --exact-match"
+      ConsoleToMsBuild="true"
+      StandardOutputImportance="low"
+      IgnoreExitCode="true"
+    >
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitTag" />
     </Exec>
     <!-- Dirty working tree? -->
-    <Exec
-          Command="git status --porcelain"
-          StandardOutputImportance="low"
-          IgnoreExitCode="true">
-      <Output TaskParameter="StandardOutput" PropertyName="GitStatusPorcelain" />
+    <Exec Command="git status --porcelain" ConsoleToMsBuild="true" StandardOutputImportance="low" IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitStatusPorcelain" />
     </Exec>
     <PropertyGroup>
       <!-- Trim outputs (git commands include newlines) -->
@@ -58,7 +67,9 @@
       <GitAuthor>$([System.String]::Copy('$(GitAuthor)').Trim())</GitAuthor>
       <GitShortSha>$([System.String]::Copy('$(GitShortSha)').Trim())</GitShortSha>
       <GitTag>$([System.String]::Copy('$(GitTag)').Trim())</GitTag>
-      <GitUncommittedChanges Condition="$([System.String]::Copy('$(GitStatusPorcelain)').Trim()) != ''">true</GitUncommittedChanges>
+      <GitUncommittedChanges Condition="$([System.String]::Copy('$(GitStatusPorcelain)').Trim()) != ''"
+        >true</GitUncommittedChanges
+      >
       <GitUncommittedChanges Condition="'$(GitUncommittedChanges)' == ''">false</GitUncommittedChanges>
       <!-- Build environment -->
       <BuildUser>$([System.Environment]::UserName)</BuildUser>

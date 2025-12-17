@@ -22,6 +22,19 @@ namespace Sage.Net.NativeHelpers.Sdl3.NativeImports;
 
 internal static partial class Sdl
 {
+    public record struct InitFlags(uint Value)
+    {
+        public static InitFlags Video => new(0x0020U);
+
+        public static InitFlags FromUInt32(uint value) => new(value);
+
+        public readonly uint ToUInt32() => Value;
+
+        public static implicit operator uint(InitFlags flags) => flags.ToUInt32();
+
+        public static implicit operator InitFlags(uint value) => FromUInt32(value);
+    }
+
     public record struct PixelFormat(uint Value)
     {
         public static PixelFormat FromUInt32(uint value) => new(value);
@@ -35,8 +48,6 @@ internal static partial class Sdl
 
     public record struct SurfaceFlags(uint Value)
     {
-        public static SurfaceFlags LockNeeded => new(1 << 1);
-
         public static SurfaceFlags FromUInt32(uint value) => new(value);
 
         public readonly uint ToUInt32() => Value;
@@ -44,5 +55,18 @@ internal static partial class Sdl
         public static implicit operator uint(SurfaceFlags flags) => flags.ToUInt32();
 
         public static implicit operator SurfaceFlags(uint value) => FromUInt32(value);
+    }
+
+    public record struct WindowFlags(ulong Value)
+    {
+        public static WindowFlags Hidden => new(0x00008UL);
+
+        public static WindowFlags FromUInt64(ulong value) => new(value);
+
+        public readonly ulong ToUInt64() => Value;
+
+        public static implicit operator ulong(WindowFlags flags) => flags.ToUInt64();
+
+        public static implicit operator WindowFlags(uint value) => FromUInt64(value);
     }
 }

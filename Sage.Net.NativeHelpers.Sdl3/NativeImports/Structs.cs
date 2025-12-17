@@ -24,6 +24,25 @@ namespace Sage.Net.NativeHelpers.Sdl3.NativeImports;
 
 internal static partial class Sdl
 {
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Event
+    {
+        [FieldOffset(0)]
+        public EventType Type;
+
+        [FieldOffset(0)]
+        private unsafe fixed byte _padding[128];
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Rect
+    {
+        public int X;
+        public int Y;
+        public int W;
+        public int H;
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Surface
     {

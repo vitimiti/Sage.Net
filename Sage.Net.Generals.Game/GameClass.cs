@@ -19,6 +19,8 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
 using Sage.Net.Generals.GameEngine.Common;
@@ -28,12 +30,22 @@ namespace Sage.Net.Generals.Game;
 
 internal sealed class GameClass(ILogger logger) : IDisposable
 {
+    private const int DefaultDisplayWidth = 800;
+    private const int DefaultDisplayHeight = 600;
+
     private static int _handlersInstalled; // 0: not installed, 1: installed
 
-    private Surface? _loadScreenBitmap;
+    private WindowHandle? _window;
+    private SurfaceHandle? _loadScreenBitmap;
+    private bool _running = true;
+    private bool _paintSplash = true;
     private bool _disposed;
 
-    public void Run() => Initialize();
+    public void Run()
+    {
+        Initialize();
+        Update();
+    }
 
     public void Dispose()
     {
@@ -43,6 +55,14 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         }
 
         _loadScreenBitmap?.Dispose();
+        _window?.Dispose();
+        SdlSubsystems.QuitAll();
+
+        VersionHelper.TheVersion = null;
+
+#if RTS_ENABLE_CRASHDUMP
+        MiniDumper.ShutdownMiniDumper();
+#endif
 
         _disposed = true;
     }
@@ -85,14 +105,142 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         };
     }
 
+    private static string? GetMetadata(string key)
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        return asm.GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(a => string.Equals(a.Key, key, StringComparison.OrdinalIgnoreCase))
+            ?.Value?.Trim();
+    }
+
+    private static int GetMetadataInt(string key) =>
+        int.TryParse(GetMetadata(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var v) ? v : 0;
+
+    private static long GetMetadataLong(string key) =>
+        long.TryParse(GetMetadata(key), NumberStyles.Integer, CultureInfo.InvariantCulture, out var v) ? v : 0;
+
+    private static (int Major, int Minor, int BuildNumber, int LocalBuildNumber) GetVersionNumbers()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+
+        // Prefer FileVersion for the "BuildNumber" if you want it to change per build.
+        var fileVer = asm.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version; // "A.B.C.D"
+        if (Version.TryParse(fileVer, out Version? fv))
+        {
+            return (fv.Major, fv.Minor, fv.Build, GetMetadataInt("LocalBuildNumber"));
+        }
+
+        // Fallback: AssemblyVersion
+        Version av = asm.GetName().Version ?? new Version(0, 0, 0, 0);
+        return (av.Major, av.Minor, av.Build, GetMetadataInt("LocalBuildNumber"));
+    }
+
+    private static (string User, string Location, string BuildTime, string BuildDate) GetBuildInfo()
+    {
+        var user = GetMetadata("BuildUser") ?? string.Empty;
+        var loc = GetMetadata("BuildLocation") ?? string.Empty;
+
+        // Deterministic build time from Git commit time
+        var unix = GetMetadataLong("GitCommitUnixTime");
+        if (unix <= 0)
+        {
+            return (user, loc, string.Empty, string.Empty);
+        }
+
+        DateTime dt = DateTimeOffset.FromUnixTimeSeconds(unix).UtcDateTime;
+        var date = dt.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        var time = dt.ToString("HH:mm:ss", CultureInfo.InvariantCulture);
+        return (user, loc, time, date);
+    }
+
+    private void InitializeAppSdl(bool runWindowed)
+    {
+        if (!SdlSubsystems.TryInitVideo())
+        {
+            throw new InvalidOperationException($"Unable to initialize SDL video subsystem ({SdlError.LastMessage}).");
+        }
+
+        if (_loadScreenBitmap!.IsInvalid)
+        {
+            return;
+        }
+
+        _window = WindowHandle.CreateSplashWindow("Generals Game", _loadScreenBitmap!.Width, _loadScreenBitmap!.Height);
+        if (_window.IsInvalid)
+        {
+            throw new InvalidOperationException($"Unable to create splash window ({SdlError.LastMessage}).");
+        }
+
+        if (runWindowed)
+        {
+            _ = _window.TrySetSize(DefaultDisplayWidth, DefaultDisplayHeight);
+        }
+
+        SdlEvents.OnQuit += (_, _) => _running = false;
+
+        SdlEvents.OnWindowExposed += (_, _) =>
+        {
+            if (_paintSplash)
+            {
+                PaintBitmap1To1();
+            }
+        };
+
+        if (!runWindowed)
+        {
+            _paintSplash = false;
+        }
+    }
+
+    private void Update()
+    {
+        while (_running)
+        {
+            SdlEvents.PollEvents();
+        }
+    }
+
+    private void PaintBitmap1To1()
+    {
+        if (_window is null || _loadScreenBitmap is null)
+        {
+            return;
+        }
+
+        if (_window.IsInvalid || _loadScreenBitmap.IsInvalid)
+        {
+            return;
+        }
+
+        SurfaceHandle windowSurface = _window!.Surface;
+        if (windowSurface.IsInvalid)
+        {
+            return;
+        }
+
+        if (!_window.TryShow())
+        {
+            return;
+        }
+
+        if (!SurfaceHandle.TryBlit(_loadScreenBitmap, null, windowSurface, null))
+        {
+            return;
+        }
+
+        _ = _window!.TryUpdateSurface();
+    }
+
     private void Initialize()
     {
         InstallUnhandledExceptionHandlers(logger);
 
         // TODO: Allow users to change the screen bitmap
-        _loadScreenBitmap = Surface.LoadBmp("Install_Final.bmp");
+        _loadScreenBitmap = SurfaceHandle.LoadBmp("Install_Final.bmp");
 
         CommandLine.ParseCommandLineForStartup(logger);
+
+        InitializeAppSdl(GlobalData.TheGlobalData!.Windowed);
 
 #if RTS_ENABLE_CRASHDUMP
         MiniDumper.InitMiniDumper(
@@ -107,5 +255,11 @@ internal sealed class GameClass(ILogger logger) : IDisposable
             "GeneralsGame"
         );
 #endif
+        PaintBitmap1To1();
+
+        VersionHelper.TheVersion = new VersionHelper();
+        (int Major, int Minor, int BuildNumber, int LocalBuildNumber) versionNumbers = GetVersionNumbers();
+        (string User, string Location, string BuildTime, string BuildDate) buildInfo = GetBuildInfo();
+        VersionHelper.TheVersion.SetVersion(versionNumbers, buildInfo);
     }
 }

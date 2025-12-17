@@ -121,7 +121,7 @@ public class Ini
     /// <param name="recurse">Indicates whether to traverse subdirectories to load files recursively. Default is true.</param>
     /// <returns>The total number of INI files successfully loaded.</returns>
     /// <exception cref="InvalidOperationException">Thrown if <paramref name="dirName"/> is null, empty, or only whitespace.</exception>
-    public uint LoadDirectory(string dirName, IniLoadType loadType, TransferOperation transfer, bool recurse = true)
+    public uint LoadDirectory(string dirName, IniLoadType loadType, TransferOperation? transfer, bool recurse = true)
     {
         if (string.IsNullOrWhiteSpace(dirName))
         {

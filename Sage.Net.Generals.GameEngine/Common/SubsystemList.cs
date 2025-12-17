@@ -128,7 +128,7 @@ public class SubsystemList : IDisposable
     }
 
     /// <summary>Shuts down all subsystems in the list by invoking their respective Dispose methods.</summary>
-    /// <remarks>This method iterates through each <see cref="SubsystemBase"/> instance in the internal list and invokes its <see cref="SubsystemBase.Dispose"/> method. It then clears the internal subsystems list.</remarks>
+    /// <remarks>This method iterates through each <see cref="SubsystemBase"/> instance in the internal list and invokes its <see cref="SubsystemBase.Dispose()"/> method. It then clears the internal subsystems list.</remarks>
     public void ShutdownAll()
     {
         foreach (SubsystemBase subsystem in _subsystems)
@@ -196,7 +196,7 @@ public class SubsystemList : IDisposable
     }
 
     /// <summary>Disposes the subsystem list.</summary>
-    /// <param name="disposing">Indicates whether the method is called from <see cref="Dispose"/>.</param>
+    /// <param name="disposing">Indicates whether the method is called from <see cref="Dispose()"/>.</param>
     protected virtual void Dispose(bool disposing)
     {
         if (_disposed)

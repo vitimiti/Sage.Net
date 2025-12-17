@@ -19,6 +19,7 @@
 // -----------------------------------------------------------------------
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
@@ -30,7 +31,7 @@ public partial class GlobalData : SubsystemBase
 {
     private readonly ILogger _logger;
 
-    private readonly GlobalData? _next = null;
+    private GlobalData? _next;
 
     /// <summary>Initializes a new instance of the <see cref="GlobalData"/> class.</summary>
     /// <param name="logger">The logger to use for logging.</param>
@@ -99,6 +100,11 @@ public partial class GlobalData : SubsystemBase
         base.Dispose(disposing);
     }
 
+    [SuppressMessage(
+        "Design",
+        "CA1031:Do not catch general exception types",
+        Justification = "This is not meant to throw!"
+    )]
     private unsafe uint GenerateCrc()
     {
         const int blockSize = 65_536;
@@ -177,6 +183,26 @@ public partial class GlobalData : SubsystemBase
 
         Log.FinalCrcValue(_logger, version >> 16, version & 0xFFFF, exeCrc.Value);
         return exeCrc.Value;
+    }
+
+    private GlobalData CloneForOverride() =>
+        new(_logger)
+        {
+            CommandLineData = CommandLineData.CloneForGlobalDataOverride(),
+            ExeCrc = ExeCrc,
+            Windowed = Windowed,
+        };
+
+    private GlobalData? NewOverride()
+    {
+        Debug.Assert(TheWritableGlobalData is not null, "No existing data.");
+
+        GlobalData previous = TheWritableGlobalData;
+        GlobalData ovr = previous.CloneForOverride();
+
+        ovr._next = previous;
+        TheWritableGlobalData = ovr;
+        return ovr;
     }
 
     private static partial class Log

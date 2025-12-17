@@ -52,6 +52,9 @@ public partial class GlobalData : SubsystemBase
     /// <summary>Gets or sets the executable CRC.</summary>
     public uint ExeCrc { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the game is running in windowed mode.</summary>
+    public bool Windowed { get; set; }
+
     private static GlobalData? TheOriginal { get; set; }
 
     /// <inheritdoc/>

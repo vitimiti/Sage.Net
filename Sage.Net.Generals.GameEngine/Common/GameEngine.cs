@@ -77,6 +77,9 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
         SubsystemList.TheSubsystemList.AddSubsystem(this);
 
         RandomValue.InitializeRandom();
+
+        NameKeyGenerator.TheNameKeyGenerator = new NameKeyGenerator(logger);
+        NameKeyGenerator.TheNameKeyGenerator.Initialize();
     }
 
     /// <summary>Resets the game engine.</summary>

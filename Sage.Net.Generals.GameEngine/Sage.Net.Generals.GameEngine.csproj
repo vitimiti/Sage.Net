@@ -7,6 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sage.Net.Core.GameEngine\Sage.Net.Core.GameEngine.csproj" />
+    <ProjectReference
+      Include="..\Sage.Net.Generators.GameMemoryGenerator\Sage.Net.Generators.GameMemoryGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.1" />

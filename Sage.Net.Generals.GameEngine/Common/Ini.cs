@@ -20,6 +20,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Sage.Net.Generals.GameEngine.Common;
@@ -27,6 +28,9 @@ namespace Sage.Net.Generals.GameEngine.Common;
 /// <summary>Represents a simple INI file parser.</summary>
 public class Ini
 {
+    private string? _currentTokenLine;
+    private int _currentTokenIndex;
+
     /// <summary>The maximum number of characters per line.</summary>
     public const int MaxCharsPerLine = 1028;
 
@@ -210,6 +214,27 @@ public class Ini
         return 1;
     }
 
+    /// <summary>Retrieves the next non-separator token from the current INI data stream.</summary>
+    /// <param name="separators">An optional array of characters used to determine where tokens are delimited. Defaults to standard separators if null.</param>
+    /// <returns>The next token as a string.</returns>
+    public string GetNextToken(char[]? separators = null)
+    {
+        var seps = separators ?? [.. Separators];
+        while (true)
+        {
+            PrepareNextLine();
+            SkipSeparators(seps);
+            if (TryExtractToken(seps, out var token))
+            {
+                return token;
+            }
+
+            // No token on this line, move to next line
+            _currentTokenLine = null;
+            _currentTokenIndex = 0;
+        }
+    }
+
     /// <summary>Prepares the specified file for reading and parsing as an INI file.</summary>
     /// <param name="filePath">The full path to the file to be prepared for reading.</param>
     /// <param name="loadType">Specifies how the INI data should be processed, using the <see cref="IniLoadType"/> enumeration.</param>
@@ -364,5 +389,61 @@ public class Ini
         }
 
         return length;
+    }
+
+    [MemberNotNull(nameof(_currentTokenLine))]
+    private void PrepareNextLine()
+    {
+        // Ensure we have a line to parse
+        while (_currentTokenLine is null || _currentTokenIndex >= _currentTokenLine.Length)
+        {
+            var line = ReadLine();
+            if (!string.IsNullOrEmpty(line))
+            {
+                _currentTokenLine = line;
+                _currentTokenIndex = 0;
+                return;
+            }
+
+            // If EOF and nothing more, throw like INI_INVALID_DATA
+            if (EndOfFile)
+            {
+                throw new InvalidDataException(
+                    $"Unexpected end of INI while reading token (File: '{FileName}', Line: {LineNumber})."
+                );
+            }
+        }
+    }
+
+    private void SkipSeparators(char[] seps)
+    {
+        while (
+            _currentTokenIndex < _currentTokenLine!.Length
+            && Array.IndexOf(seps, _currentTokenLine[_currentTokenIndex]) >= 0
+        )
+        {
+            _currentTokenIndex++;
+        }
+    }
+
+    private bool TryExtractToken(char[] seps, [NotNullWhen(true)] out string? token)
+    {
+        var start = _currentTokenIndex;
+        while (
+            _currentTokenIndex < _currentTokenLine!.Length
+            && Array.IndexOf(seps, _currentTokenLine[_currentTokenIndex]) < 0
+        )
+        {
+            _currentTokenIndex++;
+        }
+
+        if (start < _currentTokenIndex)
+        {
+            token = _currentTokenLine[start.._currentTokenIndex];
+            return true;
+        }
+
+        token = null;
+        return false;
     }
 }

@@ -92,6 +92,8 @@ internal sealed class GameClass(ILogger logger) : IDisposable
         // TODO: Allow users to change the screen bitmap
         _loadScreenBitmap = Surface.LoadBmp("Install_Final.bmp");
 
+        CommandLine.ParseCommandLineForStartup(logger);
+
 #if RTS_ENABLE_CRASHDUMP
         MiniDumper.InitMiniDumper(
             Path.Combine(

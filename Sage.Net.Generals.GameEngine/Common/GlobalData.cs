@@ -53,6 +53,9 @@ public partial class GlobalData : SubsystemBase
     /// <summary>Gets or sets the executable CRC.</summary>
     public uint ExeCrc { get; set; }
 
+    /// <summary>Gets or sets a value indicating whether the shell map is on.</summary>
+    public bool ShellMapOn { get; set; } = true;
+
     /// <summary>Gets or sets the viewport height scale.</summary>
     public float ViewportHeightScale { get; set; } = .8F;
 
@@ -109,6 +112,18 @@ public partial class GlobalData : SubsystemBase
         }
 
         base.Dispose(disposing);
+    }
+
+    private static GlobalData? NewOverride()
+    {
+        Debug.Assert(TheWritableGlobalData is not null, "No existing data.");
+
+        GlobalData previous = TheWritableGlobalData;
+        GlobalData ovr = previous.CloneForOverride();
+
+        ovr._next = previous;
+        TheWritableGlobalData = ovr;
+        return ovr;
     }
 
     [SuppressMessage(
@@ -203,18 +218,6 @@ public partial class GlobalData : SubsystemBase
             ExeCrc = ExeCrc,
             Windowed = Windowed,
         };
-
-    private GlobalData? NewOverride()
-    {
-        Debug.Assert(TheWritableGlobalData is not null, "No existing data.");
-
-        GlobalData previous = TheWritableGlobalData;
-        GlobalData ovr = previous.CloneForOverride();
-
-        ovr._next = previous;
-        TheWritableGlobalData = ovr;
-        return ovr;
-    }
 
     private static partial class Log
     {

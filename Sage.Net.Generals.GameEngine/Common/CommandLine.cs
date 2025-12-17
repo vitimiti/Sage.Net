@@ -18,6 +18,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace Sage.Net.Generals.GameEngine.Common;
@@ -30,6 +31,9 @@ public static partial class CommandLine
         new("-win", ParseWin),
         new("-fullscreen", ParseNoWin),
     ];
+
+    // TODO: Add more parsers
+    private static readonly CommandLineParameter[] ParamsForEngineInit = [new("-noshellmap", ParseNoShellMap)];
 
     /// <summary>Parses command-line arguments for startup.</summary>
     /// <param name="logger">The logger to use.</param>
@@ -44,6 +48,28 @@ public static partial class CommandLine
 
         GlobalData.TheGlobalData!.CommandLineData.HasParsedCommandLineForStartup = true;
         ParseCommandLine(logger, ParamsForStartup);
+    }
+
+    /// <summary>Parses command-line arguments required for engine initialization.</summary>
+    /// <param name="logger">The logger to use.</param>
+    /// <remarks>This method must be called after <see cref="ParseCommandLineForStartup"/> and is expected to be invoked only once.</remarks>
+    public static void ParseCommandLineForEngineInit(ILogger logger)
+    {
+        CreateGlobalData(logger);
+
+        Debug.Assert(
+            GlobalData.TheGlobalData!.CommandLineData.HasParsedCommandLineForStartup,
+            $"{nameof(ParseCommandLineForStartup)} is expected to be called before {nameof(ParseCommandLineForEngineInit)}."
+        );
+
+        Debug.Assert(
+            !GlobalData.TheGlobalData!.CommandLineData.HasParsedCommandLineForEngineInitialization,
+            $"{nameof(ParseCommandLineForEngineInit)} is expected to be called only once."
+        );
+
+        GlobalData.TheWritableGlobalData!.CommandLineData.HasParsedCommandLineForEngineInitialization = true;
+
+        ParseCommandLine(logger, ParamsForEngineInit);
     }
 
     private static void CreateGlobalData(ILogger logger)
@@ -125,6 +151,12 @@ public static partial class CommandLine
     private static int ParseNoWin(ReadOnlySpan<string> args)
     {
         GlobalData.TheWritableGlobalData!.Windowed = false;
+        return 1;
+    }
+
+    private static int ParseNoShellMap(ReadOnlySpan<string> args)
+    {
+        GlobalData.TheWritableGlobalData!.ShellMapOn = false;
         return 1;
     }
 

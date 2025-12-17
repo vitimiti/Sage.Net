@@ -96,6 +96,7 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
 #if DEBUG
         ini.LoadFileDirectory(Path.Combine("Data", "INI", "GameDataDebug"), IniLoadType.Overwrite, null);
 #endif
+        CommandLine.ParseCommandLineForEngineInit(logger);
     }
 
     /// <summary>Resets the game engine.</summary>

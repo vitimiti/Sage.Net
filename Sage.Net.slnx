@@ -23,4 +23,5 @@
   <Folder Name="/NativeHelpers/">
     <Project Path="Sage.Net.NativeHelpers.Sdl3/Sage.Net.NativeHelpers.Sdl3.csproj" />
   </Folder>
+  <Project Path="Sage.Net.Extensions/Sage.Net.Extensions.csproj" />
 </Solution>

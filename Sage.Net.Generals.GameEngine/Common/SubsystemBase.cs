@@ -23,8 +23,10 @@ using System.Diagnostics;
 namespace Sage.Net.Generals.GameEngine.Common;
 
 /// <summary>Represents a base class for all subsystems.</summary>
-public abstract class SubsystemBase
+public abstract class SubsystemBase : IDisposable
 {
+    private bool _disposed;
+
 #if DUMP_PERF_STATS
     /// <summary>Gets the total time consumed by this subsystem.</summary>
     public static float TotalTime => MsConsumed;
@@ -55,6 +57,11 @@ public abstract class SubsystemBase
     /// <summary>Gets or sets the current draw time.</summary>
     protected float CurrentDrawTime { get; set; }
 #endif
+
+    /// <summary>Initializes a new instance of the <see cref="SubsystemBase"/> class.</summary>
+    /// <remarks>Adds the subsystem to the subsystem list.</remarks>
+    protected SubsystemBase() => SubsystemList.TheSubsystemList?.AddSubsystem(this);
+
 #if DUMP_PERF_STATS
     /// <summary>Clears the total time.</summary>
     public static void ClearTotalTime() => MsConsumed = 0;
@@ -134,4 +141,28 @@ public abstract class SubsystemBase
     /// <summary>Draws the subsystem.</summary>
     public void Draw() => DrawCore();
 #endif
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>Disposes the subsystem.</summary>
+    /// <param name="disposing">Indicates whether the method is called from <see cref="Dispose"/>.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            SubsystemList.TheSubsystemList?.RemoveSubsystem(this);
+        }
+
+        _disposed = true;
+    }
 }

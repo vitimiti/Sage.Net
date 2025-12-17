@@ -8,6 +8,7 @@
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RtsEnableCrashdump Condition="'$(RtsEnableCrashdump)' == ''">false</RtsEnableCrashdump>
+    <RtsEnableCrashdump Condition="'$(DumpPerfStats)' == ''">false</RtsEnableCrashdump>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DefineConstants>$(DefineConstants);RTS_DEBUG</DefineConstants>
@@ -18,6 +19,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(RtsEnableCrashdump)' == 'true'">
     <DefineConstants>$(DefineConstants);RTS_ENABLE_CRASHDUMP</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DumpPerfStats)' == 'true'">
+    <DefineConstants>$(DefineConstants);DUMP_PERF_STATS</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

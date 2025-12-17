@@ -23,6 +23,50 @@ namespace Sage.Net.Generals.GameEngine.Common;
 /// <summary>Represents a transfer operation.</summary>
 public abstract class TransferOperation
 {
+    /// <summary>Gets or sets the transfer options.</summary>
+    public TransferOptions Options { get; protected set; } = TransferOptions.None;
+
+    /// <summary>Gets or sets the transfer mode.</summary>
+    protected TransferMode Mode { get; set; }
+
+    /// <summary>Opens a transfer operation using the specified identifier.</summary>
+    /// <param name="identifier">The unique identifier for the transfer operation to be opened.</param>
+    /// <remarks>This method is intended to initialize and prepare the transfer operation with the given <paramref name="identifier"/>.</remarks>
+    public abstract void Open(string identifier);
+
+    /// <summary>Closes the transfer operation, finalizing and releasing any associated resources.</summary>
+    /// <remarks>This method is intended to complete the transfer process and clean up any resources allocated during the operation.</remarks>
+    public abstract void Close();
+
+    /// <summary>Begins a new block in the transfer operation.</summary>
+    /// <returns>An integer representing the identifier of the newly started block.</returns>
+    /// <remarks>This method is intended to initialize a new segment within the transfer operation for further processing.</remarks>
+    public abstract int BeginBlock();
+
+    /// <summary>Ends the current block in the transfer operation.</summary>
+    /// <remarks>This method is intended to finalize the processing of the current segment within the transfer operation.</remarks>
+    public abstract void EndBlock();
+
+    /// <summary>Skips the specified amount of data in the transfer operation.</summary>
+    /// <param name="dataSize">The size of the data to skip, in bytes.</param>
+    /// <remarks>This method is intended to move the transfer operation's internal pointer forward by the given <paramref name="dataSize"/>, effectively ignoring the data in that range.</remarks>
+    public abstract void Skip(int dataSize);
+
+    /// <summary>Transfers a snapshot using the specified snapshot object.</summary>
+    /// <param name="snapshot">The snapshot instance that implements <see cref="ISnapshot"/> and will be processed in the transfer operation.</param>
+    /// <remarks>This method is intended to facilitate the transfer of state information encapsulated in the specified <paramref name="snapshot"/> during save, load, or CRC operations.</remarks>
+    public abstract void TransferSnapshot(ISnapshot snapshot);
+
+    /// <summary>Sets the transfer options for the transfer operation.</summary>
+    /// <param name="options">The transfer options to be applied.</param>
+    /// <remarks>This will add the given <paramref name="options"/> to any existing ones.</remarks>
+    public virtual void SetOptions(TransferOptions options) => Options |= options;
+
+    /// <summary>Clears the transfer options for the transfer operation.</summary>
+    /// <param name="options">The transfer options to be cleared.</param>
+    /// <remarks>This will remove the given <paramref name="options"/> from any existing ones.</remarks>
+    public virtual void ClearOptions(TransferOptions options) => Options &= ~options;
+
     /// <summary>Transfers data in a user-defined way in the context of a transfer operation.</summary>
     /// <param name="data">The pointer to the data to be transferred.</param>
     /// <param name="dataSize">The size of the data to be transferred, in bytes.</param>

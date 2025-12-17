@@ -18,18 +18,27 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Core.GameEngine.Common;
+using Sage.Net.Generals.Libraries.BaseTypes;
 
 namespace Sage.Net.Generals.GameEngine.Common;
 
 /// <summary>Provides functionality for managing global data.</summary>
 public partial class GlobalData : SubsystemBase
 {
+    private const int MaxGlobalLights = 3;
+
     private readonly ILogger _logger;
+    private readonly RgbColor[] _terrainAmbient = new RgbColor[MaxGlobalLights];
+    private readonly RgbColor[] _terrainDiffuse = new RgbColor[MaxGlobalLights];
+    private readonly TerrainLighting[][] _terrainLightning;
+    private readonly Coord3D[] _terrainLightPos = new Coord3D[MaxGlobalLights];
+    private readonly TerrainLighting[][] _terrainObjectsLightning;
 
     private GlobalData? _next;
 
@@ -39,6 +48,19 @@ public partial class GlobalData : SubsystemBase
     {
         _logger = logger;
         TheOriginal ??= this;
+
+        _terrainLightning = new TerrainLighting[Enum.GetValues<TimeOfDay>().Length][];
+        _terrainObjectsLightning = new TerrainLighting[Enum.GetValues<TimeOfDay>().Length][];
+        for (var i = 0; i < MaxGlobalLights; i++)
+        {
+            _terrainLightning[i] = new TerrainLighting[MaxGlobalLights];
+            _terrainObjectsLightning[i] = new TerrainLighting[MaxGlobalLights];
+        }
+
+        TerrainLightning = new JaggedArrayList<TerrainLighting>(_terrainLightning);
+        TerrainObjectsLightning = new JaggedArrayList<TerrainLighting>(_terrainObjectsLightning);
+
+        _ = SetTimeOfDay(TimeOfDay.Afternoon);
     }
 
     /// <summary>Gets or sets the writable global data.</summary>
@@ -55,6 +77,24 @@ public partial class GlobalData : SubsystemBase
 
     /// <summary>Gets or sets a value indicating whether the shell map is on.</summary>
     public bool ShellMapOn { get; set; } = true;
+
+    /// <summary>Gets the terrain ambient colors.</summary>
+    public IList<RgbColor> TerrainAmbient => _terrainAmbient;
+
+    /// <summary>Gets the terrain diffuse colors.</summary>
+    public IList<RgbColor> TerrainDiffuse => _terrainDiffuse;
+
+    /// <summary>Gets the terrain lighting colors.</summary>
+    public IList<IList<TerrainLighting>> TerrainLightning { get; }
+
+    /// <summary>Gets the terrain light positions.</summary>
+    public IList<Coord3D> TerrainLightPosition => _terrainLightPos;
+
+    /// <summary>Gets the terrain objects lighting colors.</summary>
+    public IList<IList<TerrainLighting>> TerrainObjectsLightning { get; }
+
+    /// <summary>Gets or sets the time of day.</summary>
+    public TimeOfDay TimeOfDay { get; set; } = TimeOfDay.Afternoon;
 
     /// <summary>Gets or sets the viewport height scale.</summary>
     public float ViewportHeightScale { get; set; } = .8F;
@@ -91,6 +131,28 @@ public partial class GlobalData : SubsystemBase
     /// <inheritdoc/>
     public override void UpdateCore() { }
 
+    /// <summary>Updates the time of day and adjusts terrain lighting accordingly.</summary>
+    /// <param name="timeOfDay">The desired time of day to set, represented by the <see cref="TimeOfDay"/> enum.</param>
+    /// <returns>Returns <see langword="true"/> if the time of day was successfully updated; otherwise, <see langword="false"/>.</returns>
+    public bool SetTimeOfDay(TimeOfDay timeOfDay)
+    {
+        if ((int)timeOfDay >= Enum.GetValues<TimeOfDay>().Length || timeOfDay < TimeOfDay.Morning)
+        {
+            return false;
+        }
+
+        TimeOfDay = timeOfDay;
+        for (var i = 0; i < MaxGlobalLights; i++)
+        {
+            _terrainAmbient[i] = _terrainLightning[(int)timeOfDay][i].Ambient;
+            _terrainDiffuse[i] = _terrainLightning[(int)timeOfDay][i].Diffuse;
+            _terrainLightPos[i] = _terrainLightning[(int)timeOfDay][i].LightPosition;
+        }
+
+        return true;
+    }
+
+    /// <summary>Parses and applies custom definitions related to the global data configuration.</summary>
     public void ParseCustomDefinition()
     {
         if (AddonCompatibility.HasFullViewportDat())
@@ -226,5 +288,86 @@ public partial class GlobalData : SubsystemBase
 
         [LoggerMessage(LogLevel.Debug, Message = "EXE+Version({Major}.{Minor})+SCB CRC is 0x{ExeCrc:X8}")]
         public static partial void FinalCrcValue(ILogger logger, uint major, uint minor, uint exeCrc);
+    }
+
+    private sealed class ArrayListAdapter<T>(T[] actualArray) : IList<T>
+    {
+        private const string ErrorMessage = "Fixed-size.";
+
+        public int Count => actualArray.Length;
+
+        public bool IsReadOnly => false;
+
+        public T this[int index]
+        {
+            get => actualArray[index];
+            set => actualArray[index] = value;
+        }
+
+        public IEnumerator<T> GetEnumerator() => ((IEnumerable<T>)actualArray).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public int IndexOf(T item) => Array.IndexOf(actualArray, item);
+
+        public bool Contains(T item) => ((IEnumerable<T>)actualArray).Contains(item);
+
+        public void CopyTo(T[] array, int arrayIndex) => actualArray.CopyTo(array, arrayIndex);
+
+        public void Insert(int index, T item) => throw new NotSupportedException(ErrorMessage);
+
+        public void RemoveAt(int index) => throw new NotSupportedException(ErrorMessage);
+
+        public void Add(T item) => throw new NotSupportedException(ErrorMessage);
+
+        public void Clear() => throw new NotSupportedException(ErrorMessage);
+
+        public bool Remove(T item) => throw new NotSupportedException(ErrorMessage);
+    }
+
+    private sealed class JaggedArrayList<T> : IList<IList<T>>
+    {
+        private readonly IList<T>[] _rows;
+
+        public JaggedArrayList(T[][] data)
+        {
+            _rows = new IList<T>[data.Length];
+            for (var i = 0; i < data.Length; i++)
+            {
+#pragma warning disable IDE0028 // Collection initialization can be simplified
+                _rows[i] = new ArrayListAdapter<T>(data[i]);
+#pragma warning restore IDE0028 // Collection initialization can be simplified
+            }
+        }
+
+        public int Count => _rows.Length;
+
+        public bool IsReadOnly => false;
+
+        public IList<T> this[int index]
+        {
+            get => _rows[index];
+            set => throw new NotSupportedException("Cannot replace rows of a fixed-size jagged array.");
+        }
+
+        public IEnumerator<IList<T>> GetEnumerator() => ((IEnumerable<IList<T>>)_rows).GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public int IndexOf(IList<T> item) => Array.IndexOf(_rows, item);
+
+        public void Insert(int index, IList<T> item) => throw new NotSupportedException("Fixed-size.");
+
+        public void RemoveAt(int index) => throw new NotSupportedException("Fixed-size.");
+
+        public void Add(IList<T> item) => throw new NotSupportedException("Fixed-size.");
+
+        public void Clear() => throw new NotSupportedException("Fixed-size.");
+
+        public bool Contains(IList<T> item) => ((ICollection<IList<T>>)_rows).Contains(item);
+
+        public void CopyTo(IList<T>[] array, int arrayIndex) => _rows.CopyTo(array, arrayIndex);
+
+        public bool Remove(IList<T> item) => throw new NotSupportedException("Fixed-size.");
     }
 }

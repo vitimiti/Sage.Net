@@ -10,6 +10,9 @@
     <Project Path="Sage.Net.Generals.GameEngine/Sage.Net.Generals.GameEngine.csproj" />
     <Project Path="Sage.Net.Generals.Game\Sage.Net.Generals.Game.csproj" />
   </Folder>
+  <Folder Name="/Generals/Libraries/">
+    <Project Path="Sage.Net.Generals.Libraries.BaseTypes/Sage.Net.Generals.Libraries.BaseTypes.csproj" />
+  </Folder>
   <Folder Name="/GeneralsMd/">
     <Project Path="Sage.Net.GeneralsMd.Game\Sage.Net.GeneralsMd.Game.csproj" />
   </Folder>

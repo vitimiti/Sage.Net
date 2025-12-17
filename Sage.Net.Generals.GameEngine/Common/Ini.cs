@@ -28,15 +28,27 @@ namespace Sage.Net.Generals.GameEngine.Common;
 /// <summary>Represents a simple INI file parser.</summary>
 public class Ini
 {
-    private string? _currentTokenLine;
-    private int _currentTokenIndex;
+    /// <summary>Defines a process used to parse and handle fields in a given context.</summary>
+    /// <param name="ini">The INI instance.</param>
+    /// <param name="instance">The instance to be processed.</param>
+    /// <param name="store">The store to be updated.</param>
+    /// <param name="userData">User data.</param>
+    public delegate void FieldParseProcess(Ini ini, ref object? instance, ref object? store, object? userData);
 
     /// <summary>The maximum number of characters per line.</summary>
     public const int MaxCharsPerLine = 1028;
 
+    private const string BlockEnd = "END";
+    private const string NoBlock = "NO_BLOCK";
+
+    private string? _currentTokenLine;
+    private int _currentTokenIndex;
+
     /// <summary>The block parse delegate.</summary>
     /// <param name="ini">The INI instance.</param>
     public delegate void BlockParse(Ini ini);
+
+    public delegate void BuildMultiIniField(MultiIniFieldParse p);
 
     private static readonly Dictionary<string, BlockParse> TypeTable = [];
 
@@ -194,7 +206,7 @@ public class Ini
                         }
 
 #if DEBUG
-                        CurrentBlockStart = "NO_BLOCK";
+                        CurrentBlockStart = NoBlock;
 #endif
                     }
                     else
@@ -212,6 +224,71 @@ public class Ini
         }
 
         return 1;
+    }
+
+    /// <summary>Initializes the specified object from the current INI data stream.</summary>
+    /// <param name="what">The object to be initialized.</param>
+    /// <param name="parseTable">The parse table containing the field names and their corresponding parsing processes.</param>
+    public void InitializeFromIni(ref object what, FieldParse parseTable)
+    {
+        MultiIniFieldParse p = new();
+        p.Add(parseTable);
+        InitializeFromIniMulti(ref what, p);
+    }
+
+    /// <summary>Initializes the specified object from the current INI data stream.</summary>
+    /// <param name="what">The object to be initialized.</param>
+    /// <param name="process">The delegate containing the field names and their corresponding parsing processes.</param>
+    public void InitializeFromIniMultiProcess(ref object what, BuildMultiIniField process)
+    {
+        ArgumentNullException.ThrowIfNull(process);
+
+        MultiIniFieldParse p = new();
+        process(p);
+        InitializeFromIniMulti(ref what, p);
+    }
+
+    /// <summary>Initializes the specified object from the current INI data stream.</summary>
+    /// <param name="what">The object to be initialized.</param>
+    /// <param name="parseTable">The parse table containing the field names and their corresponding parsing processes.</param>
+    /// <exception cref="InvalidOperationException">Thrown if the specified object cannot be initialized from the current INI data stream.</exception>
+    /// <exception cref="InvalidDataException">Thrown if the specified object cannot be parsed from the current INI data stream.</exception>
+    public void InitializeFromIniMulti(ref object what, MultiIniFieldParse parseTable)
+    {
+        ArgumentNullException.ThrowIfNull(what);
+        ArgumentNullException.ThrowIfNull(parseTable);
+
+        while (true)
+        {
+            var line = ReadLine();
+
+            // EOF before encountering END?
+            if (EndOfFile && string.IsNullOrWhiteSpace(line))
+            {
+                ThrowMissingEndToken();
+            }
+
+            if (!TryGetFirstToken(line, out var field))
+            {
+                continue;
+            }
+
+            if (IsEndToken(field))
+            {
+                return;
+            }
+
+            if (!TryParseKnownField(field, ref what, parseTable))
+            {
+                ThrowUnknownField(field);
+            }
+
+            // Match original "sanity check": reached EOF without closing end token
+            if (EndOfFile)
+            {
+                ThrowMissingEndToken();
+            }
+        }
     }
 
     /// <summary>Retrieves the next non-separator token from the current INI data stream.</summary>
@@ -350,6 +427,27 @@ public class Ini
             select block.Value
         ).FirstOrDefault();
 
+    private static bool IsEndToken(string token) => token.Equals(BlockEnd, StringComparison.OrdinalIgnoreCase);
+
+    private static bool TryGetFirstToken(string? line, [NotNullWhen(true)] out string? token)
+    {
+        token = null;
+
+        if (string.IsNullOrWhiteSpace(line))
+        {
+            return false;
+        }
+
+        var parts = line.Split(Separators.ToArray(), StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+        {
+            return false;
+        }
+
+        token = parts[0];
+        return true;
+    }
+
     private int FillBuffer(byte[] buffer, int maxCharsPerLine)
     {
         var length = 0;
@@ -446,4 +544,82 @@ public class Ini
         token = null;
         return false;
     }
+
+#pragma warning disable IDE0022 // Use expression body for methods
+    private string GetCurrentBlockForError()
+    {
+#if DEBUG
+        return CurrentBlockStart ?? NoBlock;
+#else
+        return NoBlock;
+#endif
+    }
+#pragma warning restore IDE0022 // Use expression body for methods
+
+    private void ParseKnownField(
+        FieldParse fp,
+        int index,
+        ref object what,
+        MultiIniFieldParse parseTable,
+        string fieldForErrorMessage
+    )
+    {
+        try
+        {
+            var instance = what;
+
+            var byteOffset = fp.Offset + (int)parseTable.GetNthExtraOffset(index);
+            var store = byteOffset == 0 ? what : new OffsetStore(what, byteOffset);
+
+            fp.Parse(this, ref instance, ref store, fp.UserData);
+
+            if (instance is not null)
+            {
+                what = instance;
+            }
+        }
+        catch (Exception ex)
+        {
+            var message =
+                $"[LINE: {LineNumber} - FILE: '{FileName}'] Error reading field '{fieldForErrorMessage}' of block '{GetCurrentBlockForError()}'";
+
+            Debug.Fail(message, ex.ToString());
+            throw new InvalidOperationException(message, ex);
+        }
+    }
+
+    private bool TryParseKnownField(string field, ref object what, MultiIniFieldParse parseTable)
+    {
+        for (var i = 0; i < parseTable.Count; i++)
+        {
+            FieldParse fp = parseTable.GetNthFieldParse(i);
+            if (!fp.Token.Equals(field, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            ParseKnownField(fp, i, ref what, parseTable, field);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ThrowUnknownField(string field)
+    {
+        var message =
+            $"[LINE: {LineNumber} - FILE: '{FileName}'] Unknown field '{field}' in block '{GetCurrentBlockForError()}'";
+        Debug.Fail(message);
+        throw new InvalidOperationException(message);
+    }
+
+    private void ThrowMissingEndToken()
+    {
+        var message =
+            $"Error parsing block '{GetCurrentBlockForError()}', in INI file '{FileName}'. Missing '{BlockEnd}' token.";
+        Debug.Fail(message);
+        throw new InvalidDataException(message);
+    }
+
+    private sealed record OffsetStore(object Base, int ByteOffset);
 }

@@ -104,6 +104,26 @@ public partial class GlobalData : SubsystemBase
 
     private static GlobalData? TheOriginal { get; set; }
 
+    /// <summary>Parses the game data definition.</summary>
+    /// <param name="logger">The logger to use for logging.</param>
+    /// <param name="ini">The game data definition to parse.</param>
+    public static void ParseGameDataDefinition(ILogger logger, Ini ini)
+    {
+        ArgumentNullException.ThrowIfNull(ini);
+
+        if (TheWritableGlobalData is not null && ini.LoadType is not IniLoadType.Multifile)
+        {
+            if (ini.LoadType is IniLoadType.CreateOverrides)
+            {
+                _ = NewOverride();
+            }
+        }
+        else
+        {
+            TheWritableGlobalData ??= new GlobalData(logger);
+        }
+    }
+
     /// <inheritdoc/>
     /// <remarks>Generates the executable CRC.</remarks>
     public override void Initialize() => ExeCrc = GenerateCrc();
@@ -327,6 +347,8 @@ public partial class GlobalData : SubsystemBase
 
     private sealed class JaggedArrayList<T> : IList<IList<T>>
     {
+        private const string ErrorMessage = "Fixed-size.";
+
         private readonly IList<T>[] _rows;
 
         public JaggedArrayList(T[][] data)
@@ -356,18 +378,18 @@ public partial class GlobalData : SubsystemBase
 
         public int IndexOf(IList<T> item) => Array.IndexOf(_rows, item);
 
-        public void Insert(int index, IList<T> item) => throw new NotSupportedException("Fixed-size.");
+        public void Insert(int index, IList<T> item) => throw new NotSupportedException(ErrorMessage);
 
-        public void RemoveAt(int index) => throw new NotSupportedException("Fixed-size.");
+        public void RemoveAt(int index) => throw new NotSupportedException(ErrorMessage);
 
-        public void Add(IList<T> item) => throw new NotSupportedException("Fixed-size.");
+        public void Add(IList<T> item) => throw new NotSupportedException(ErrorMessage);
 
-        public void Clear() => throw new NotSupportedException("Fixed-size.");
+        public void Clear() => throw new NotSupportedException(ErrorMessage);
 
         public bool Contains(IList<T> item) => ((ICollection<IList<T>>)_rows).Contains(item);
 
         public void CopyTo(IList<T>[] array, int arrayIndex) => _rows.CopyTo(array, arrayIndex);
 
-        public bool Remove(IList<T> item) => throw new NotSupportedException("Fixed-size.");
+        public bool Remove(IList<T> item) => throw new NotSupportedException(ErrorMessage);
     }
 }

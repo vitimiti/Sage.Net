@@ -23,11 +23,14 @@ namespace Sage.Net.Generals.GameEngine.Common;
 /// <summary>Represents a transfer operation.</summary>
 public abstract class TransferOperation
 {
+    /// <summary>Gets or sets the transfer mode.</summary>
+    public TransferMode Mode { get; protected set; } = TransferMode.Invalid;
+
+    /// <summary>Gets or sets the transfer identifier.</summary>
+    public string Identifier { get; protected set; } = string.Empty;
+
     /// <summary>Gets or sets the transfer options.</summary>
     public TransferOptions Options { get; protected set; } = TransferOptions.None;
-
-    /// <summary>Gets or sets the transfer mode.</summary>
-    protected TransferMode Mode { get; set; }
 
     /// <summary>Opens a transfer operation using the specified identifier.</summary>
     /// <param name="identifier">The unique identifier for the transfer operation to be opened.</param>

@@ -12,6 +12,7 @@
     <RegenerateTrigonometryTables Condition="'$(RegenerateTrigonometryTables)' == ''"
       >false</RegenerateTrigonometryTables
     >
+    <Deterministic Condition="'$(Deterministic)' == ''">false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DefineConstants>$(DefineConstants);RTS_DEBUG</DefineConstants>
@@ -28,6 +29,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(RegenerateTrigonometryTables)' == 'true'">
     <DefineConstants>$(DefineConstants);REGENERATE_TRIGONOMETRY_TABLES</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Deterministic)' == 'true'">
+    <DefineConstants>$(DefineConstants);DETERMINISTIC</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

@@ -21,6 +21,7 @@
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using Sage.Net.Core.GameEngine.Common;
 
 namespace Sage.Net.Generals.GameEngine.Common;
 
@@ -72,8 +73,10 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
             Log.VersionData(logger, versionMessage);
         }
 
-        SubsystemList.TheSubsystemList = new();
+        SubsystemList.TheSubsystemList = new SubsystemList();
         SubsystemList.TheSubsystemList.AddSubsystem(this);
+
+        RandomValue.InitializeRandom();
     }
 
     /// <summary>Resets the game engine.</summary>

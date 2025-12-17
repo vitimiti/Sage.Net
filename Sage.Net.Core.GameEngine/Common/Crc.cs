@@ -32,18 +32,25 @@ public class Crc
     public uint Value { get; private set; }
 
     /// <summary>Computes the CRC value based on the provided byte buffer and updates the current CRC value.</summary>
-    /// <param name="buffer">A read-only span of bytes containing the data to compute the CRC from.</param>
+    /// <param name="buffer">A pointer to the first byte of the buffer to compute the CRC from.</param>
+    /// <param name="bufferSize">The size of the buffer to compute the CRC from.</param>
 #if !DEBUG
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-    public void Compute(ReadOnlySpan<byte> buffer)
+    public unsafe void Compute(nint buffer, int bufferSize) => Compute((byte*)buffer, bufferSize);
+
+    /// <inheritdoc cref="Compute(nint, int)"/>
+#if !DEBUG
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+    public unsafe void Compute(void* buffer, int bufferSize)
     {
-        if (buffer.Length < 1)
+        if (buffer is null || bufferSize < 1)
         {
             return;
         }
 
-        foreach (var b in buffer)
+        foreach (var b in new Span<byte>(buffer, bufferSize))
         {
             var hiBit = (Value & 0x8000_0000) != 0 ? 1U : 0U;
             Value <<= 1;

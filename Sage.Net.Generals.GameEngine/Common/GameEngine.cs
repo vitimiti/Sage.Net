@@ -91,6 +91,7 @@ public abstract partial class GameEngine(ILogger logger) : SubsystemBase
         );
 
         InitializeSubsystem(GlobalData.TheWritableGlobalData, "TheWritableGlobalData", null);
+        GlobalData.TheWritableGlobalData.ParseCustomDefinition();
     }
 
     /// <summary>Resets the game engine.</summary>

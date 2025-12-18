@@ -1,0 +1,12 @@
+{
+  "Sage": {
+    "Diagnostics": {
+      "Dumps": {
+        "DumpDirectory": "Dumps",
+        "DumpLevel": "WithHeap",
+        "MaxDumpFiles": 1,
+        "FilePrefix": "sage_crash"
+      }
+    }
+  }
+}

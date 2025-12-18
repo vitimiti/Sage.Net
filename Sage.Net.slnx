@@ -1,1 +1,3 @@
-<Solution />
+<Solution>
+  <Project Path="Sage.Net.Diagnostics/Sage.Net.Diagnostics.csproj" />
+</Solution>

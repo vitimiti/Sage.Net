@@ -7,31 +7,6 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <RtsEnableCrashdump Condition="'$(RtsEnableCrashdump)' == ''">false</RtsEnableCrashdump>
-    <RtsEnableCrashdump Condition="'$(DumpPerfStats)' == ''">false</RtsEnableCrashdump>
-    <RegenerateTrigonometryTables Condition="'$(RegenerateTrigonometryTables)' == ''"
-      >false</RegenerateTrigonometryTables
-    >
-    <Deterministic Condition="'$(Deterministic)' == ''">false</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <DefineConstants>$(DefineConstants);RTS_DEBUG</DefineConstants>
-    <Optimize>false</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(RtsEnableCrashdump)' == 'true'">
-    <DefineConstants>$(DefineConstants);RTS_ENABLE_CRASHDUMP</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DumpPerfStats)' == 'true'">
-    <DefineConstants>$(DefineConstants);DUMP_PERF_STATS</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(RegenerateTrigonometryTables)' == 'true'">
-    <DefineConstants>$(DefineConstants);REGENERATE_TRIGONOMETRY_TABLES</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Deterministic)' == 'true'">
-    <DefineConstants>$(DefineConstants);DETERMINISTIC</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Label="Deterministic Builds">
     <Deterministic>true</Deterministic>

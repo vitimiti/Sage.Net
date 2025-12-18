@@ -71,6 +71,12 @@ public partial class DumpService : IDumpService
     )]
     public void WriteDump(string reason)
     {
+        if (!_options.Enabled)
+        {
+            Log.DumpDisabled(_logger);
+            return;
+        }
+
         try
         {
             if (!Directory.Exists(_systemPath))
@@ -123,6 +129,12 @@ public partial class DumpService : IDumpService
 
     private static partial class Log
     {
+        [LoggerMessage(
+            LogLevel.Trace,
+            Message = "Dump creation requested but skipped because it is disabled in configuration."
+        )]
+        public static partial void DumpDisabled(ILogger logger);
+
         [LoggerMessage(LogLevel.Information, Message = "Dump created successfully: {Path}")]
         public static partial void DumpCreatedSuccessfully(ILogger logger, string path);
 

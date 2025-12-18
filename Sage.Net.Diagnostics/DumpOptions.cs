@@ -35,6 +35,14 @@ namespace Sage.Net.Diagnostics;
 public class DumpOptions
 {
     /// <summary>
+    /// Gets or sets a value indicating whether dumps are enabled.
+    /// </summary>
+    /// <remarks>
+    /// Defaults to <see langword="false"/>.
+    /// </remarks>
+    public bool Enabled { get; set; }
+
+    /// <summary>
     /// Gets or sets the directory name (relative to the application data folder) where dump files are written.
     /// </summary>
     /// <remarks>

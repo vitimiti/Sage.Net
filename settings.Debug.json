@@ -4,16 +4,16 @@
       "Default": "Information",
       "Microsoft": "Warning",
       "Microsoft.Hosting.Lifetime": "Information",
-      "Sage.Net": "Information"
+      "Sage.Net": "Debug"
     }
   },
   "Sage": {
     "Diagnostics": {
       "Dumps": {
-        "Enabled": false,
+        "Enabled": true,
         "DumpDirectory": "Dumps",
-        "DumpLevel": "Normal",
-        "MaxDumpFiles": 5,
+        "DumpLevel": "WithHeap",
+        "MaxDumpFiles": 1,
         "FilePrefix": "sage_crash"
       }
     }

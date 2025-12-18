@@ -57,7 +57,7 @@ public partial class SdlCrashDialogProvider : ICrashDialogProvider
     {
         public const uint MessageBoxError = 0x0010;
 
-        [LibraryImport("SDL", EntryPoint = "SDL_ShowSimpleMessageBox", StringMarshalling = StringMarshalling.Utf8)]
+        [LibraryImport("SDL3", EntryPoint = "SDL_ShowSimpleMessageBox", StringMarshalling = StringMarshalling.Utf8)]
         [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
         [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
         [return: MarshalAs(UnmanagedType.I4)]

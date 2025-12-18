@@ -55,8 +55,14 @@ public class DumpOptions
     /// Gets or sets the level of detail to include in the generated process dump.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// Defaults to <see cref="DumpType.Normal"/>. Choose higher levels only when necessary, as they can produce
     /// significantly larger files.
+    /// </para>
+    /// <para>
+    /// You should use <see cref="DumpType.WithHeap"/> carefully and only for debugging purposes, as it can be several
+    /// gigabytes in size.
+    /// </para>
     /// </remarks>
     public DumpType DumpLevel { get; set; } = DumpType.Normal;
 

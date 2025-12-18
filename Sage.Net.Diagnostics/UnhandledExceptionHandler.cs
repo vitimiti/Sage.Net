@@ -44,15 +44,23 @@ public static partial class UnhandledExceptionHandler
     {
         ArgumentNullException.ThrowIfNull(serviceProvider);
 
+        ILogger? logger = serviceProvider
+            .GetService<ILoggerFactory>()
+            ?.CreateLogger("Sage.Net.Diagnostics.UnhandledException");
+
+        AppDomain.CurrentDomain.FirstChanceException += (sender, e) =>
+        {
+            if (e.Exception is { } exception && logger is not null)
+            {
+                Log.LogFirstChanceException(logger, exception);
+            }
+        };
+
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
             try
             {
                 var exception = (Exception)args.ExceptionObject;
-                ILogger? logger = serviceProvider
-                    .GetService<ILoggerFactory>()
-                    ?.CreateLogger("Sage.Net.Diagnostics.UnhandledException");
-
                 IDumpService? dumpService = serviceProvider.GetService<IDumpService>();
                 if (logger is not null)
                 {
@@ -77,6 +85,9 @@ public static partial class UnhandledExceptionHandler
 
     private static partial class Log
     {
+        [LoggerMessage(LogLevel.Trace, Message = "First-chance exception detected.")]
+        public static partial void LogFirstChanceException(ILogger logger, Exception exception);
+
         [LoggerMessage(
             LogLevel.Critical,
             Message = "An unhandled exception occurred. The application will now terminate."

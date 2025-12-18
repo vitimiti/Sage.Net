@@ -38,7 +38,6 @@ public partial class DumpService : IDumpService
 {
     private readonly DumpOptions _options;
     private readonly ILogger<DumpService> _logger;
-    private readonly string _systemPath;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DumpService"/> class.
@@ -52,7 +51,7 @@ public partial class DumpService : IDumpService
 
         _options = options.Value;
         _logger = logger;
-        _systemPath = Path.Combine(
+        DumpDirectoryPath = Path.Combine(
             Environment.GetFolderPath(
                 OperatingSystem.IsWindows()
                     ? Environment.SpecialFolder.LocalApplicationData
@@ -62,6 +61,9 @@ public partial class DumpService : IDumpService
             _options.DumpDirectory
         );
     }
+
+    /// <inheritdoc />
+    public string DumpDirectoryPath { get; }
 
     /// <inheritdoc />
     [SuppressMessage(
@@ -79,9 +81,9 @@ public partial class DumpService : IDumpService
 
         try
         {
-            if (!Directory.Exists(_systemPath))
+            if (!Directory.Exists(DumpDirectoryPath))
             {
-                _ = Directory.CreateDirectory(_systemPath);
+                _ = Directory.CreateDirectory(DumpDirectoryPath);
             }
 
             CleanOldDumps();
@@ -91,7 +93,7 @@ public partial class DumpService : IDumpService
 
             var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss", CultureInfo.InvariantCulture);
             var fileName = $"{_options.FilePrefix}_{reason}_{timestamp}.dmp";
-            var fullPath = Path.Combine(_systemPath, fileName);
+            var fullPath = Path.Combine(DumpDirectoryPath, fileName);
 
             // This is the core call that works cross-platform
             client.WriteDump(_options.DumpLevel, fullPath);
@@ -106,12 +108,12 @@ public partial class DumpService : IDumpService
 
     private void CleanOldDumps()
     {
-        if (!Directory.Exists(_systemPath))
+        if (!Directory.Exists(DumpDirectoryPath))
         {
             return;
         }
 
-        var files = new DirectoryInfo(_systemPath)
+        var files = new DirectoryInfo(DumpDirectoryPath)
             .GetFiles($"{_options.FilePrefix}*.dmp")
             .OrderByDescending(f => f.CreationTime)
             .ToList();

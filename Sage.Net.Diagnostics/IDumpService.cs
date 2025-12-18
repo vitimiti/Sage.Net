@@ -30,6 +30,11 @@ namespace Sage.Net.Diagnostics;
 public interface IDumpService
 {
     /// <summary>
+    /// Gets the full path to the directory where dump files are written.
+    /// </summary>
+    string DumpDirectoryPath { get; }
+
+    /// <summary>
     /// Creates a diagnostic process dump for the current process using the configured
     /// <see cref="DumpOptions"/>. The dump file name incorporates the specified <paramref name="reason"/>.
     /// </summary>

@@ -21,19 +21,43 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sage.Net.Abstractions;
 using Sage.Net.Diagnostics;
 using Sage.Net.Diagnostics.Sdl3;
 using Sage.Net.Game;
 
-IConfigurationRoot configuration = new ConfigurationBuilder()
+var switchMappings = new Dictionary<string, string>
+{
+    { "-mod", "mod" },
+    { "-id", "Sage:Game:GameId" },
+    { "-title", "Sage:Game:WindowTitle" },
+};
+
+IConfiguration argsConfig = new ConfigurationBuilder().AddCommandLine(args, switchMappings).Build();
+
+var modName = argsConfig["mod"];
+
+IConfigurationBuilder configBuilder = new ConfigurationBuilder()
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-    .AddJsonFile("settings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile("settings.json", optional: false, reloadOnChange: true);
+
 #if DEBUG
-    .AddJsonFile("settings.Debug.json", optional: true, reloadOnChange: true)
+configBuilder.AddJsonFile("settings.Debug.json", optional: true, reloadOnChange: true);
 #endif
-    .Build();
+
+if (!string.IsNullOrEmpty(modName))
+{
+    configBuilder.AddJsonFile($"settings.{modName}.json", optional: true, reloadOnChange: true);
+#if DEBUG
+    configBuilder.AddJsonFile($"settings.{modName}.Debug.json", optional: true, reloadOnChange: true);
+#endif
+}
+
+IConfigurationRoot configuration = configBuilder.AddCommandLine(args, switchMappings).Build();
 
 var services = new ServiceCollection();
+
+services.Configure<GameOptions>(configuration.GetSection("Sage:Game"));
 
 services.AddLogging(builder =>
 {

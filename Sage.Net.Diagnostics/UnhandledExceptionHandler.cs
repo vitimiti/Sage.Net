@@ -70,11 +70,13 @@ public static partial class UnhandledExceptionHandler
                 dumpService?.WriteDump("UnhandledException");
 
                 ICrashDialogProvider? dialogProvider = serviceProvider.GetService<ICrashDialogProvider>();
-                if (dialogProvider is not null)
+                if (dialogProvider is null)
                 {
-                    var path = dumpService?.DumpDirectoryPath ?? "***Unknown Dump Folder***";
-                    dialogProvider.ShowCrashDialog(exception, path);
+                    return;
                 }
+
+                var path = dumpService?.DumpDirectoryPath ?? "***Unknown Dump Folder***";
+                dialogProvider.ShowCrashDialog(exception, path);
             }
             catch
             {

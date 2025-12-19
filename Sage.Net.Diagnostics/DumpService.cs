@@ -23,6 +23,7 @@ using System.Globalization;
 using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Sage.Net.Abstractions;
 
 namespace Sage.Net.Diagnostics;
 
@@ -42,22 +43,33 @@ public partial class DumpService : IDumpService
     /// <summary>
     /// Initializes a new instance of the <see cref="DumpService"/> class.
     /// </summary>
-    /// <param name="options">The options monitor providing <see cref="DumpOptions"/> values.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="options"/> is <see langword="null"/>.</exception>
-    public DumpService(IOptions<DumpOptions> options, ILogger<DumpService> logger)
+    /// <param name="dumpOptions">The options used to configure dump generation.</param>
+    /// <param name="gameOptions">The options used to identify the current game.</param>
+    /// <param name="logger">The logger used to log events.</param>
+    /// <remarks>
+    /// This service generates process dumps and stores them in a designated directory, which is derived based on application configuration and platform-specific user data paths.
+    /// It also manages dump file retention by enforcing a maximum file count limit and removing older files as needed.
+    /// </remarks>
+    public DumpService(
+        IOptions<DumpOptions> dumpOptions,
+        IOptions<GameOptions> gameOptions,
+        ILogger<DumpService> logger
+    )
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(dumpOptions);
+        ArgumentNullException.ThrowIfNull(gameOptions);
 
-        _options = options.Value;
+        _options = dumpOptions.Value;
+        GameOptions gameOpts = gameOptions.Value;
         _logger = logger;
+
         DumpDirectoryPath = Path.Combine(
             Environment.GetFolderPath(
                 OperatingSystem.IsWindows()
                     ? Environment.SpecialFolder.LocalApplicationData
                     : Environment.SpecialFolder.ApplicationData
             ),
-            "Sage.Net",
+            gameOpts.GameId,
             _options.DumpDirectory
         );
     }

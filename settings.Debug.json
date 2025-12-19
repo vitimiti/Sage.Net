@@ -8,6 +8,10 @@
     }
   },
   "Sage": {
+    "Game": {
+      "GameId": "SageGame",
+      "WindowTitle": "Sage.Net Game"
+    },
     "Diagnostics": {
       "Dumps": {
         "Enabled": true,

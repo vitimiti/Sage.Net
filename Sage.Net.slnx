@@ -2,6 +2,7 @@
   <Folder Name="/Platform/">
     <Project Path="Sage.Net.Diagnostics.Sdl3/Sage.Net.Diagnostics.Sdl3.csproj" />
   </Folder>
+  <Project Path="Sage.Net.Abstractions/Sage.Net.Abstractions.csproj" />
   <Project Path="Sage.Net.Diagnostics/Sage.Net.Diagnostics.csproj" />
   <Project Path="Sage.Net.Game/Sage.Net.Game.csproj" />
 </Solution>

@@ -44,10 +44,10 @@ public partial class SdlCrashDialogProvider : ICrashDialogProvider
         var message = $"""
             The engine has encountered a critical error and must close.
 
-            Details: {ex.GetType().Name}
-            {ex.Message}
+            Dump Path (if enabled in 'settings.json'): {dumpPath}
 
-            A crash dump has been (if nothing else failed) generated in {dumpPath}.
+            --- Technical Details ---
+            {ex}
             """;
 
         _ = Sdl.ShowSimpleMessageBox(Sdl.MessageBoxError, title, message, nint.Zero);

@@ -30,12 +30,17 @@ internal sealed class SageGame : IDisposable
     private readonly ILogger<SageGame> _logger;
     private readonly IServiceProvider _services;
     private readonly GameOptions _gameOptions;
+    private readonly string _baseGamePath;
 
     public SageGame(IServiceProvider services)
     {
         _logger = services.GetRequiredService<ILogger<SageGame>>();
         _services = services;
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
+
+        _baseGamePath =
+            _gameOptions.BaseGamePaths.Select(ResolvePath).FirstOrDefault(Directory.Exists)
+            ?? Environment.CurrentDirectory;
     }
 
     public void Run() => throw new NotImplementedException();
@@ -44,4 +49,12 @@ internal sealed class SageGame : IDisposable
     {
         // TODO release managed resources here
     }
+
+    private static string ResolvePath(string path) =>
+        path.StartsWith('~')
+            ? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                path.TrimStart('~', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+            )
+            : path;
 }

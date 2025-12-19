@@ -20,13 +20,23 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Sage.Net.Abstractions;
 
 namespace Sage.Net.Game;
 
-internal sealed class SageGame(IServiceProvider services) : IDisposable
+internal sealed class SageGame : IDisposable
 {
-    private readonly ILogger<SageGame> _logger = services.GetRequiredService<ILogger<SageGame>>();
-    private readonly IServiceProvider _services = services;
+    private readonly ILogger<SageGame> _logger;
+    private readonly IServiceProvider _services;
+    private readonly GameOptions _gameOptions;
+
+    public SageGame(IServiceProvider services)
+    {
+        _logger = services.GetRequiredService<ILogger<SageGame>>();
+        _services = services;
+        _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
+    }
 
     public void Run() => throw new NotImplementedException();
 

@@ -55,4 +55,25 @@ public class GameOptions
     /// running application.
     /// </remarks>
     public string WindowTitle { get; set; } = "Sage.Net Game";
+
+    /// <summary>
+    /// Gets the collection of base directories where game assets are located.
+    /// </summary>
+    /// <value>
+    /// An <see cref="IList{String}"/> containing paths to the primary directories used for loading game assets.
+    /// The collection can include multiple paths to accommodate distributed or modular content storage.
+    /// </value>
+    /// <remarks>
+    /// <para>
+    /// The <see cref="BaseGamePaths"/> property enables the game engine to locate essential resources,
+    /// such as textures, models, and other assets, across specified directories.
+    /// This is particularly useful for scenarios where the game assets are spread across multiple locations,
+    /// such as custom mods, extensions, or localized configurations.
+    /// </para>
+    /// <para>
+    /// The game assets will be searched for in the order specified in the collection. The first matching asset
+    /// will be used, and the rest will be ignored.
+    /// </para>
+    /// </remarks>
+    public IList<string> BaseGamePaths { get; } = [Environment.CurrentDirectory];
 }

@@ -1,25 +1,8 @@
 {
-  "Logging": {
-    "LogLevel": {
-      "Default": "Information",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information",
-      "Sage.Net": "Information"
-    }
-  },
   "Sage": {
     "Game": {
       "GameId": "GeneralsMD",
       "WindowTitle": "Command and Conquer: Generals Zero Hour"
-    },
-    "Diagnostics": {
-      "Dumps": {
-        "Enabled": false,
-        "DumpDirectory": "Dumps",
-        "DumpLevel": "Normal",
-        "MaxDumpFiles": 5,
-        "FilePrefix": "sage_crash"
-      }
     }
   }
 }

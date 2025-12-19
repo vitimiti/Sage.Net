@@ -39,15 +39,5 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
-    <Content Condition="'$(Configuration)' == 'Debug'" Include="..\settings.Generals.Debug.json">
-      <Link>settings.Generals.Debug.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
-    <Content Condition="'$(Configuration)' == 'Debug'" Include="..\settings.ZeroHour.Debug.json">
-      <Link>settings.ZeroHour.Debug.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-    </Content>
   </ItemGroup>
 </Project>

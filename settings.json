@@ -14,10 +14,10 @@
     },
     "Diagnostics": {
       "Dumps": {
-        "Enabled": false,
+        "Enabled": true,
         "DumpDirectory": "Dumps",
         "DumpLevel": "Normal",
-        "MaxDumpFiles": 5,
+        "MaxDumpFiles": 2,
         "FilePrefix": "sage_crash"
       }
     }

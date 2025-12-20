@@ -4,14 +4,19 @@
       "GameId": "GeneralsMD",
       "WindowTitle": "Command and Conquer: Generals Zero Hour",
       "BaseGamePaths": [
-        "C:\\Program Files (x86)\\EA Games\\Command and Conquer Generals Zero Hour",
         "C:\\Program Files\\EA Games\\Command and Conquer Generals Zero Hour",
-        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Command & Conquer Generals - Zero Hour",
+        "C:\\Program Files (x86)\\EA Games\\Command and Conquer Generals Zero Hour",
         "C:\\Program Files (x86)\\EA Games\\Command & Conquer Generals Zero Hour",
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Command & Conquer Generals - Zero Hour",
         "C:\\Program Files (x86)\\EA Games\\Command & Conquer The First Decade\\Command & Conquer(tm) Generals Zero Hour",
         "/Applications/Command & Conquer Generals Zero Hour",
         "~/.steam/steam/steamapps/common/Command & Conquer Generals - Zero Hour"
       ]
+    }
+  },
+  "Diagnostics": {
+    "Dumps": {
+      "FilePrefix": "zerohour_crash"
     }
   }
 }

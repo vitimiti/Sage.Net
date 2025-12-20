@@ -9,8 +9,7 @@
       "Dumps": {
         "Enabled": true,
         "DumpLevel": "WithHeap",
-        "MaxDumpFiles": 1,
-        "FilePrefix": "sage_crash"
+        "MaxDumpFiles": 1
       }
     }
   }

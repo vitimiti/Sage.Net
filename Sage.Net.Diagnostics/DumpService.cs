@@ -24,6 +24,7 @@ using Microsoft.Diagnostics.NETCore.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sage.Net.Abstractions;
+using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Diagnostics;
 
@@ -85,6 +86,8 @@ public partial class DumpService : IDumpService
     )]
     public void WriteDump(string reason)
     {
+        using IDisposable? logContext = LogContext.BeginOperation(_logger, nameof(WriteDump));
+
         if (!_options.Enabled)
         {
             Log.DumpDisabled(_logger);

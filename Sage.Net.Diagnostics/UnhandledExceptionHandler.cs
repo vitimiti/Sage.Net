@@ -21,6 +21,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Diagnostics;
 
@@ -52,6 +53,7 @@ public static partial class UnhandledExceptionHandler
         {
             if (e.Exception is { } exception && logger is not null)
             {
+                using IDisposable? logContext = LogContext.BeginOperation(logger, "FirstChanceException");
                 Log.LogFirstChanceException(logger, exception);
             }
         };
@@ -64,6 +66,7 @@ public static partial class UnhandledExceptionHandler
                 IDumpService? dumpService = serviceProvider.GetService<IDumpService>();
                 if (logger is not null)
                 {
+                    using IDisposable? logContext = LogContext.BeginOperation(logger, "UnhandledException");
                     Log.LogUnhandledException(logger, exception);
                 }
 

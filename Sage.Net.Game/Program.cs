@@ -23,7 +23,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sage.Net.Abstractions;
 using Sage.Net.Diagnostics;
-using Sage.Net.Diagnostics.Sdl3;
 using Sage.Net.Game;
 using Sage.Net.Sdl3;
 

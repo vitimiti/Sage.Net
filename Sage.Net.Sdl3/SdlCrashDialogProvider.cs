@@ -20,8 +20,9 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Sage.Net.Diagnostics;
 
-namespace Sage.Net.Diagnostics.Sdl3;
+namespace Sage.Net.Sdl3;
 
 /// <summary>
 /// Provides an implementation of <see cref="ICrashDialogProvider"/> that displays a crash dialog
@@ -50,17 +51,6 @@ public partial class SdlCrashDialogProvider : ICrashDialogProvider
             {ex}
             """;
 
-        _ = Sdl.ShowSimpleMessageBox(Sdl.MessageBoxError, title, message, nint.Zero);
-    }
-
-    private static partial class Sdl
-    {
-        public const uint MessageBoxError = 0x0010;
-
-        [LibraryImport("SDL3", EntryPoint = "SDL_ShowSimpleMessageBox", StringMarshalling = StringMarshalling.Utf8)]
-        [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
-        [return: MarshalAs(UnmanagedType.I4)]
-        public static partial bool ShowSimpleMessageBox(uint flags, string title, string message, nint window);
+        _ = Sdl.ShowErrorDialog(title, message);
     }
 }

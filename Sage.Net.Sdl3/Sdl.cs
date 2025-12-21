@@ -28,6 +28,8 @@ internal static unsafe partial class Sdl
 {
     public const uint InitVideo = 0x0020;
 
+    private const uint MessageBoxError = 0x0010;
+
     public static string GetError => Utf8StringMarshaller.ConvertToManaged(GetErrorUnsafe()) ?? "Unknown Error";
 
     [LibraryImport("SDL3", EntryPoint = "SDL_Init")]
@@ -46,6 +48,9 @@ internal static unsafe partial class Sdl
     [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
     [return: MarshalAs(UnmanagedType.I4)]
     public static partial bool PollEvent(out SdlEvent sdlEvent);
+
+    public static bool ShowErrorDialog(string title, string message) =>
+        ShowSimpleMessageBox(MessageBoxError, title, message, nint.Zero);
 
     [NativeMarshalling(typeof(SafeHandleMarshaller<Surface>))]
     public sealed class Surface : SafeHandle
@@ -185,6 +190,12 @@ internal static unsafe partial class Sdl
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
     private static partial void DestroyWindow(nint window);
+
+    [LibraryImport("SDL3", EntryPoint = "SDL_ShowSimpleMessageBox", StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.UserDirectories)]
+    [return: MarshalAs(UnmanagedType.I4)]
+    private static partial bool ShowSimpleMessageBox(uint flags, string title, string message, nint window);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct NativeSurface

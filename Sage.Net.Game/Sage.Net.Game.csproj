@@ -6,7 +6,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sage.Net.Diagnostics.Sdl3\Sage.Net.Diagnostics.Sdl3.csproj" />
     <ProjectReference Include="..\Sage.Net.Diagnostics\Sage.Net.Diagnostics.csproj" />
     <ProjectReference Include="..\Sage.Net.Abstractions\Sage.Net.Abstractions.csproj" />
     <ProjectReference Include="..\Sage.Net.Io.Big\Sage.Net.Io.Big.csproj" />

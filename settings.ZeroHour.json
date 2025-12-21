@@ -7,10 +7,14 @@
         "C:\\Program Files\\EA Games\\Command and Conquer Generals Zero Hour",
         "C:\\Program Files (x86)\\EA Games\\Command and Conquer Generals Zero Hour",
         "C:\\Program Files (x86)\\EA Games\\Command & Conquer Generals Zero Hour",
-        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Command & Conquer Generals - Zero Hour",
         "C:\\Program Files (x86)\\EA Games\\Command & Conquer The First Decade\\Command & Conquer(tm) Generals Zero Hour",
+        "C:\\Program Files (x86)\\Origin Games\\Command and Conquer Generals Zero Hour",
+        "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Command & Conquer Generals - Zero Hour",
+        "/Applications/Command & Conquer Generals Zero Hour.app/Contents/Resources/Game Data",
         "/Applications/Command & Conquer Generals Zero Hour",
-        "~/.steam/steam/steamapps/common/Command & Conquer Generals - Zero Hour"
+        "~/.steam/steam/steamapps/common/Command & Conquer Generals - Zero Hour",
+        "~/.local/share/Steam/steamapps/common/Command & Conquer Generals - Zero Hour",
+        "~/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Command & Conquer Generals - Zero Hour"
       ]
     }
   },

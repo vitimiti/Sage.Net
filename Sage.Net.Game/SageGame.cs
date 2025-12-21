@@ -62,22 +62,24 @@ internal sealed partial class SageGame : IDisposable
         Log.LogBaseGamePath(_logger, _baseGamePath);
 
         var rawModPath = _gameOptions.ModFilesPath;
-        if (!string.IsNullOrWhiteSpace(rawModPath))
+        if (string.IsNullOrWhiteSpace(rawModPath))
         {
-            _modBigFilesPath = ResolvePath(rawModPath);
-            _loadMods = Directory.Exists(_modBigFilesPath);
-            if (!_loadMods)
-            {
-                return;
-            }
-
-            Log.LogLoadingMods(_logger, _modBigFilesPath);
-            _modBigFilesExtension = string.IsNullOrWhiteSpace(_gameOptions.ModBigFilesExtension)
-                ? ".big"
-                : _gameOptions.ModBigFilesExtension;
-
-            Log.LogModBigExtension(_logger, _modBigFilesExtension);
+            return;
         }
+
+        _modBigFilesPath = ResolvePath(rawModPath);
+        _loadMods = Directory.Exists(_modBigFilesPath);
+        if (!_loadMods)
+        {
+            return;
+        }
+
+        Log.LogLoadingMods(_logger, _modBigFilesPath);
+        _modBigFilesExtension = string.IsNullOrWhiteSpace(_gameOptions.ModBigFilesExtension)
+            ? ".big"
+            : _gameOptions.ModBigFilesExtension;
+
+        Log.LogModBigExtension(_logger, _modBigFilesExtension);
     }
 
     public void Run()

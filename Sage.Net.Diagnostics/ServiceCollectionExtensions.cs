@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
     extension(IServiceCollection services)
     {
         /// <summary>
-        /// Registers diagnostics related services and binds <see cref="DumpOptions"/> from configuration.
+        /// Registers diagnostics related services and binds <see cref="DumpOptions"/> and <see cref="ProfilerOptions"/> from configuration.
         /// </summary>
         /// <param name="configuration">The application configuration root used to bind options.</param>
         /// <returns>The same <see cref="IServiceCollection"/> instance to allow fluent chaining.</returns>
@@ -52,7 +52,11 @@ public static class ServiceCollectionExtensions
             ArgumentNullException.ThrowIfNull(configuration);
 
             _ = services.Configure<DumpOptions>(configuration.GetSection("Sage:Diagnostics:Dumps"));
+            _ = services.Configure<ProfilerOptions>(configuration.GetSection("Sage:Diagnostics:Profiling"));
+
             _ = services.AddSingleton<IDumpService, DumpService>();
+            _ = services.AddSingleton<Profiler>();
+
             return services;
         }
     }

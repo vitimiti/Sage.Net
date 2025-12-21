@@ -32,6 +32,9 @@ internal sealed class SageGame : IDisposable
     private readonly GameOptions _gameOptions;
     private readonly string _baseGamePath;
     private readonly GameTime _gameTime = new();
+    private readonly string? _modBigFilesPath;
+    private readonly string? _modBigFilesExtension;
+    private readonly bool _loadMods;
 
     public SageGame(IServiceProvider services)
     {
@@ -42,6 +45,17 @@ internal sealed class SageGame : IDisposable
         _baseGamePath =
             _gameOptions.BaseGamePaths.Select(ResolvePath).FirstOrDefault(Directory.Exists)
             ?? Environment.CurrentDirectory;
+
+        var rawModPath = _gameOptions.ModBigFilesPath;
+        if (!string.IsNullOrWhiteSpace(rawModPath))
+        {
+            _modBigFilesPath = ResolvePath(rawModPath);
+            _loadMods = Directory.Exists(_modBigFilesPath);
+
+            _modBigFilesExtension = string.IsNullOrWhiteSpace(_gameOptions.ModBigFilesExtension)
+                ? ".big"
+                : _gameOptions.ModBigFilesExtension;
+        }
     }
 
     public void Run()

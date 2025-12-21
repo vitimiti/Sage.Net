@@ -76,4 +76,34 @@ public class GameOptions
     /// </para>
     /// </remarks>
     public IList<string> BaseGamePaths { get; } = [Environment.CurrentDirectory];
+
+    /// <summary>
+    /// Gets or sets the path where the mod's BIG files are located.
+    /// </summary>
+    /// <value>
+    /// A <see cref="string"/> representing the directory path for mod-related BIG files.
+    /// This value may be <c>null</c> if no specific path is defined.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="ModBigFilesPath"/> is used to locate BIG files associated with a mod.
+    /// These files typically contain game data such as assets, configurations, and other
+    /// resources specific to the mod. If not specified, the game engine will NOT load any mods intentionally.
+    /// Mods may be loaded if they have the <c>.big</c> extension and are located within the found base game path, but
+    /// this is NOT recommended.
+    /// </remarks>
+    public string? ModBigFilesPath { get; set; }
+
+    /// <summary>
+    /// Gets or sets the file extension used for identifying large mod files.
+    /// </summary>
+    /// <value>
+    /// A <see cref="string"/> that represents the file extension for mod big files,
+    /// such as <c>".big"</c>. The value is optional and can be <c>null</c>.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="ModBigFilesExtension"/> property determines the specific file extension
+    /// that the engine will recognize and use when loading large mod files. This setting
+    /// facilitates customization by mod creators, enabling support for non-default file extensions.
+    /// </remarks>
+    public string? ModBigFilesExtension { get; set; }
 }

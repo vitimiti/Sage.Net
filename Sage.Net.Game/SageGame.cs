@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sage.Net.Abstractions;
+using Sage.Net.Diagnostics;
 using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Game;
@@ -46,6 +47,8 @@ internal sealed partial class SageGame : IDisposable
         using IDisposable? logContext = LogContext.BeginOperation(_logger, nameof(SageGame));
 
         _services = services;
+        UnhandledExceptionHandler.Install(_services);
+
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
         _splashScreen = services.GetRequiredService<ISplashScreen>();
 

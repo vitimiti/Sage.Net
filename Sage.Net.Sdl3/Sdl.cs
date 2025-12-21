@@ -28,7 +28,7 @@ internal static unsafe partial class Sdl
 {
     public const uint InitVideo = 0x0020;
 
-    public static string? GetError => Utf8StringMarshaller.ConvertToManaged(GetErrorUnsafe());
+    public static string GetError => Utf8StringMarshaller.ConvertToManaged(GetErrorUnsafe()) ?? "Unknown Error";
 
     [LibraryImport("SDL3", EntryPoint = "SDL_Init")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]

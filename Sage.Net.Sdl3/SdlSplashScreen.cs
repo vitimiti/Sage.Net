@@ -52,10 +52,7 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
 
         if (!Sdl.Init(Sdl.InitVideo))
         {
-            var error = Sdl.GetError ?? "Unknown error";
-            Log.SdlInitializationFailed(logger, error);
-
-            throw new InvalidOperationException($"SDL initialization failed ({error}).");
+            throw new InvalidOperationException($"SDL initialization failed ({Sdl.GetError}).");
         }
 
         var bitmapPath = string.Empty;
@@ -90,14 +87,14 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
         _window = Sdl.Window.Create($"{options.WindowTitle} - Loading", _bmp.Width, _bmp.Height, Sdl.Window.Borderless);
         if (_window.IsInvalid)
         {
-            Log.FailedToCreateWindow(logger, Sdl.GetError ?? "Unknown error");
+            Log.FailedToCreateWindow(logger, Sdl.GetError);
             return;
         }
 
         _windowSurface = _window.Surface;
         if (_windowSurface.IsInvalid)
         {
-            Log.FailedToGetWindowSurface(logger, Sdl.GetError ?? "Unknown error");
+            Log.FailedToGetWindowSurface(logger, Sdl.GetError);
             return;
         }
 
@@ -149,12 +146,6 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
 
     private static partial class Log
     {
-        [LoggerMessage(
-            LogLevel.Critical,
-            Message = "SDL cannot be initialized and the game will now terminate ({Error})."
-        )]
-        public static partial void SdlInitializationFailed(ILogger logger, string error);
-
         [LoggerMessage(LogLevel.Debug, Message = "Using bitmap file: {BitmapPath}")]
         public static partial void UsingBitmapFile(ILogger logger, string bitmapPath);
 

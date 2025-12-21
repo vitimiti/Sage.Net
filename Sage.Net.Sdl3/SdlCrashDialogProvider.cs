@@ -18,8 +18,6 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Sage.Net.Diagnostics;
 
 namespace Sage.Net.Sdl3;

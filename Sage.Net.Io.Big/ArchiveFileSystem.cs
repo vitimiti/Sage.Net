@@ -20,18 +20,57 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sage.Net.Io.Big;
 using Sage.Net.LoggerHelper;
 
-namespace Sage.Net.Game;
+namespace Sage.Net.Io.Big;
 
-internal sealed partial class ArchiveFileSystem : IDisposable
+/// <summary>
+/// Manages a virtual file system backed by one or more archive files,
+/// allowing for streamlined access to files stored within the archive system.
+/// </summary>
+public sealed partial class ArchiveFileSystem : IDisposable
 {
     private readonly List<BigArchive> _archives = [];
     private readonly Dictionary<string, BigArchive> _fileToArchiveMap = new(StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// Gets a read-only list of <see cref="BigArchive"/> objects managed by the
+    /// <see cref="ArchiveFileSystem"/>. This collection represents the set of
+    /// archive files currently loaded into the virtual file system and provides
+    /// access to their contents.
+    /// </summary>
+    /// <remarks>
+    /// The <see cref="Archives"/> property provides a centralized view of all
+    /// <see cref="BigArchive"/> instances that have been initialized within the
+    /// context of the <see cref="ArchiveFileSystem"/>. These archives may represent
+    /// game data files, mod files, or other types of data stored in the Big Archive
+    /// format.
+    /// The property is intended to be read-only and ensures that access to the
+    /// underlying collection is safe and free from modification. Modifications to
+    /// the content of the archives should be performed through dedicated methods
+    /// of the <see cref="ArchiveFileSystem"/> or directly on the
+    /// <see cref="BigArchive"/> objects.
+    /// </remarks>
     public IReadOnlyList<BigArchive> Archives => _archives;
 
+    /// <summary>
+    /// Initializes the archive file system by loading archive files from the specified
+    /// base game directory and optional mod directory.
+    /// </summary>
+    /// <param name="services">
+    /// The service provider used to resolve dependencies within the file system.
+    /// </param>
+    /// <param name="baseGameDirectory">
+    /// The directory path where the base game archive files are located.
+    /// </param>
+    /// <param name="modBigFilesDirectory">
+    /// The optional directory path where the mod archive files are located. If null, only
+    /// the base game archives are loaded.
+    /// </param>
+    /// <param name="modBigFileExtension">
+    /// The optional file extension for mod archive files. If null or empty, no mod
+    /// archives will be loaded.
+    /// </param>
     public void Initialize(
         IServiceProvider services,
         string baseGameDirectory,
@@ -39,7 +78,7 @@ internal sealed partial class ArchiveFileSystem : IDisposable
         string? modBigFileExtension
     )
     {
-        ILogger? logger = services.GetService<ILoggerFactory>()?.CreateLogger("Sage.Net.Game.ArchiveFileSystem");
+        ILogger? logger = services.GetService<ILoggerFactory>()?.CreateLogger("Sage.Net.Io.Big.ArchiveFileSystem");
         IDisposable? logContext = null;
         if (logger is not null)
         {
@@ -85,6 +124,10 @@ internal sealed partial class ArchiveFileSystem : IDisposable
             : null;
     }
 
+    /// <summary>
+    /// Releases all resources used by the ArchiveFileSystem, including disposing
+    /// of each loaded archive in the system.
+    /// </summary>
     public void Dispose()
     {
         foreach (BigArchive archive in _archives)

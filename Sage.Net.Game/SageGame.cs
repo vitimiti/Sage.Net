@@ -31,6 +31,7 @@ internal sealed class SageGame : IDisposable
     private readonly IServiceProvider _services;
     private readonly GameOptions _gameOptions;
     private readonly string _baseGamePath;
+    private readonly GameTime _gameTime = new();
 
     public SageGame(IServiceProvider services)
     {
@@ -43,7 +44,25 @@ internal sealed class SageGame : IDisposable
             ?? Environment.CurrentDirectory;
     }
 
-    public void Run() => throw new NotImplementedException();
+    public void Run()
+    {
+        Initialize();
+        var counter = 0;
+        while (true)
+        {
+            _gameTime.Update();
+
+            Update(_gameTime.DeltaTime);
+            Draw(_gameTime.DeltaTime);
+            counter++;
+
+            if (counter >= 60)
+            {
+                // TODO: implement a proper interface for the game loop management.
+                break;
+            }
+        }
+    }
 
     public void Dispose()
     {
@@ -57,4 +76,10 @@ internal sealed class SageGame : IDisposable
                 path.TrimStart('~', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
             )
             : path;
+
+    private void Initialize() => _gameTime.Start();
+
+    private void Update(double deltaTime) => throw new NotImplementedException();
+
+    private void Draw(double deltaTime) => throw new NotImplementedException();
 }

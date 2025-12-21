@@ -101,8 +101,15 @@ public partial class Profiler
         private readonly long _startTicks = Stopwatch.GetTimestamp();
         private readonly double _startGameTime = parent._gameTime?.TotalTime ?? 0;
 
+        private bool _disposed;
+
         public void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             TimeSpan elapsed = Stopwatch.GetElapsedTime(_startTicks);
             var gameTimeElapsed = (parent._gameTime?.TotalTime ?? 0D) - _startGameTime;
 
@@ -116,6 +123,8 @@ public partial class Profiler
                     gameTimeElapsed
                 );
             }
+
+            _disposed = true;
         }
     }
 }

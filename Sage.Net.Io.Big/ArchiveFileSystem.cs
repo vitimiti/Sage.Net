@@ -33,6 +33,8 @@ public sealed partial class ArchiveFileSystem : IDisposable
     private readonly List<BigArchive> _archives = [];
     private readonly Dictionary<string, BigArchive> _fileToArchiveMap = new(StringComparer.OrdinalIgnoreCase);
 
+    private bool _disposed;
+
     /// <summary>
     /// Gets a read-only list of <see cref="BigArchive"/> objects managed by the
     /// <see cref="ArchiveFileSystem"/>. This collection represents the set of
@@ -130,10 +132,17 @@ public sealed partial class ArchiveFileSystem : IDisposable
     /// </summary>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         foreach (BigArchive archive in _archives)
         {
             archive.Dispose();
         }
+
+        _disposed = true;
     }
 
     private void LoadArchives(

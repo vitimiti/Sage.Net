@@ -50,6 +50,8 @@ public sealed partial class BigArchive : IDisposable
     private readonly FileStream _archiveStream;
     private readonly FrozenDictionary<string, BigArchiveEntry> _entries;
 
+    private bool _disposed;
+
     /// <summary>
     /// Gets the name of the archive file.
     /// </summary>
@@ -214,7 +216,17 @@ public sealed partial class BigArchive : IDisposable
     /// of system resources. Failure to do so may result in file handle leaks or other resource contention issues.
     /// Once this method is called, the instance should not be used further.
     /// </remarks>
-    public void Dispose() => _archiveStream.Dispose();
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _archiveStream.Dispose();
+
+        _disposed = true;
+    }
 
     private static partial class Log
     {

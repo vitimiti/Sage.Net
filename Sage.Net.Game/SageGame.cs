@@ -42,6 +42,7 @@ internal sealed partial class SageGame : IDisposable
     private readonly ArchiveFileSystem _archiveFileSystem = new();
 
     private bool _running = true;
+    private bool _disposed;
 
     public SageGame(IServiceProvider services)
     {
@@ -99,8 +100,15 @@ internal sealed partial class SageGame : IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         _splashScreen.Dispose();
         _archiveFileSystem.Dispose();
+
+        _disposed = true;
     }
 
     private void Initialize()

@@ -31,6 +31,7 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
     private Sdl.Window? _window;
     private Sdl.Surface? _windowSurface;
     private Sdl.Surface? _bmp;
+    private bool _disposed;
 
     /// <inheritdoc/>
     public bool InitializationIsComplete { get; set; }
@@ -137,12 +138,19 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
     /// <inheritdoc/>
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+
         _bmp?.Dispose();
         _windowSurface?.Dispose();
         _window?.Dispose();
 
         // TODO: Move this to the main loop system (window system maybe?)
         Sdl.Quit();
+
+        _disposed = true;
     }
 
     private static partial class Log

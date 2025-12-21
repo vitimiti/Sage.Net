@@ -92,10 +92,7 @@ internal sealed partial class SageGame : IDisposable
         }
     }
 
-    public void Dispose()
-    {
-        // TODO release managed resources here
-    }
+    public void Dispose() => _splashScreen.Dispose();
 
     private static string ResolvePath(string path) =>
         path.StartsWith('~')

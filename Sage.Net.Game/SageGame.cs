@@ -22,10 +22,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sage.Net.Abstractions;
+using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Game;
 
-internal sealed class SageGame : IDisposable
+internal sealed partial class SageGame : IDisposable
 {
     private readonly ILogger<SageGame> _logger;
     private readonly IServiceProvider _services;
@@ -35,46 +36,59 @@ internal sealed class SageGame : IDisposable
     private readonly string? _modBigFilesPath;
     private readonly string? _modBigFilesExtension;
     private readonly bool _loadMods;
+    private readonly ISplashScreen _splashScreen;
+
+    private bool _running = true;
 
     public SageGame(IServiceProvider services)
     {
         _logger = services.GetRequiredService<ILogger<SageGame>>();
+        using IDisposable? logContext = LogContext.BeginOperation(_logger, nameof(SageGame));
+
         _services = services;
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
+        _splashScreen = services.GetRequiredService<ISplashScreen>();
+
+        foreach (var path in _gameOptions.BaseGamePaths)
+        {
+            var resolved = ResolvePath(path);
+            Log.LogBaseGamePathCheck(_logger, path, resolved, Directory.Exists(resolved));
+        }
 
         _baseGamePath =
             _gameOptions.BaseGamePaths.Select(ResolvePath).FirstOrDefault(Directory.Exists)
             ?? Environment.CurrentDirectory;
 
-        var rawModPath = _gameOptions.ModBigFilesPath;
+        Log.LogBaseGamePath(_logger, _baseGamePath);
+
+        var rawModPath = _gameOptions.ModFilesPath;
         if (!string.IsNullOrWhiteSpace(rawModPath))
         {
             _modBigFilesPath = ResolvePath(rawModPath);
             _loadMods = Directory.Exists(_modBigFilesPath);
+            if (!_loadMods)
+            {
+                return;
+            }
 
+            Log.LogLoadingMods(_logger, _modBigFilesPath);
             _modBigFilesExtension = string.IsNullOrWhiteSpace(_gameOptions.ModBigFilesExtension)
                 ? ".big"
                 : _gameOptions.ModBigFilesExtension;
+
+            Log.LogModBigExtension(_logger, _modBigFilesExtension);
         }
     }
 
     public void Run()
     {
         Initialize();
-        var counter = 0;
-        while (true)
+        while (_running)
         {
             _gameTime.Update();
 
             Update(_gameTime.DeltaTime);
             Draw(_gameTime.DeltaTime);
-            counter++;
-
-            if (counter >= 60)
-            {
-                // TODO: implement a proper interface for the game loop management.
-                break;
-            }
         }
     }
 
@@ -91,9 +105,43 @@ internal sealed class SageGame : IDisposable
             )
             : path;
 
-    private void Initialize() => _gameTime.Start();
+    private void Initialize()
+    {
+        _gameTime.Start();
+        _splashScreen.Initialize(_baseGamePath, _gameOptions);
 
-    private void Update(double deltaTime) => throw new NotImplementedException();
+        // TODO: Run an actual initialization here.
+        _ = Task.Run(() =>
+        {
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+            _splashScreen.InitializationIsComplete = true;
+        });
+    }
 
-    private void Draw(double deltaTime) => throw new NotImplementedException();
+    private void Update(double deltaTime)
+    {
+        _splashScreen.Update();
+        if (_splashScreen.InitializationIsComplete)
+        {
+            // TODO: Go into the actual game loop here.
+            _running = false;
+        }
+    }
+
+    private void Draw(double deltaTime) => _splashScreen.Draw();
+
+    private static partial class Log
+    {
+        [LoggerMessage(LogLevel.Trace, Message = "Checking base game path: {Raw} -> {Resolved} (Exists: {Exists})")]
+        public static partial void LogBaseGamePathCheck(ILogger logger, string raw, string resolved, bool exists);
+
+        [LoggerMessage(LogLevel.Debug, Message = "Base game path: {Path}")]
+        public static partial void LogBaseGamePath(ILogger logger, string path);
+
+        [LoggerMessage(LogLevel.Information, Message = "Loading mods from: {Path}")]
+        public static partial void LogLoadingMods(ILogger logger, string path);
+
+        [LoggerMessage(LogLevel.Debug, Message = "Using mod BIG files extension: {Extension}")]
+        public static partial void LogModBigExtension(ILogger logger, string extension);
+    }
 }

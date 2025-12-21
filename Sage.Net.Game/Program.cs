@@ -25,13 +25,9 @@ using Sage.Net.Abstractions;
 using Sage.Net.Diagnostics;
 using Sage.Net.Diagnostics.Sdl3;
 using Sage.Net.Game;
+using Sage.Net.Sdl3;
 
-var switchMappings = new Dictionary<string, string>
-{
-    { "-mod", "mod" },
-    { "-id", "Sage:Game:GameId" },
-    { "-title", "Sage:Game:WindowTitle" },
-};
+var switchMappings = new Dictionary<string, string> { { "-mod", "mod" }, { "-id", "Sage:Game:GameId" } };
 
 IConfiguration argsConfig = new ConfigurationBuilder().AddCommandLine(args, switchMappings).Build();
 
@@ -76,6 +72,8 @@ services.AddLogging(builder =>
 services.AddSageDiagnostics(configuration);
 
 services.AddSingleton<ICrashDialogProvider, SdlCrashDialogProvider>();
+
+services.AddSingleton<ISplashScreen, SdlSplashScreen>();
 
 ServiceProvider serviceProvider = services.BuildServiceProvider();
 

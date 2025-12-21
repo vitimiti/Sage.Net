@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Io/">
+    <Project Path="Sage.Net.Io.Big/Sage.Net.Io.Big.csproj" />
+    <Project Path="Sage.Net.Io.Extensions/Sage.Net.Io.Extensions.csproj" />
+  </Folder>
   <Folder Name="/Platform/">
     <Project Path="Sage.Net.Diagnostics.Sdl3/Sage.Net.Diagnostics.Sdl3.csproj" />
     <Project Path="Sage.Net.Sdl3\Sage.Net.Sdl3.csproj" />

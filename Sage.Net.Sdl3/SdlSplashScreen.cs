@@ -20,6 +20,7 @@
 
 using Microsoft.Extensions.Logging;
 using Sage.Net.Abstractions;
+using Sage.Net.Io.Extensions;
 using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Sdl3;
@@ -56,16 +57,16 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
         }
 
         var bitmapPath = string.Empty;
-        if (
-            options.ModFilesPath is not null
-            && options.ModSplashScreenBmpFileName is not null
-            && Directory.Exists(options.ModFilesPath)
-        )
+        if (options.ModFilesPath is not null && options.ModSplashScreenBmpFileName is not null)
         {
-            var tempPath = Path.Combine(options.ModFilesPath, options.ModSplashScreenBmpFileName);
-            if (File.Exists(tempPath))
+            var resolvedModPath = options.ModFilesPath.ResolveTildePath()!;
+            if (Directory.Exists(resolvedModPath))
             {
-                bitmapPath = tempPath;
+                var tempPath = Path.Combine(resolvedModPath, options.ModSplashScreenBmpFileName);
+                if (File.Exists(tempPath))
+                {
+                    bitmapPath = tempPath;
+                }
             }
         }
 

@@ -22,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sage.Net.Abstractions;
-using Sage.Net.Diagnostics;
+using Sage.Net.Io.Extensions;
 using Sage.Net.LoggerHelper;
 
 namespace Sage.Net.Game;
@@ -38,6 +38,7 @@ internal sealed partial class SageGame : IDisposable
     private readonly string? _modBigFilesExtension;
     private readonly bool _loadMods;
     private readonly ISplashScreen _splashScreen;
+    private readonly ArchiveFileSystem _archiveFileSystem = new();
 
     private bool _running = true;
 
@@ -47,19 +48,17 @@ internal sealed partial class SageGame : IDisposable
         using IDisposable? logContext = LogContext.BeginOperation(_logger, nameof(SageGame));
 
         _services = services;
-        UnhandledExceptionHandler.Install(_services);
-
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
         _splashScreen = services.GetRequiredService<ISplashScreen>();
 
         foreach (var path in _gameOptions.BaseGamePaths)
         {
-            var resolved = ResolvePath(path);
+            var resolved = path.ResolveTildePath()!;
             Log.LogBaseGamePathCheck(_logger, path, resolved, Directory.Exists(resolved));
         }
 
         _baseGamePath =
-            _gameOptions.BaseGamePaths.Select(ResolvePath).FirstOrDefault(Directory.Exists)
+            _gameOptions.BaseGamePaths.Select(path => path.ResolveTildePath()!).FirstOrDefault(Directory.Exists)
             ?? Environment.CurrentDirectory;
 
         Log.LogBaseGamePath(_logger, _baseGamePath);
@@ -70,7 +69,7 @@ internal sealed partial class SageGame : IDisposable
             return;
         }
 
-        _modBigFilesPath = ResolvePath(rawModPath);
+        _modBigFilesPath = rawModPath.ResolveTildePath()!;
         _loadMods = Directory.Exists(_modBigFilesPath);
         if (!_loadMods)
         {
@@ -97,15 +96,11 @@ internal sealed partial class SageGame : IDisposable
         }
     }
 
-    public void Dispose() => _splashScreen.Dispose();
-
-    private static string ResolvePath(string path) =>
-        path.StartsWith('~')
-            ? Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                path.TrimStart('~', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-            )
-            : path;
+    public void Dispose()
+    {
+        _splashScreen.Dispose();
+        _archiveFileSystem.Dispose();
+    }
 
     private void Initialize()
     {
@@ -113,11 +108,7 @@ internal sealed partial class SageGame : IDisposable
         _splashScreen.Initialize(_baseGamePath, _gameOptions);
 
         // TODO: Run an actual initialization here.
-        _ = Task.Run(() =>
-        {
-            Thread.Sleep(TimeSpan.FromSeconds(10));
-            _splashScreen.InitializationIsComplete = true;
-        });
+        _ = Task.Run(PerformBackgroundInitialization);
     }
 
     private void Update(double deltaTime)
@@ -131,6 +122,13 @@ internal sealed partial class SageGame : IDisposable
     }
 
     private void Draw(double deltaTime) => _splashScreen.Draw();
+
+    private void PerformBackgroundInitialization()
+    {
+        _archiveFileSystem.Initialize(_services, _baseGamePath, _modBigFilesPath, _modBigFilesExtension);
+
+        _splashScreen.InitializationIsComplete = true;
+    }
 
     private static partial class Log
     {

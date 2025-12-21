@@ -9,6 +9,7 @@
     <ProjectReference Include="..\Sage.Net.Diagnostics.Sdl3\Sage.Net.Diagnostics.Sdl3.csproj" />
     <ProjectReference Include="..\Sage.Net.Diagnostics\Sage.Net.Diagnostics.csproj" />
     <ProjectReference Include="..\Sage.Net.Abstractions\Sage.Net.Abstractions.csproj" />
+    <ProjectReference Include="..\Sage.Net.Io.Big\Sage.Net.Io.Big.csproj" />
     <ProjectReference Include="..\Sage.Net.Sdl3\Sage.Net.Sdl3.csproj" />
   </ItemGroup>
   <ItemGroup>

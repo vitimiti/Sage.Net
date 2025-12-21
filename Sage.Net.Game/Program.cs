@@ -27,7 +27,15 @@ using Sage.Net.Diagnostics.Sdl3;
 using Sage.Net.Game;
 using Sage.Net.Sdl3;
 
-var switchMappings = new Dictionary<string, string> { { "-mod", "mod" }, { "-id", "Sage:Game:GameId" } };
+var switchMappings = new Dictionary<string, string>
+{
+    { "-mod", "mod" },
+    { "-log", "Logging:LogLevel:Sage.Net" },
+    { "-id", "Sage:Game:GameId" },
+    { "-splash", "Sage:Game:ModSplashScreenBmpFileName" },
+    { "-modfiles", "Sage:Game:ModFilesPath" },
+    { "-modbigextension", "Sage:Game:ModBigFilesExtension" },
+};
 
 IConfiguration argsConfig = new ConfigurationBuilder().AddCommandLine(args, switchMappings).Build();
 
@@ -75,7 +83,7 @@ services.AddSingleton<ICrashDialogProvider, SdlCrashDialogProvider>();
 
 services.AddSingleton<ISplashScreen, SdlSplashScreen>();
 
-ServiceProvider serviceProvider = services.BuildServiceProvider();
+using ServiceProvider serviceProvider = services.BuildServiceProvider();
 
 UnhandledExceptionHandler.Install(serviceProvider);
 

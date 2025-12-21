@@ -19,6 +19,10 @@
         "DumpLevel": "Normal",
         "MaxDumpFiles": 2,
         "FilePrefix": "sage_crash"
+      },
+      "Profiling": {
+        "Enabled": false,
+        "LogThresholdMs": 0
       }
     }
   }

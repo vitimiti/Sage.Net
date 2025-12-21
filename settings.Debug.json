@@ -10,6 +10,9 @@
         "Enabled": true,
         "DumpLevel": "WithHeap",
         "MaxDumpFiles": 1
+      },
+      "Profiling": {
+        "Enabled": true
       }
     }
   }

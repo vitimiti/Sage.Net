@@ -75,23 +75,23 @@ public class GameOptions
     /// will be used, and the rest will be ignored.
     /// </para>
     /// </remarks>
-    public IList<string> BaseGamePaths { get; } = [Environment.CurrentDirectory];
+    public IList<string> BaseGamePaths { get; } = [];
 
     /// <summary>
-    /// Gets or sets the path where the mod's BIG files are located.
+    /// Gets or sets the path where the mod's files are located.
     /// </summary>
     /// <value>
-    /// A <see cref="string"/> representing the directory path for mod-related BIG files.
+    /// A <see cref="string"/> representing the directory path for mod-related files.
     /// This value may be <c>null</c> if no specific path is defined.
     /// </value>
     /// <remarks>
-    /// The <see cref="ModBigFilesPath"/> is used to locate BIG files associated with a mod.
+    /// The <see cref="ModFilesPath"/> is used to locate files associated with a mod.
     /// These files typically contain game data such as assets, configurations, and other
     /// resources specific to the mod. If not specified, the game engine will NOT load any mods intentionally.
     /// Mods may be loaded if they have the <c>.big</c> extension and are located within the found base game path, but
     /// this is NOT recommended.
     /// </remarks>
-    public string? ModBigFilesPath { get; set; }
+    public string? ModFilesPath { get; set; }
 
     /// <summary>
     /// Gets or sets the file extension used for identifying large mod files.
@@ -106,4 +106,19 @@ public class GameOptions
     /// facilitates customization by mod creators, enabling support for non-default file extensions.
     /// </remarks>
     public string? ModBigFilesExtension { get; set; }
+
+    /// <summary>
+    /// Gets or sets the file name of the splash screen bitmap for the mod.
+    /// </summary>
+    /// <value>
+    /// A <see cref="string"/> representing the name of the bitmap file used as the splash screen
+    /// when the mod is launched. The default value is <c>null</c>, indicating no splash screen is specified and
+    /// the default game splash screen will be used instead.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="ModSplashScreenBmpFileName"/> determines the visual branding displayed
+    /// during the initialization of a mod. The file should be a valid bitmap (.bmp) image and
+    /// resides in the mod's directory.
+    /// </remarks>
+    public string? ModSplashScreenBmpFileName { get; set; }
 }

@@ -31,6 +31,7 @@ var switchMappings = new Dictionary<string, string>
     { "-mod", "mod" },
     { "-log", "Logging:LogLevel:Sage.Net" },
     { "-id", "Sage:Game:GameId" },
+    { "-windowed", "Sage:Game:Windowed" },
     { "-splash", "Sage:Game:ModSplashScreenBmpFileName" },
     { "-modfiles", "Sage:Game:ModFilesPath" },
     { "-modbigextension", "Sage:Game:ModBigFilesExtension" },

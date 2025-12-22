@@ -54,7 +54,7 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
 
         if (!Sdl.Init(Sdl.InitVideo))
         {
-            throw new InvalidOperationException($"SDL initialization failed ({Sdl.GetError}).");
+            throw new InvalidOperationException($"SDL initialization failed ({Sdl.CurrentError}).");
         }
 
         var bitmapPath = string.Empty;
@@ -89,14 +89,14 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
         _window = Sdl.Window.Create($"{options.WindowTitle} - Loading", _bmp.Width, _bmp.Height, Sdl.Window.Borderless);
         if (_window.IsInvalid)
         {
-            Log.FailedToCreateWindow(logger, Sdl.GetError);
+            Log.FailedToCreateWindow(logger, Sdl.CurrentError);
             return;
         }
 
         _windowSurface = _window.Surface;
         if (_windowSurface.IsInvalid)
         {
-            Log.FailedToGetWindowSurface(logger, Sdl.GetError);
+            Log.FailedToGetWindowSurface(logger, Sdl.CurrentError);
             return;
         }
 
@@ -146,9 +146,6 @@ public sealed partial class SdlSplashScreen(ILogger<SdlSplashScreen> logger) : I
         _bmp?.Dispose();
         _windowSurface?.Dispose();
         _window?.Dispose();
-
-        // TODO: Move this to the main loop system (window system maybe?)
-        Sdl.Quit();
 
         _disposed = true;
     }

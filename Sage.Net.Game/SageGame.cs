@@ -40,7 +40,9 @@ internal sealed partial class SageGame : IDisposable
     private readonly bool _loadMods;
     private readonly ISplashScreen _splashScreen;
     private readonly ArchiveFileSystem _archiveFileSystem = new();
+    private readonly IGameWindow _gameWindow;
 
+    private GameState _gameState = GameState.Splash;
     private bool _running = true;
     private bool _disposed;
 
@@ -52,6 +54,7 @@ internal sealed partial class SageGame : IDisposable
         _services = services;
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
         _splashScreen = services.GetRequiredService<ISplashScreen>();
+        _gameWindow = services.GetRequiredService<IGameWindow>();
 
         foreach (var path in _gameOptions.BaseGamePaths)
         {
@@ -105,6 +108,7 @@ internal sealed partial class SageGame : IDisposable
             return;
         }
 
+        _gameWindow.Dispose();
         _splashScreen.Dispose();
         _archiveFileSystem.Dispose();
 
@@ -116,21 +120,41 @@ internal sealed partial class SageGame : IDisposable
         _gameTime.Start();
         _splashScreen.Initialize(_baseGamePath, _gameOptions);
 
-        // TODO: Run an actual initialization here.
         _ = Task.Run(PerformBackgroundInitialization);
     }
 
     private void Update(double deltaTime)
     {
-        _splashScreen.Update();
-        if (_splashScreen.InitializationIsComplete)
+        if (_gameState is GameState.Splash)
         {
-            // TODO: Go into the actual game loop here.
-            _running = false;
+            _splashScreen.Update();
+            if (!_splashScreen.InitializationIsComplete)
+            {
+                return;
+            }
+
+            _splashScreen.Dispose();
+            _gameState = GameState.MainWindow;
+            _gameWindow.Initialize();
+        }
+        else
+        {
+            _gameWindow.Update();
+            _running = !_gameWindow.QuitRequested;
         }
     }
 
-    private void Draw(double deltaTime) => _splashScreen.Draw();
+    private void Draw(double deltaTime)
+    {
+        if (_gameState is GameState.Splash)
+        {
+            _splashScreen.Draw();
+        }
+        else
+        {
+            _gameWindow.Draw();
+        }
+    }
 
     private void PerformBackgroundInitialization()
     {

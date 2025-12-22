@@ -57,6 +57,48 @@ public class GameOptions
     public string WindowTitle { get; set; } = "Sage.Net Game";
 
     /// <summary>
+    /// Gets or sets the horizontal resolution of the game window.
+    /// </summary>
+    /// <value>
+    /// An <see cref="int"/> representing the width, in pixels, of the game window.
+    /// The default value is <c>800</c>.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="XResolution"/> determines the horizontal display size of the game,
+    /// impacting how the game content is rendered on screen. It should be combined
+    /// with <see cref="YResolution"/> for specifying the complete resolution.
+    /// </remarks>
+    public int XResolution { get; set; } = 800;
+
+    /// <summary>
+    /// Gets or sets the vertical resolution of the game window.
+    /// </summary>
+    /// <value>
+    /// An <see cref="int"/> representing the height, in pixels, of the game window.
+    /// The default value is <c>600</c>.
+    /// </value>
+    /// <remarks>
+    /// The <see cref="YResolution"/> determines the vertical display size of the game,
+    /// affecting how the game content is displayed on screen. It should be used together
+    /// with <see cref="XResolution"/> to define the full resolution of the game window.
+    /// </remarks>
+    public int YResolution { get; set; } = 600;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the game runs in windowed mode.
+    /// </summary>
+    /// <value>
+    /// A <see cref="bool"/> where <c>true</c> means the game will run in windowed mode,
+    /// and <c>false</c> means the game will run in fullscreen mode.
+    /// </value>
+    /// <remarks>
+    /// This property determines the display mode for the game. Windowed mode is useful
+    /// for development, multitasking, or running the game in a constrained display environment.
+    /// Depending on the graphics engine settings, switching modes might require restarting the game.
+    /// </remarks>
+    public bool Windowed { get; set; }
+
+    /// <summary>
     /// Gets the collection of base directories where game assets are located.
     /// </summary>
     /// <value>

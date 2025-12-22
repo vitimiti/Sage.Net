@@ -5,6 +5,9 @@
     }
   },
   "Sage": {
+    "Game": {
+      "Windowed": true
+    },
     "Diagnostics": {
       "Dumps": {
         "Enabled": true,

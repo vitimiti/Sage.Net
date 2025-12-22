@@ -82,6 +82,8 @@ services.AddSingleton<ICrashDialogProvider, SdlCrashDialogProvider>();
 
 services.AddSingleton<ISplashScreen, SdlSplashScreen>();
 
+services.AddSingleton<IGameWindow, SdlGameWindow>();
+
 using ServiceProvider serviceProvider = services.BuildServiceProvider();
 
 UnhandledExceptionHandler.Install(serviceProvider);

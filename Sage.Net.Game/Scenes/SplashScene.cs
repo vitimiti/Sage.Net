@@ -35,12 +35,11 @@ internal sealed class SplashScene(
     private readonly ISplashScreen _splashScreen = services.GetRequiredService<ISplashScreen>();
     private readonly ArchiveFileSystem _archiveFileSystem = new();
 
-    private IScene? _nextScene;
     private bool _disposed;
 
     public bool QuitRequested => false;
 
-    public IScene? NextScene => _splashScreen.InitializationIsComplete ? new EmptyScene(services) : null;
+    public IScene? NextScene { get; private set; }
 
     public void Initialize()
     {
@@ -51,9 +50,9 @@ internal sealed class SplashScene(
     public void Update(double deltaTime)
     {
         _splashScreen.Update();
-        if (_splashScreen.InitializationIsComplete && _nextScene is null)
+        if (_splashScreen.InitializationIsComplete && NextScene is null)
         {
-            _nextScene = new EmptyScene(services);
+            NextScene = new EmptyScene(services);
         }
     }
 

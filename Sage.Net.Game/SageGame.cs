@@ -53,14 +53,14 @@ internal sealed partial class SageGame : IDisposable
         foreach (var path in _gameOptions.BaseGamePaths)
         {
             var resolved = path.ResolveTildePath()!;
-            Log.LogBaseGamePathCheck(_logger, path, resolved, Directory.Exists(resolved));
+            Log.BaseGamePathCheck(_logger, path, resolved, Directory.Exists(resolved));
         }
 
         _baseGamePath =
             _gameOptions.BaseGamePaths.Select(path => path.ResolveTildePath()!).FirstOrDefault(Directory.Exists)
             ?? Environment.CurrentDirectory;
 
-        Log.LogBaseGamePath(_logger, _baseGamePath);
+        Log.BaseGamePath(_logger, _baseGamePath);
 
         var rawModPath = _gameOptions.ModFilesPath;
         if (string.IsNullOrWhiteSpace(rawModPath))
@@ -74,12 +74,12 @@ internal sealed partial class SageGame : IDisposable
             return;
         }
 
-        Log.LogLoadingMods(_logger, _modBigFilesPath);
+        Log.LoadingMods(_logger, _modBigFilesPath);
         _modBigFilesExtension = string.IsNullOrWhiteSpace(_gameOptions.ModBigFilesExtension)
             ? ".big"
             : _gameOptions.ModBigFilesExtension;
 
-        Log.LogModBigExtension(_logger, _modBigFilesExtension);
+        Log.ModBigExtension(_logger, _modBigFilesExtension);
     }
 
     public void Run()
@@ -92,6 +92,8 @@ internal sealed partial class SageGame : IDisposable
             Update(_gameTime.DeltaTime);
             Draw();
         }
+
+        Log.QuitRequested(_logger);
     }
 
     public void Dispose()
@@ -123,7 +125,7 @@ internal sealed partial class SageGame : IDisposable
         _scene.Update(deltaTime);
         if (_scene.NextScene is { } nextScene)
         {
-            Log.LogSceneTransition(_logger, nextScene.GetType().Name);
+            Log.SceneTransition(_logger, nextScene.GetType().Name);
             _scene.Dispose();
             _scene = nextScene;
             nextScene.Initialize();
@@ -137,18 +139,21 @@ internal sealed partial class SageGame : IDisposable
     private static partial class Log
     {
         [LoggerMessage(LogLevel.Trace, Message = "Checking base game path: {Raw} -> {Resolved} (Exists: {Exists})")]
-        public static partial void LogBaseGamePathCheck(ILogger logger, string raw, string resolved, bool exists);
+        public static partial void BaseGamePathCheck(ILogger logger, string raw, string resolved, bool exists);
 
         [LoggerMessage(LogLevel.Debug, Message = "Base game path: {Path}")]
-        public static partial void LogBaseGamePath(ILogger logger, string path);
+        public static partial void BaseGamePath(ILogger logger, string path);
 
         [LoggerMessage(LogLevel.Information, Message = "Loading mods from: {Path}")]
-        public static partial void LogLoadingMods(ILogger logger, string path);
+        public static partial void LoadingMods(ILogger logger, string path);
 
         [LoggerMessage(LogLevel.Debug, Message = "Using mod BIG files extension: {Extension}")]
-        public static partial void LogModBigExtension(ILogger logger, string extension);
+        public static partial void ModBigExtension(ILogger logger, string extension);
 
         [LoggerMessage(LogLevel.Debug, Message = "Transitioning to scene {SceneName}")]
-        public static partial void LogSceneTransition(ILogger logger, string sceneName);
+        public static partial void SceneTransition(ILogger logger, string sceneName);
+
+        [LoggerMessage(LogLevel.Debug, Message = "Quit requested, terminating game loop.")]
+        public static partial void QuitRequested(ILogger logger);
     }
 }

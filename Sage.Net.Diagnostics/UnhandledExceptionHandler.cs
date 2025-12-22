@@ -51,11 +51,13 @@ public static partial class UnhandledExceptionHandler
 
         AppDomain.CurrentDomain.FirstChanceException += (sender, e) =>
         {
-            if (e.Exception is { } exception && logger is not null)
+            if (e.Exception is not { } exception || logger is null)
             {
-                using IDisposable? logContext = LogContext.BeginOperation(logger, "FirstChanceException");
-                Log.LogFirstChanceException(logger, exception);
+                return;
             }
+
+            using IDisposable? logContext = LogContext.BeginOperation(logger, "FirstChanceException");
+            Log.FirstChanceException(logger, exception);
         };
 
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
@@ -67,7 +69,7 @@ public static partial class UnhandledExceptionHandler
                 if (logger is not null)
                 {
                     using IDisposable? logContext = LogContext.BeginOperation(logger, "UnhandledException");
-                    Log.LogUnhandledException(logger, exception);
+                    Log.UnhandledException(logger, exception);
                 }
 
                 dumpService?.WriteDump("UnhandledException");
@@ -91,12 +93,12 @@ public static partial class UnhandledExceptionHandler
     private static partial class Log
     {
         [LoggerMessage(LogLevel.Trace, Message = "First-chance exception detected.")]
-        public static partial void LogFirstChanceException(ILogger logger, Exception exception);
+        public static partial void FirstChanceException(ILogger logger, Exception exception);
 
         [LoggerMessage(
             LogLevel.Critical,
             Message = "An unhandled exception occurred. The application will now terminate."
         )]
-        public static partial void LogUnhandledException(ILogger logger, Exception exception);
+        public static partial void UnhandledException(ILogger logger, Exception exception);
     }
 }

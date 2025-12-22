@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="GameState.cs" company="Sage.Net">
+// <copyright file="EmptyScene.cs" company="Sage.Net">
 // A transliteration and update of the CnC Generals (Zero Hour) engine and games with mod-first support.
 // Copyright (C) 2025 Sage.Net Contributors
 //
@@ -18,10 +18,40 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace Sage.Net.Game;
+using Microsoft.Extensions.DependencyInjection;
+using Sage.Net.Abstractions;
 
-internal enum GameState
+namespace Sage.Net.Game.Scenes;
+
+internal sealed class EmptyScene(IServiceProvider services) : IScene
 {
-    Splash,
-    MainWindow,
+    private readonly IGameWindow _gameWindow = services.GetRequiredService<IGameWindow>();
+
+    private bool _disposed;
+
+    public bool QuitRequested { get; private set; }
+
+    public IScene? NextScene => null;
+
+    public void Initialize() => _gameWindow.Initialize();
+
+    public void Update(double deltaTime)
+    {
+        _gameWindow.Update();
+        QuitRequested = _gameWindow.QuitRequested;
+    }
+
+    public void Draw() => _gameWindow.Draw();
+
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
+        _gameWindow.Dispose();
+
+        _disposed = true;
+    }
 }

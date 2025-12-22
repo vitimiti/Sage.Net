@@ -22,7 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sage.Net.Abstractions;
-using Sage.Net.Io.Big;
+using Sage.Net.Game.Scenes;
 using Sage.Net.Io.Extensions;
 using Sage.Net.LoggerHelper;
 
@@ -37,12 +37,8 @@ internal sealed partial class SageGame : IDisposable
     private readonly GameTime _gameTime = new();
     private readonly string? _modBigFilesPath;
     private readonly string? _modBigFilesExtension;
-    private readonly bool _loadMods;
-    private readonly ISplashScreen _splashScreen;
-    private readonly ArchiveFileSystem _archiveFileSystem = new();
-    private readonly IGameWindow _gameWindow;
 
-    private GameState _gameState = GameState.Splash;
+    private IScene? _scene;
     private bool _running = true;
     private bool _disposed;
 
@@ -53,8 +49,6 @@ internal sealed partial class SageGame : IDisposable
 
         _services = services;
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
-        _splashScreen = services.GetRequiredService<ISplashScreen>();
-        _gameWindow = services.GetRequiredService<IGameWindow>();
 
         foreach (var path in _gameOptions.BaseGamePaths)
         {
@@ -75,8 +69,7 @@ internal sealed partial class SageGame : IDisposable
         }
 
         _modBigFilesPath = rawModPath.ResolveTildePath()!;
-        _loadMods = Directory.Exists(_modBigFilesPath);
-        if (!_loadMods)
+        if (!Directory.Exists(_modBigFilesPath))
         {
             return;
         }
@@ -97,7 +90,7 @@ internal sealed partial class SageGame : IDisposable
             _gameTime.Update();
 
             Update(_gameTime.DeltaTime);
-            Draw(_gameTime.DeltaTime);
+            Draw();
         }
     }
 
@@ -108,9 +101,7 @@ internal sealed partial class SageGame : IDisposable
             return;
         }
 
-        _gameWindow.Dispose();
-        _splashScreen.Dispose();
-        _archiveFileSystem.Dispose();
+        _scene?.Dispose();
 
         _disposed = true;
     }
@@ -118,50 +109,30 @@ internal sealed partial class SageGame : IDisposable
     private void Initialize()
     {
         _gameTime.Start();
-        _splashScreen.Initialize(_baseGamePath, _gameOptions);
-
-        _ = Task.Run(PerformBackgroundInitialization);
+        _scene = new SplashScene(_services, _baseGamePath, _gameOptions, _modBigFilesPath, _modBigFilesExtension);
+        _scene.Initialize();
     }
 
     private void Update(double deltaTime)
     {
-        if (_gameState is GameState.Splash)
+        if (_scene is null)
         {
-            _splashScreen.Update();
-            if (!_splashScreen.InitializationIsComplete)
-            {
-                return;
-            }
+            return;
+        }
 
-            _splashScreen.Dispose();
-            _gameState = GameState.MainWindow;
-            _gameWindow.Initialize();
-        }
-        else
+        _scene.Update(deltaTime);
+        if (_scene.NextScene is { } nextScene)
         {
-            _gameWindow.Update();
-            _running = !_gameWindow.QuitRequested;
+            Log.LogSceneTransition(_logger, nextScene.GetType().Name);
+            _scene.Dispose();
+            _scene = nextScene;
+            nextScene.Initialize();
         }
+
+        _running = !_scene.QuitRequested;
     }
 
-    private void Draw(double deltaTime)
-    {
-        if (_gameState is GameState.Splash)
-        {
-            _splashScreen.Draw();
-        }
-        else
-        {
-            _gameWindow.Draw();
-        }
-    }
-
-    private void PerformBackgroundInitialization()
-    {
-        _archiveFileSystem.Initialize(_services, _baseGamePath, _modBigFilesPath, _modBigFilesExtension);
-
-        _splashScreen.InitializationIsComplete = true;
-    }
+    private void Draw() => _scene?.Draw();
 
     private static partial class Log
     {
@@ -176,5 +147,8 @@ internal sealed partial class SageGame : IDisposable
 
         [LoggerMessage(LogLevel.Debug, Message = "Using mod BIG files extension: {Extension}")]
         public static partial void LogModBigExtension(ILogger logger, string extension);
+
+        [LoggerMessage(LogLevel.Debug, Message = "Transitioning to scene {SceneName}")]
+        public static partial void LogSceneTransition(ILogger logger, string sceneName);
     }
 }

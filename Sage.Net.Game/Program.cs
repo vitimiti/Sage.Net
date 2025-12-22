@@ -80,9 +80,9 @@ services.AddSageDiagnostics(configuration);
 
 services.AddSingleton<ICrashDialogProvider, SdlCrashDialogProvider>();
 
-services.AddSingleton<ISplashScreen, SdlSplashScreen>();
+services.AddTransient<ISplashScreen, SdlSplashScreen>();
 
-services.AddSingleton<IGameWindow, SdlGameWindow>();
+services.AddTransient<IGameWindow, SdlGameWindow>();
 
 using ServiceProvider serviceProvider = services.BuildServiceProvider();
 
